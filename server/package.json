@@ -1,0 +1,47 @@
+{
+  "name": "my-node-project",
+  "version": "1.0.0",
+  "description": "A Node.js project with Express, TypeScript, PostgreSQL, and Sequelize.",
+  "main": "/src/server.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "nodemon",
+    "dev": "ts-node src/index.ts",
+    "migrate": "sequelize-cli db:migrate",
+    "seed": "sequelize-cli db:seed:all",
+    "migrate:undo": "sequelize-cli db:migrate:undo:all",
+    "seed:undo": "sequelize-cli db:seed:undo:all",
+    "lint": "eslint 'src/**/*.ts'",
+    "format": "prettier --write 'src/**/*.{ts,js}'"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.5.4",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/sequelize": "^4.28.20",
+    "eslint": "^8.36.0",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

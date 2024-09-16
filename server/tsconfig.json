@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Target the latest ECMAScript version
+    "module": "commonjs", // Use CommonJS module system (needed for Node.js)
+    "outDir": "./dist", // Output directory for compiled JavaScript files
+    "rootDir": "./src", // Root directory for TypeScript source files
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Enable compatibility with CommonJS modules
+    "skipLibCheck": true, // Skip type checking of declaration files for faster compilation
+    "typeRoots": ["./node_modules/@types", "./src/config"] // Include custom type declarations
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/db/migrations/20240909043127-create-users-table.mjs"], // Include TypeScript and declaration files
+  "exclude": ["node_modules"] // Exclude node_modules from compilation
+}
