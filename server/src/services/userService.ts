@@ -6,42 +6,31 @@ import { Op } from "sequelize";
 
 const addUser = async ({
   username,
-  email,
   password,
-  role,
 }: SignUpParams): Promise<SafeUser> => {
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [{ email: email }, { username: username }],
+        [Op.or]: [{ username: username }],
       },
     });
 
     if (existingUser) {
-      throw new CustomError("Username or email already exists.", 400, true);
+      throw new CustomError("Username  already exists.", 400, true);
     }
-   // made an instance of User to use it for validation before insertion
+    // made an instance of User to use it for validation before insertion
     const user = User.build({
       username,
-      email,
       password: password,
-      role: role,
     });
     await user.validate();
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       username,
-      email,
       password: hashedPassword,
-      role: role,
     });
-    return newUser.omitFields([
-      "password",
-      "createdAt",
-      "updatedAt",
-      "deletedAt",
-    ]);
+    return newUser.omitFields(["password", "createdAt", "updatedAt"]);
   } catch (error) {
     throw error;
   }
@@ -54,7 +43,7 @@ const getUser = async ({
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [{ email: usernameOrEmail }, { username: usernameOrEmail }],
+        [Op.or]: [{ username: usernameOrEmail }],
       },
     });
     if (
@@ -68,7 +57,6 @@ const getUser = async ({
       "password",
       "createdAt",
       "updatedAt",
-      "deletedAt",
     ]);
   } catch (error) {
     throw error;

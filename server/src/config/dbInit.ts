@@ -1,3 +1,4 @@
+import User from "../db/models/User";
 import sequelize from "./database"; // Import the Sequelize instance
 
 // Test connection
@@ -26,6 +27,7 @@ async function syncModels() {
 // Initialize and export
 async function initializeDatabase() {
   await testConnection();
+  User.associate();
   await syncModels();
 }
 

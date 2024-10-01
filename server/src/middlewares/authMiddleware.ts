@@ -1,9 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../errors/customError";
 import { verifyToken } from "../services/jwtService";
-import { RolesProps } from "../types/types";
 
-const authUser = (req: Request, res: Response, next: NextFunction) => {
+const authUser = (
+  req: Request,
+  res: Response<{}, { userId: number }>,
+  next: NextFunction
+) => {
   try {
     let idToken = req.headers.authorization?.split(" ")[1];
     if (!idToken) {
@@ -15,8 +18,7 @@ const authUser = (req: Request, res: Response, next: NextFunction) => {
     }
     // since setting headers in a middleware does not persist them to the next request
     // instead use cookies or locals
-    res.locals.userId = tokenData.id;
-    res.locals.userType = tokenData.userType;
+    res.locals.userId = +tokenData.id;
 
     next();
   } catch (error) {
@@ -24,26 +26,4 @@ const authUser = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const restrictTo = (allowedTypes: string[]) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userType = res.locals.userType;
-
-      if (!allowedTypes.includes(userType)) {
-        return next(
-          new CustomError(
-            "You don't have permission to access this action",
-            403,
-            true
-          )
-        );
-      }
-
-      next();
-    } catch (error) {
-      next(error);
-    }
-  };
-};
-
-export { authUser, restrictTo };
+export { authUser };

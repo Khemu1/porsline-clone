@@ -9,6 +9,14 @@ module.exports = {
         primaryKey: true,
         autoIncrement: true,
       },
+      maker: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "user",
+          key: "id",
+        },
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,

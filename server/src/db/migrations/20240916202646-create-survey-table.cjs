@@ -15,6 +15,11 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      inactive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       workspace: {
         type: DataTypes.INTEGER,
         references: {

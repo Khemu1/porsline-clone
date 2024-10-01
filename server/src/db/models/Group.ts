@@ -1,17 +1,17 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
-import { WorkSpaceModel } from "../../types/types";
+import { GroupModel } from "../../types/types";
 
-interface WorkSpaceModelCreationAttributes
-  extends Optional<WorkSpaceModel, "id" | "createdAt" | "updatedAt"> {}
+interface GroupModelCreationAttributes
+  extends Optional<GroupModel, "id" | "createdAt" | "updatedAt"> {}
 
-class WorkSpace
-  extends Model<WorkSpaceModel, WorkSpaceModelCreationAttributes>
-  implements WorkSpaceModel
+class Group
+  extends Model<GroupModel, GroupModelCreationAttributes>
+  implements GroupModel
 {
   declare id: number;
-  declare maker: number;
-  declare title: string;
+  declare userId: number;
+  declare name: string;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -19,38 +19,43 @@ class WorkSpace
 }
 
 // Initialize the model
-WorkSpace.init(
+Group.init(
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    maker: {
+    userId: {
       type: DataTypes.INTEGER,
       references: {
-        model: "user",
+        model: "User",
         key: "id",
       },
+      allowNull: false,
+      onDelete: "CASCADE",
     },
-    title: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
         notEmpty: {
-          msg: "Title is required",
+          msg: "Name is required",
         },
         notNull: {
-          msg: "Title cannot be null",
+          msg: "Name cannot be null",
         },
       },
+    },
+    description: {
+      type: DataTypes.TEXT,
     },
   },
   {
     sequelize,
-    tableName: "workspace",
+    tableName: "Group",
     timestamps: true,
     paranoid: true,
   }
 );
-export default WorkSpace;
+export default Group;

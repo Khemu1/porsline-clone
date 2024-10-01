@@ -1,21 +1,27 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
-import { RolesProps, SafeUser } from "../../types/types";
+import { SafeUser, UserModel } from "../../types/types";
+import WorkSpace from "./WorkSpace";
+import Survey from "./Survey";
+import Group from "./Group";
+import UserGroup from "./UserGroup";
 
-// Model definition
-class User extends Model {
+interface UserModelCreationAttributes
+  extends Optional<UserModel, "id" | "createdAt" | "updatedAt"> {}
+
+class User
+  extends Model<UserModel, UserModelCreationAttributes>
+  implements UserModel
+{
   /**
    *The “declare” keyword informs the TypeScript compiler that a variable or method exists in another file (typically a JavaScript file).
     It’s similar to an “import” statement but doesn’t import anything; instead, it provides type information.
    */
   declare id: number; // Type declaration, not a public field
   declare username: string;
-  declare email: string;
   declare password: string;
-  declare role: RolesProps;
   declare createdAt: Date;
   declare updatedAt: Date;
-  declare deletedAt: Date | null;
 
   /**
    * this method omits the given fields that are given in the array using the Omit Utility Type
@@ -34,7 +40,21 @@ class User extends Model {
     return userObject as SafeUser;
   }
   static associate() {
-    
+    // user to workspace
+    User.hasMany(WorkSpace, { foreignKey: "maker" });
+    WorkSpace.belongsTo(User, { foreignKey: "maker" });
+    // workspace to survey
+    WorkSpace.hasMany(Survey, { foreignKey: "workspace" });
+    Survey.belongsTo(WorkSpace, { foreignKey: "workspace" });
+    //group to usergroup
+    Group.hasMany(UserGroup, { foreignKey: "groupId" });
+    UserGroup.belongsTo(Group, { foreignKey: "groupId" });
+    // user to usergroup
+    User.hasMany(UserGroup, { foreignKey: "userId" });
+    UserGroup.belongsTo(User, { foreignKey: "userId" });
+    //  User (creator) to Group
+    User.hasMany(Group, { foreignKey: "creatorId" }); // User is the creator of many groups
+    Group.belongsTo(User, { foreignKey: "creatorId", as: "creator" }); // A group belongs to one creator (User)
   }
 }
 
@@ -75,23 +95,12 @@ User.init(
         },
       },
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
-    deletedAt: {
-      type: DataTypes.DATE,
-    },
   },
   {
     sequelize,
     tableName: "user",
     timestamps: true,
-    paranoid: true, // Enable soft delete
+    paranoid: true,
     indexes: [
       {
         unique: true,
