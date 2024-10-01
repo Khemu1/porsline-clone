@@ -1,7 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../../config/database";
 import { RolesProps, SafeUser } from "../../types/types";
-import Product from "./Product";
 
 // Model definition
 class User extends Model {
