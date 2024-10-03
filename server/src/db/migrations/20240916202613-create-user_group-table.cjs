@@ -7,8 +7,9 @@ module.exports = {
     await queryInterface.createTable("user_group", {
       userId: {
         type: DataTypes.INTEGER,
+        primaryKey: true, // Set as primary key
         references: {
-          model: "user", 
+          model: "user",
           key: "id",
         },
         allowNull: false,
@@ -16,8 +17,10 @@ module.exports = {
       },
       groupId: {
         type: DataTypes.INTEGER,
+        primaryKey: true, // Set as primary key
         references: {
           model: "group",
+          key: "id",
         },
         allowNull: false,
         onDelete: "CASCADE",
@@ -34,11 +37,7 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint("user_group", {
-      fields: ["userId", "groupId"],
-      type: "primary key",
-      name: "PK_user_group",
-    });
+    // No need to add a constraint here; it's already covered in the userId and groupId fields
   },
 
   async down(queryInterface) {

@@ -5,26 +5,30 @@ import User from "../db/models/User";
 
 export const NewGroupValidation = async (
   req: Request<{}, {}, NewGroup>,
-  res: Response<{}, { invitedUsers: User[] }>,
+  res: Response<{}, { groupData: NewGroup }>,
   next: NextFunction
 ) => {
   try {
-    const data = req.body;
+    const { invitedUsers, groupName } = req.body;
 
-    if (!Array.isArray(data.invitedUsers) || data.invitedUsers.length === 0) {
+    if (
+      !Array.isArray(invitedUsers) ||
+      invitedUsers.length === 0 ||
+      typeof groupName !== "string"
+    ) {
       throw new CustomError("Invalid invited users", 400, true);
     }
 
-    const invitedUsernames = data.invitedUsers;
-    const foundUsers = await User.findAll({
-      where: { username: invitedUsernames },
-    });
+    await Promise.all(
+      invitedUsers.map(async (id) => {
+        const user = await User.findByPk(id);
+        if (!user) {
+          throw new CustomError(`User not found`, 404, true);
+        }
+      })
+    );
 
-    if (foundUsers.length !== invitedUsernames.length) {
-      throw new CustomError("Some invited users do not exist", 400, true);
-    }
-
-    res.locals.invitedUsers = foundUsers;
+    res.locals.groupData = req.body;
     next();
   } catch (error) {
     next(error);

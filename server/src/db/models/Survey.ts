@@ -3,7 +3,10 @@ import sequelize from "../../config/database";
 import { SurveyModel } from "../../types/types";
 
 interface SurveyModelCreationAttributes
-  extends Optional<SurveyModel, "active" | "id" | "createdAt" | "updatedAt"> {}
+  extends Optional<
+    SurveyModel,
+    "isActive" | "id" | "createdAt" | "updatedAt"
+  > {}
 
 class Survey
   extends Model<SurveyModel, SurveyModelCreationAttributes>
@@ -11,8 +14,9 @@ class Survey
 {
   declare id: number;
   declare title: string;
-  declare active: boolean;
+  declare isActive: boolean;
   declare workspace: number;
+  declare url: string;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -43,7 +47,7 @@ Survey.init(
         },
       },
     },
-    active: {
+    isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
@@ -61,12 +65,16 @@ Survey.init(
         key: "id",
       },
     },
+    url: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
+
   {
     sequelize,
     tableName: "survey",
     timestamps: true,
-    paranoid: true,
   }
 );
 export default Survey;

@@ -17,7 +17,7 @@ async function testConnection() {
 async function syncModels() {
   try {
     // Sync all models defined in Sequelize instance
-    await sequelize.sync({ force: false }); // Set { force: true } to drop and recreate tables
+    await sequelize.sync(); // Set { force: true } to drop and recreate tables
     console.log("Models were synchronized successfully.");
   } catch (error) {
     console.error("Error synchronizing models:", error);

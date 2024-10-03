@@ -1,9 +1,26 @@
+import { Op } from "sequelize";
+import Survey from "../db/models/Survey";
+import UserGroup from "../db/models/UserGroup";
 import WorkSpace from "../db/models/WorkSpace";
-import { WorkSpaceModel } from "../types/types";
+import { CustomError } from "../errors/customError";
+import {
+  UpdateWorkspaceDescriptionResponse,
+  UpdateWorkspaceOwnerResponse,
+  UpdateWorkspaceTitleResponse,
+  WorkSpaceModel,
+} from "../types/types";
 
 export const addWorkSpaceService = async (userId: number, title: string) => {
   try {
-    const workspace = await WorkSpace.create({ title, maker: userId });
+    const group = await UserGroup.findOne({ where: { userId: userId } });
+    if (!group) {
+      throw new CustomError("error finding your group", 404, true);
+    }
+    const workspace = await WorkSpace.create({
+      title,
+      maker: userId,
+      groupId: group.groupId,
+    });
     const { title: _, createdAt, ...worksapceData } = workspace.get();
     return worksapceData;
   } catch (error) {
@@ -15,21 +32,58 @@ export const getWorkSpacesService = async (
   userId: number
 ): Promise<WorkSpaceModel[]> => {
   try {
-    const workspaces = await WorkSpace.findAll({
-      where: {
-        maker: userId,
-      },
-      order: [
-        ["createdAt", "ASC"],
-        ["updatedAt", "DESC"],
-      ],
-      attributes: {
-        exclude: ["maker", "updatedAt"],
-      },
+    const userGroups = await UserGroup.findAll({ where: { userId } });
+    console.log("User Groups:", userGroups);
+
+    const groupIds = userGroups.map((userGroup) => userGroup.groupId);
+
+    const myWorkspaces = await WorkSpace.findAll({
+      where: { maker: userId },
+      include: [{ model: Survey, as: "surveys" }],
     });
-    return workspaces.map((workspace) => {
-      const plainWorkspace = workspace.get();
-      return plainWorkspace as WorkSpaceModel;
+
+    const groupWorkspaces = await WorkSpace.findAll({
+      where: {
+        groupId: groupIds,
+        id: { [Op.not]: myWorkspaces.map((ws) => ws.id) },
+      },
+      include: [{ model: Survey, as: "surveys" }],
+    });
+
+    const allWorkspaces = [...myWorkspaces, ...groupWorkspaces];
+
+    return allWorkspaces;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateWorkspaceTitleService = async (
+  workspaceId: number,
+  title: string
+): Promise<UpdateWorkspaceTitleResponse> => {
+  try {
+    const updatedDate = new Date();
+    await WorkSpace.update(
+      { title, updatedAt: updatedDate },
+      {
+        where: {
+          id: workspaceId,
+        },
+      }
+    );
+    return { title, updatedAt: updatedDate };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteWorkspaceService = async (workspaceId: number) => {
+  try {
+    await WorkSpace.destroy({
+      where: {
+        id: workspaceId,
+      },
     });
   } catch (error) {
     throw error;

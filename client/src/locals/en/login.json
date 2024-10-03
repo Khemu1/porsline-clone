@@ -1,0 +1,9 @@
+{
+  "loginTitle": "Sign In",
+  "usernamePlaceholder": "Enter your username",
+  "passwordPlaceholder": "Enter your password",
+  "loginButton": "Log In",
+  "pleaseFillFields": "Please fill in both fields.",
+  "error404": "Invalid Credentials",
+  "error500": "Unexpected error occurred"
+}

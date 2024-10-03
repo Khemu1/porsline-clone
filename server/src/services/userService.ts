@@ -25,10 +25,9 @@ const addUser = async ({
     });
     await user.validate();
 
-    const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       username,
-      password: hashedPassword,
+      password,
     });
     return newUser.omitFields(["password", "createdAt", "updatedAt"]);
   } catch (error) {
@@ -37,28 +36,22 @@ const addUser = async ({
 };
 
 const getUser = async ({
-  usernameOrEmail,
+  username,
   password,
 }: signInParams): Promise<SafeUser> => {
   try {
     const existingUser = await User.findOne({
       where: {
-        [Op.or]: [{ username: usernameOrEmail }],
+        username: username,
       },
     });
-    if (
-      !existingUser ||
-      !(await bcrypt.compare(password, existingUser.password))
-    ) {
+    if (!existingUser || password !== existingUser.password) {
       throw new CustomError("Invalid credentials", 401, true);
     }
 
-    return existingUser.omitFields([
-      "password",
-      "createdAt",
-      "updatedAt",
-    ]);
+    return existingUser.omitFields(["password", "createdAt", "updatedAt"]);
   } catch (error) {
+    console.log("failed to find user :", error);
     throw error;
   }
 };

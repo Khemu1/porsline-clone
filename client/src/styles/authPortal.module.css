@@ -1,0 +1,62 @@
+/*
+Primary Background: #121212 (Very Dark Gray)
+Secondary Background: #1E1E1E (Dark Gray)
+Primary Text: #E0E0E0 (Light Gray)
+Secondary Text: #B3B3B3 (Muted Light Gray)
+Accent Color 1: #BB86FC (Light Purple)
+Accent Color 2: #03DAC6 (Teal)
+Error Color: #CF6679 (Red)
+Border/Divider: #292929 (Soft Black)
+*/
+
+.authPortal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 300px;
+  width: 350px;
+  background-color: #1e1e1e;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0px 5px 5px 0px #141414;
+}
+
+.authPortal form {
+  display: flex;
+  width: 90%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 25px;
+}
+.authPortal label {
+  color: #f5f5f5;
+  white-space: break-spaces;
+}
+
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  /* align-items: center; */
+  /* min-width: 250px;
+  width: 250px; */
+  gap: 3px;
+}
+input {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 0px;
+  transition: all 250ms ease-in-out;
+}
+
+input:focus-within {
+  outline: none;
+  box-shadow: 0px 0px 10px #6272a4;
+}
+
+.authPortal div:has(button) {
+  display: flex;
+  justify-content: center;
+}

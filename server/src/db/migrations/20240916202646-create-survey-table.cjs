@@ -15,7 +15,7 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      inactive: {
+      isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
@@ -28,6 +28,10 @@ module.exports = {
         },
         allowNull: false,
         onDelete: "CASCADE",
+      },
+      url: {
+        type: DataTypes.TEXT,
+        allowNull: false,
       },
       createdAt: {
         type: DataTypes.DATE,

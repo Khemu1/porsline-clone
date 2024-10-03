@@ -17,11 +17,11 @@ class UserGroup
   static associate() {}
 }
 
-// Initialize the model
 UserGroup.init(
   {
     userId: {
       type: DataTypes.INTEGER,
+      primaryKey: true, // This field is a primary key
       references: {
         model: "user",
         key: "id",
@@ -31,18 +31,29 @@ UserGroup.init(
     },
     groupId: {
       type: DataTypes.INTEGER,
+      primaryKey: true, // This field is also a primary key
       references: {
-        model: "Group",
+        model: "group",
+        key: "id",
       },
       allowNull: false,
       onDelete: "CASCADE",
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
     sequelize,
     tableName: "user_group",
     timestamps: true,
-    paranoid: true,
     indexes: [
       {
         unique: true,
@@ -52,4 +63,5 @@ UserGroup.init(
     ],
   }
 );
+
 export default UserGroup;
