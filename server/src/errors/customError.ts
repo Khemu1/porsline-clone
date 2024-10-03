@@ -1,30 +1,35 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 
 // src/errors/customError.ts
+
 export class CustomError extends Error {
-  public statusCode: number;
-  public details?: any;
-  public status: string;
-  public isOperational: boolean = false; // is a trused error or not
+  message: string;
+  statusCode: number;
+  status: string;
+  isOperational: boolean;
+  type: string;
+  details: string = "";
+  errors?: Record<string, string>;
 
   constructor(
     message: string,
-    statusCode: number,
-    isOpertional: boolean,
-    details?: any
+    statusCode: number = 500,
+    safe: boolean = false,
+    type: string = "server error",
+    details?: string,
+    errors?: Record<string, string>
   ) {
     super(message);
+    this.message = message;
     this.statusCode = statusCode;
-    this.details = details;
-    this.name = "CustomError";
-    this.status = Math.floor(1000 / statusCode) === 4 ? "fail" : "error";
-    this.isOperational = isOpertional;
-
-    // this will tell from where the error generated
-    Error.captureStackTrace(this, this.constructor);
+    this.status = statusCode >= 200 && statusCode < 300 ? "success" : "fail";
+    this.isOperational = safe;
+    this.details = details || "";
+    this.type = type;
+    this.errors = errors;
+    // this.stack = new Error().stack;
   }
 }
-
 export const sendDevError = (
   error: CustomError,
   req: Request,

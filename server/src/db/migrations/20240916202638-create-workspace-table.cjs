@@ -24,6 +24,15 @@ module.exports = {
         allowNull: false,
         onDelete: "CASCADE",
       },
+      groupId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "group",
+          key: "id",
+        },
+        allowNull: false,
+        onDelete: "CASCADE",
+      },
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,

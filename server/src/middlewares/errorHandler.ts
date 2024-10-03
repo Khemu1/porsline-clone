@@ -26,7 +26,6 @@ const errorHandler = (
     });
   }
   const isDev = process.env.NODE_ENV === "development";
-
   isDev ? sendDevError(err, req, res) : sendProdError(err, req, res);
 };
 

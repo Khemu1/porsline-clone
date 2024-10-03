@@ -9,7 +9,7 @@ export const validateWithSchema = <T>(error: any) => {
     return errors; // Return the errors object
   }
 
-  return null; // Return null if the error is not a ZodError
+  return { message: "Un expected error happened" }; // Return null if the error is not a ZodError
 };
 
 export const newSurveySchema = () => {
@@ -17,5 +17,14 @@ export const newSurveySchema = () => {
     title: string()
       .min(1, "workspace title is required")
       .max(100, "workspace title is too long"),
+  });
+};
+
+export const updateUrlSchema = () => {
+  return object({
+    title: string()
+      .min(1, "URL is required")
+      .max(100, "URL is too long")
+      .regex(/^[a-zA-Z0-9]+$/, "URL must contain only letters and numbers"),
   });
 };

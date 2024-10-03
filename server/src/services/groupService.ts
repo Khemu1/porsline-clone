@@ -3,26 +3,22 @@ import Group from "../db/models/Group";
 import User from "../db/models/User";
 import { CustomError } from "../errors/customError";
 import UserGroup from "../db/models/UserGroup";
+import { GroupModel, UserGroupModel } from "../types/types";
 
-export const addToGroupService = async (users: string[], groupName: string) => {
+export const addToGroupService = async (
+  users: number[],
+  groupName: string,
+  maker: number
+) => {
   try {
-    const group = await Group.create({ name: groupName });
-
-    const userInstances = await Promise.all(
-      users.map(async (username) => {
-        const user = await User.findOne({ where: { username } });
-        if (!user) {
-          throw new CustomError(`User ${username} not found`, 404, true);
-        }
-        return user;
-      })
-    );
+    const group = await Group.create({ name: groupName, maker });
 
     await Promise.all(
-      userInstances.map(async (user) => {
-        await UserGroup.create({ groupId: group.id, userId: user.id });
+      users.map(async (id) => {
+        await UserGroup.create({ groupId: group.id, userId: id });
       })
     );
+    return group;
   } catch (error) {
     throw error;
   }
@@ -58,6 +54,26 @@ export const DeleteGroupMember = async (username: string) => {
 
     await UserGroup.destroy({ where: { userId: user.id } });
     return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getGroupService = async (
+  groupId: number
+): Promise<UserGroupModel[] | []> => {
+  try {
+    const groupAndMembers: GroupModel | null = await Group.findByPk(groupId, {
+      include: [
+        {
+          model: UserGroup,
+        },
+      ],
+    });
+    if (!groupAndMembers?.UserGroups) {
+      return [];
+    }
+    return groupAndMembers.UserGroups as UserGroupModel[];
   } catch (error) {
     throw error;
   }

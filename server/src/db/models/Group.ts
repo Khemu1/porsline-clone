@@ -10,7 +10,7 @@ class Group
   implements GroupModel
 {
   declare id: number;
-  declare userId: number;
+  declare maker: number;
   declare name: string;
   declare createdAt: Date;
   declare updatedAt: Date;
@@ -26,10 +26,10 @@ Group.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    userId: {
+    maker: {
       type: DataTypes.INTEGER,
       references: {
-        model: "User",
+        model: "user",
         key: "id",
       },
       allowNull: false,
@@ -53,9 +53,8 @@ Group.init(
   },
   {
     sequelize,
-    tableName: "Group",
+    tableName: "group",
     timestamps: true,
-    paranoid: true,
   }
 );
 export default Group;

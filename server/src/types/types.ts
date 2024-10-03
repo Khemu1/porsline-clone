@@ -1,10 +1,11 @@
 export interface GroupModel {
   id: number;
-  userId: number;
+  maker: number;
   name: string;
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  UserGroups?: UserGroupModel[];
 }
 export interface UserModel {
   id: number;
@@ -12,7 +13,11 @@ export interface UserModel {
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
+  groupId: number;
+  workspaces?: WorkSpaceModel[];
+  UserGroups?: UserGroupModel[];
 }
+
 export interface UserGroupModel {
   userId: number;
   groupId: number;
@@ -24,13 +29,25 @@ export interface WorkSpaceModel {
   id: number;
   maker: number;
   title: string;
+  groupId: number;
   createdAt?: Date;
   updatedAt?: Date;
+  surveys?: SurveyModel[];
 }
 export interface SurveyModel {
   id: number;
   title: string;
-  active?: boolean;
+  isActive: boolean;
+  url: string;
+  workspace: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+export interface UpdateSurveyModel {
+  id: number;
+  title: string;
+  sisActive: boolean;
+  url: string;
   workspace: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -92,5 +109,34 @@ export interface NewSurvey {
   active?: boolean;
 }
 export interface NewGroup {
-  invitedUsers: string[];
+  invitedUsers: number[];
+  groupName: string;
+}
+
+export interface UpdateSurveyStatusResponse {
+  updatedAt: Date;
+}
+
+export interface UpdateSurveyTitleResponse {
+  title: string;
+  updatedAt: Date;
+}
+export interface UpdateSurveyUrlResponse {
+  url: string;
+  updatedAt: Date;
+}
+
+export interface UpdateWorkspaceTitleResponse {
+  title: string;
+  updatedAt: Date;
+}
+
+export interface UpdateWorkspaceDescriptionResponse {
+  description: string;
+  updatedAt: Date;
+}
+
+export interface UpdateWorkspaceOwnerResponse {
+  ownerId: number;
+  updatedAt: Date;
 }

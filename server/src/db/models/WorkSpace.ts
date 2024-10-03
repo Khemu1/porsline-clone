@@ -12,6 +12,7 @@ class WorkSpace
   declare id: number;
   declare maker: number;
   declare title: string;
+  declare groupId: number;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -33,6 +34,13 @@ WorkSpace.init(
         key: "id",
       },
     },
+    groupId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: "group",
+        key: "id",
+      },
+    },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -50,7 +58,6 @@ WorkSpace.init(
     sequelize,
     tableName: "workspace",
     timestamps: true,
-    paranoid: true,
   }
 );
 export default WorkSpace;

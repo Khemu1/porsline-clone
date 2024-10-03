@@ -7,13 +7,13 @@ import {
 
 export const addWorkSpace = async (
   req: Request<{}, {}, NewWorkSpace>,
-  res: Response<{}, { userId: number }>,
+  res: Response<{}, { userId: string }>,
   next: NextFunction
 ) => {
   try {
     const userId = +res.locals.userId;
     const { title } = req.body;
-    const workspaceData = await addWorkSpaceService(userId, title);
+    const workspaceData = await addWorkSpaceService(+userId, title);
     res.status(201).json(workspaceData);
   } catch (error) {
     next(error);
@@ -21,12 +21,12 @@ export const addWorkSpace = async (
 };
 export const getWorkSpaces = async (
   req: Request<{}, {}, {}>,
-  res: Response<{}, { userId: number }>,
+  res: Response<{}, { userId: string }>,
   next: NextFunction
 ) => {
   try {
     const userId = +res.locals.userId;
-    const workspaceData = await getWorkSpacesService(userId);
+    const workspaceData = await getWorkSpacesService(+userId);
     res.status(201).json(workspaceData);
   } catch (error) {
     next(error);
