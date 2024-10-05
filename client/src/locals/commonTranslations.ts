@@ -1,0 +1,36 @@
+export const commonTranslations = {
+  en: {
+    unknownError: "An unknown error occurred.",
+    save: "Save",
+    cancel: "Cancel",
+    delete: "Delete",
+    duplicate: "Duplicate",
+    move: "Move",
+    selectWorkSpace: "Select WorkSpace",
+    active: "Active",
+    inactive: "Inactive",
+    preview: "Preview",
+    activate: "Activate",
+    deactivate: "Deactivate",
+    moveTo: "Move to",
+    enterName: "Enter name",
+    // Other common translations
+  },
+  de: {
+    unknownError: "Ein unbekannter Fehler ist aufgetreten.",
+    save: "Speichern",
+    cancel: "Abbrechen",
+    delete: "Löschen",
+    duplicate: "Duplizieren",
+    move: "Verschieben",
+    selectWorkSpace: "Arbeitsbereich auswählen",
+    active: "Aktiv",
+    inactive: "Inaktiv",
+    preview: "Vorschau",
+    activate: "Aktivieren",
+    deactivate: "Deaktivieren",
+    moveTo: "Verschieben nach",
+    enterName: "Namen eingeben",
+    // Other common translations
+  },
+};

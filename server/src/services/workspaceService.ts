@@ -40,6 +40,7 @@ export const getWorkSpacesService = async (
     const myWorkspaces = await WorkSpace.findAll({
       where: { maker: userId },
       include: [{ model: Survey, as: "surveys" }],
+      order: [["createdAt", "DESC"]],
     });
 
     const groupWorkspaces = await WorkSpace.findAll({
@@ -48,11 +49,16 @@ export const getWorkSpacesService = async (
         id: { [Op.not]: myWorkspaces.map((ws) => ws.id) },
       },
       include: [{ model: Survey, as: "surveys" }],
+      order: [["createdAt", "DESC"]], 
     });
 
     const allWorkspaces = [...myWorkspaces, ...groupWorkspaces];
 
-    return allWorkspaces;
+    const sortedWorkspaces = allWorkspaces.sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    );
+
+    return sortedWorkspaces;
   } catch (error) {
     throw error;
   }
@@ -89,3 +95,6 @@ export const deleteWorkspaceService = async (workspaceId: number) => {
     throw error;
   }
 };
+
+
+

@@ -8,7 +8,7 @@ import Loading from "./loading/Loading";
 import Workspaces from "./workspaces/Workspaces";
 import Workspace from "./workspaces/Workspace";
 import Surveys from "./surveys/Surveys";
-import Survey from "./surveys/survey";
+import Survey from "./surveys/Survey";
 
 export {
   Loading,

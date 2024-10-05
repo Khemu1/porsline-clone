@@ -15,14 +15,13 @@ export const useSignIn = () => {
   const dispatch = useDispatch();
   const handleSignIn = async (
     data: SignInProps,
-    t: (key: string) => string
   ) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
       console.log("going in");
-      const { userId, username } = await signIn(data,t);
+      const { userId, username } = await signIn(data);
       setSuccess(true);
       if (success) {
         localStorage.setItem("userData", JSON.stringify({ userId, username }));
@@ -88,7 +87,7 @@ export const useAuthUser = () => {
   useEffect(() => {
     const isAuthPage = pathName.pathname.startsWith("/");
 
-    if (isAuthPage && (!user.isAuthenticated || !user.userId)) {
+    if (isAuthPage && !user.id) {
       handleSignIn();
     }
   }, [handleSignIn, pathName, user]);

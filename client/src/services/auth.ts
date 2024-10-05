@@ -1,10 +1,8 @@
 import { SignInProps, SignInResponseProps } from "../types";
 import { CustomError } from "../utils/CustomError";
 
-
 export const signIn = async (
-  formData: SignInProps,
-  t: (key: string) => string
+  formData: SignInProps
 ): Promise<SignInResponseProps> => {
   try {
     const response = await fetch("/api/auth/signin", {
@@ -17,12 +15,7 @@ export const signIn = async (
 
     if (!response.ok) {
       const errorData: CustomError = await response.json();
-      const errorMessage =
-        errorData.statusCode === 404
-          ? t("error404")
-          : errorData.statusCode === 500
-          ? t("error500")
-          : errorData.message || "Sign-in failed";
+      const errorMessage = errorData.message || "Sign-in failed";
 
       const err = new CustomError(
         errorMessage,
@@ -39,7 +32,7 @@ export const signIn = async (
     return data;
   } catch (error) {
     if (!(error instanceof CustomError)) {
-      throw new CustomError(t("error500"), 500);
+      throw new CustomError(("error500"), 500);
     }
     console.error(error);
     throw error;

@@ -6,7 +6,10 @@ import WorkSpace from "../db/models/WorkSpace";
 
 export const authUser = (
   req: Request,
-  res: Response<{}, { userId: string }>,
+  res: Response<
+    {},
+    { userId: string; workspaceId: string; }
+  >,
   next: NextFunction
 ) => {
   try {
@@ -32,44 +35,4 @@ export const authUser = (
   } catch (error) {
     next(error);
   }
-};
-
-export const checkUserInGroup = async (
-  req: Request<{}, {}, {}>,
-  res: Response<{}, { userId: string; workspaceId: string; groupId: string }>,
-  next: NextFunction
-) => {
-  const { userId, workspaceId } = res.locals;
-
-  const workspace = await WorkSpace.findOne({
-    where: { id: workspaceId },
-  });
-
-  if (!workspace) {
-    return next(
-      new CustomError("Workspace not found", 404, true, "workspaceNotFound")
-    );
-  }
-
-  const groupId = workspace.get().groupId;
-
-  const userGroupMembership = await UserGroup.findOne({
-    where: {
-      userId,
-      groupId,
-    },
-  });
-
-  if (!userGroupMembership) {
-    return next(
-      new CustomError(
-        "User is not a member of the group",
-        403,
-        true,
-        "notAMemberOfGroup"
-      )
-    );
-  }
-  res.locals.groupId = userGroupMembership.groupId.toString();
-  next();
 };

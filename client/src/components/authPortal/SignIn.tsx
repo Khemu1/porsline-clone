@@ -1,7 +1,5 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import authPortalStyle from "../../styles/authPortal.module.css";
-import { useTranslation } from "react-i18next";
-import i18n from "../../locals/i18n";
 import { useSignIn } from "../../hooks/auth";
 
 // Define the type for the form data
@@ -11,16 +9,10 @@ interface FormData {
 }
 
 const SignIn: React.FC = () => {
-  const { t } = useTranslation("login");
-
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
   });
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,9 +30,9 @@ const SignIn: React.FC = () => {
       const { username, password } = formData;
 
       if (username && password) {
-        await handleSignIn(formData, t);
+        await handleSignIn(formData);
       } else {
-        window.alert(t("pleaseFillFields"));
+        window.alert("pleaseFillFields");
       }
     } catch (error) {
       console.error(error);
@@ -49,37 +41,28 @@ const SignIn: React.FC = () => {
 
   return (
     <div className={authPortalStyle.authPortal}>
-      <div className="flex gap-2 mb-5">
-        <button onClick={() => changeLanguage("en")} className="btn-secondary">
-          English
-        </button>
-        <button onClick={() => changeLanguage("de")} className="btn-secondary">
-          Deutsch
-        </button>
-      </div>
-
-      <h1 className="mb-5 font-semibold text-5xl italic">{t("loginTitle")}</h1>
+      <h1 className="mb-5 font-semibold text-5xl italic">{"loginTitle"}</h1>
 
       <form onSubmit={handleSubmit}>
         <div className={authPortalStyle.inputContainer}>
-          <label htmlFor="username">{t("usernamePlaceholder")}</label>
+          <label htmlFor="username">{"usernamePlaceholder"}</label>
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder={t("usernamePlaceholder")}
+            placeholder={"usernamePlaceholder"}
           />
         </div>
 
         <div className={authPortalStyle.inputContainer}>
-          <label htmlFor="password">{t("passwordPlaceholder")}</label>
+          <label htmlFor="password">{"passwordPlaceholder"}</label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder={t("passwordPlaceholder")}
+            placeholder={"passwordPlaceholder"}
           />
         </div>
 
@@ -89,7 +72,7 @@ const SignIn: React.FC = () => {
             disabled={loading || success}
             className="btn-secondary"
           >
-            {t("loginButton")}
+            {"loginButton"}
           </button>
         </div>
         {error && (

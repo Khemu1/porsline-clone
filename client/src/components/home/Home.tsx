@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { setWorkspaces } from "../../store/slices/workspaceSlice";
 import { useLanguage } from "../lang/LanguageProvider";
+
 const Home = () => {
   const { t } = useLanguage();
   const { handleGetWorkspaces, loading, error, data } = useGetWorkspaces();
@@ -41,6 +42,7 @@ const Home = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   useEffect(() => {
     handleGetWorkspaces();
   }, [handleGetWorkspaces]);
@@ -56,7 +58,7 @@ const Home = () => {
   }
 
   if (error) {
-    return <div>Error fetching workspaces: {error.message}</div>;
+    return <div>{t("unknownError")}</div>; // Using translation for unknown error
   }
 
   return (
@@ -108,14 +110,12 @@ const Home = () => {
           </button>
           {menuOpen && (
             <div
-              className="flex flex-col text-left right-0 top-[30px] text-sm absolute  font-semibold  bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
+              className="flex flex-col text-left right-0 top-[30px] text-sm absolute font-semibold bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
               ref={workspaceChangeMenuRef}
             >
-              <span className="survey_card_buttons">
-                {t("renameWorkspace")}
-              </span>
+              <span className="survey_card_buttons">{t("rename")} </span>
               <span className="survey_card_buttons text-red-600">
-                t{"deleteWorkspace"}
+                {t("delete")}{" "}
               </span>
             </div>
           )}

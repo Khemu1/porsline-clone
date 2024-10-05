@@ -6,6 +6,7 @@ const Workspace: React.FC<WorkspaceProps> = ({
   selected,
   workspace,
   onSelect,
+  length,
 }) => {
   return (
     <div
@@ -20,11 +21,13 @@ const Workspace: React.FC<WorkspaceProps> = ({
             className="w-[20px]"
           />
         </div>
-        <p className="font-semibold">{workspace.title}</p>
+        <p className="font-semibold text-ellipsis overflow-hidden px-2 text-nowrap whitespace-nowrap">
+          {workspace.title}
+        </p>
       </div>
 
       <div>
-        <p>{workspace.surveys.length}</p>
+        <p>{length}</p>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
 import { ZodError } from "zod";
 import { CustomError } from "../errors/customError";
 import WorkSpace from "../db/models/WorkSpace";
+import { Op } from "sequelize";
 
 export const validateNewWorkSpace = async (
   req: Request<{}, {}, NewWorkSpace>,
@@ -27,28 +28,31 @@ export const validateNewWorkSpace = async (
 };
 
 export const checkWorkspaceExists = async (
-  req: Request<{ workspaceId: string }, {}, { title: string }>,
-  res: Response<{}, { workspaceId: string; userId: string }>,
+  req: Request<
+    { surveyId: string; workspaceId: string },
+    {},
+    { title: string }
+  >,
+  res: Response<{}, { workspaceId: string; userId: string; groupId: string }>,
   next: NextFunction
 ) => {
+  console.log(req.params);
   const { workspaceId } = req.params;
   const { userId } = res.locals;
-  if (isNaN(+workspaceId)) {
+  if (isNaN(+workspaceId) || +workspaceId < 1) {
     return next(
       new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
     );
   }
 
   const workspace = await WorkSpace.findOne({
-    where: { id: workspaceId, maker: +userId },
+    where: { id: workspaceId },
   });
 
   if (!workspace) {
     return next(new CustomError("Workspace not found", 404, true));
   }
-
-  res.locals.workspaceId = workspaceId;
-
+  res.locals.groupId = workspace.groupId.toString();
   next();
 };
 
@@ -60,13 +64,18 @@ export const checkDuplicateWorkspaceTitle = async (
   const { workspaceId, title } = req.body;
   const { groupId } = res.locals;
 
-  const existingSurveys = await WorkSpace.findOne({
-    where: { id: workspaceId, title, groupId: +groupId },
+  const exsitingWorkspace = await WorkSpace.findOne({
+    where: { id: { [Op.not]: workspaceId }, title, groupId: +groupId },
   });
 
-  if (existingSurveys) {
+  if (exsitingWorkspace) {
     return next(
-      new CustomError("Survey with this title already exists", 409, true)
+      new CustomError(
+        "workspace with this title already exists",
+        409,
+        true,
+        "workspaceTitleExists"
+      )
     );
   }
 

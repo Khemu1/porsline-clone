@@ -1,9 +1,0 @@
-{
-  "loginTitle": "Anmelden",
-  "usernamePlaceholder": "Geben Sie Ihren Benutzernamen ein",
-  "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
-  "loginButton": "Einloggen",
-  "pleaseFillFields": "Bitte füllen Sie beide Felder aus.",
-  "error404": "Ungültige Anmeldeinformationen",
-  "error500": "Unerwarteter Fehler aufgetreten"
-}

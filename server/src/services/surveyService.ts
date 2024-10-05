@@ -130,3 +130,35 @@ export const deleteSurveyService = async (surveyId: number) => {
     throw error;
   }
 };
+
+export const moveSurveyService = async (
+  targetWorkspaceId: number,
+  surveyId: number
+) => {
+  console.log("moveSurveyService", targetWorkspaceId, surveyId);
+  try {
+    await Survey.update(
+      { workspace: targetWorkspaceId },
+      {
+        where: {
+          id: surveyId,
+        },
+      }
+    );
+    return targetWorkspaceId;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const duplicateSurveyService = async (survey: SurveyModel) => {
+  console.log("duplicateSurveyService", survey);
+  try {
+    await Survey.create({
+      ...survey,
+      id: undefined,
+    });
+  } catch (error) {
+    throw error;
+  }
+};

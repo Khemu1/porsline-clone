@@ -1,11 +1,12 @@
 import { object, string, ZodError } from "zod";
-import { translations } from "../../locals/translations";
+import { translations } from "../components/lang/translations";
 
 type Translations = typeof translations;
 
 export type TranslationKeys = keyof Translations["en"];
 
 export const validateWithSchema = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any,
   language: keyof typeof translations
 ) => {
@@ -22,7 +23,7 @@ export const validateWithSchema = (
   }
 
   return {
-    message: translations[language]?.unexpectedError || "Unexpected error",
+    message: translations[language]?.unknownError || "Unexpected error",
   };
 };
 

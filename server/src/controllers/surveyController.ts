@@ -1,13 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { NewSurvey } from "../types/types";
+import { NewSurvey, SurveyModel } from "../types/types";
 import {
   addSurveyService,
   deleteSurveyService,
+  duplicateSurveyService,
   getSurveyService,
+  moveSurveyService,
   updateSurveyStatusService,
   updateSurveyTitleService,
   updateSurveyUrlService,
 } from "../services/surveyService";
+import { json } from "sequelize";
 
 export const addSurvey = async (
   req: Request<{ workspaceId: string }, {}, NewSurvey>,
@@ -95,6 +98,36 @@ export const deleteSurvey = async (
     const { surveyId } = req.params;
     await deleteSurveyService(+surveyId);
     return res.status(204);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const duplicateSurvey = async (
+  req: Request<{ surveyId: string }, {}, { targetWorkspaceId: string }>,
+  res: Response<{}, { duplicateSurvey: SurveyModel }>,
+  next: NextFunction
+) => {
+  try {
+    const { duplicateSurvey } = res.locals;
+    await duplicateSurveyService(duplicateSurvey);
+    return res.status(201).json({ duplicateSurvey });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const moveSurvey = async (
+  req: Request<{ surveyId: string }, {}, { targetWorkspaceId: string }>,
+  res: Response<{}>,
+  next: NextFunction
+) => {
+  try {
+    // console.log("controller", req.body);
+    const { targetWorkspaceId } = req.body;
+    const { surveyId } = req.params;
+    await moveSurveyService(+targetWorkspaceId, +surveyId);
+    return res.status(200).json({ targetWorkspaceId });
   } catch (error) {
     next(error);
   }
