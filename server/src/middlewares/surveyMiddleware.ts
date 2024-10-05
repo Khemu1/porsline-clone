@@ -10,7 +10,6 @@ import { CustomError } from "../errors/customError";
 import Survey from "../db/models/Survey";
 import WorkSpace from "../db/models/WorkSpace";
 import { Op } from "sequelize";
-import { compareSync } from "bcrypt";
 export const validateNewSurvey = async (
   req: Request<{ surveyId: string }, {}, { title: string }>,
   res: Response<
@@ -32,7 +31,19 @@ export const validateNewSurvey = async (
     next();
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json("vals");
+      const { headers } = req;
+      const currentLang = headers["accept-language"] as "en" | "de";
+      console.log(validateWithSchema(error, currentLang));
+      next(
+        new CustomError(
+          "validation Error",
+          400,
+          true,
+          "`validationError`",
+          "",
+          validateWithSchema(error, currentLang)
+        )
+      );
     }
     next(error); // Pass other errors to the error handler
   }
@@ -131,7 +142,6 @@ export const checkSurveyExists = async (
       );
     }
 
-    // Check for duplicate survey title
     if (title !== survey.title) {
       res.locals.duplicateSurvey = {
         ...survey.get(),
@@ -142,7 +152,7 @@ export const checkSurveyExists = async (
       };
     }
 
-    next(); // Proceed to the next middleware
+    next();
   } catch (error) {
     return next(error);
   }
@@ -215,15 +225,19 @@ export const checkDuplicateSurveyUrl = async (
 
     next();
   } catch (error) {
+    console.log("errrorrororor");
+    const { headers } = req;
+    const currentLang = headers["accept-language"] as "en" | "de";
     if (error instanceof ZodError) {
+      console.log("zodError");
       next(
         new CustomError(
-          "somthing happened while validating the url",
+          "validation Error",
           400,
           true,
-          "`invalidUrl`",
+          "`validationError`",
           "",
-          validateWithSchema(error)
+          validateWithSchema(error, currentLang)
         )
       );
     }

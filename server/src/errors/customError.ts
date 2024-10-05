@@ -35,13 +35,21 @@ export const sendDevError = (
   req: Request,
   res: Response
 ) => {
-  const { statusCode = 500, status = "error", message, stack, type } = error;
+  const {
+    statusCode = 500,
+    status = "error",
+    message,
+    stack,
+    type,
+    errors,
+  } = error;
   res.status(statusCode).json({
     status,
     message,
     type,
     stack,
-    error: error.details || {},
+    details: error.details || {},
+    errors,
   });
 };
 
@@ -56,6 +64,7 @@ export const sendProdError = (
     message,
     isOperational,
     type,
+    errors,
   } = error;
 
   if (isOperational) {
@@ -63,11 +72,13 @@ export const sendProdError = (
       status,
       message,
       type,
+      errors,
     });
   } else {
     res.status(500).json({
       status: "error",
       message: "Something went wrong!",
+      errors,
     });
   }
 };
