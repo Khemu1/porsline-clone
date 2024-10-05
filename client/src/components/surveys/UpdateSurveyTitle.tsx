@@ -1,12 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { closeDialog } from "../../store/slices/dialogSlice";
 import { RootState } from "../../store/store";
-import {  useState } from "react";
+import { useState } from "react";
 import { useUpdateSurvey } from "../../hooks/survey";
 import { useLanguage } from "../lang/LanguageProvider";
 
 const UpdateSurveyTitle = () => {
-  const { t } = useLanguage();
+  const { t, getCurrentLanguageTranslations } = useLanguage();
   const dispatch = useDispatch();
   const currentSurveyState = useSelector(
     (state: RootState) => state.currentSurvey
@@ -31,11 +31,10 @@ const UpdateSurveyTitle = () => {
         title,
         surveyId,
         workspaceId: workspaceId,
-        t,
+        getCurrentLanguageTranslations
       });
     }
   };
-
 
   return (
     <div>
@@ -44,10 +43,7 @@ const UpdateSurveyTitle = () => {
         <div className="border-b border-b-gray-500 p-[2rem]">
           <input
             type="text"
-            placeholder={
-              currentSurveyState.currentSurvey?.title ||
-              t("surveyTitlePlaceholder")
-            }
+            placeholder={currentSurveyState.currentSurvey?.title || "Asdasd"}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="py-[10px]"
@@ -75,8 +71,6 @@ const UpdateSurveyTitle = () => {
         </div>
       </form>
     </div>
-
-    
   );
 };
 

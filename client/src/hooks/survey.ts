@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  createNewSurvey,
+  deleteSurveyFromWorkspace,
   duplicateSurvey,
   moveSurveyToWorkspace,
   updateSurveyStatus,
@@ -9,23 +11,20 @@ import {
 import { useState } from "react";
 import {
   SurveyModel,
-  UpdateSurveyStatusResponse,
   UpdateSurveyTitleProps,
   UpdateSurveyTitleResponse,
 } from "../types";
 import { CustomError } from "../utils/CustomError";
 import { RootState } from "../store/store";
-import {
-  clearCurrentSurvey,
-  setCurrentSurvey,
-} from "../store/slices/currentSurveySlice";
-import { setSurveys } from "../store/slices/surveySlice";
-import { setWorkspaces } from "../store/slices/workspaceSlice";
 import { translations } from "../components/lang/translations";
 import {
-  clearCurrentWorkspace,
-  setCurrentWorkspace,
-} from "../store/slices/currentWorkspaceSlice";
+  addSurvey,
+  deleteSurvey,
+  duplicateSurveyF,
+  moveSurveyF,
+  toggleSurveyActiveF,
+  updateSurveyTitleF,
+} from "../utils";
 
 export const useUpdateSurvey = () => {
   const dispatch = useDispatch();
@@ -33,6 +32,13 @@ export const useUpdateSurvey = () => {
     (state: RootState) => state.currentSurvey.currentSurvey
   );
   const surveys = useSelector((state: RootState) => state.survey.surveys);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces
+  );
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -47,51 +53,33 @@ export const useUpdateSurvey = () => {
       workspaceId,
       surveyId,
       getCurrentLanguageTranslations,
+      currentLang,
     }: UpdateSurveyTitleProps) => {
-      const response = await updateSurveyTitle(
+      return await updateSurveyTitle(
         title,
         workspaceId,
         surveyId,
-        getCurrentLanguageTranslations
+        getCurrentLanguageTranslations,
+        currentLang
       );
-      return response;
     },
-    onSuccess: (data: UpdateSurveyTitleResponse) => {
-      const updatedSurvey = {
-        ...currentSurvey,
-        title: data.title,
-        updatedAt: data.updatedAt,
-      };
-
-      dispatch(setCurrentSurvey(updatedSurvey as SurveyModel));
-      const newSurveys = surveys.map((survey) => {
-        if (survey.id === updatedSurvey.id) {
-          return {
-            ...survey,
-            title: updatedSurvey.title,
-            updatedAt: updatedSurvey.updatedAt,
-          };
-        }
-        return survey;
-      });
-
-      dispatch(setSurveys(newSurveys));
-      setErrorState(null);
-
-      console.log("Updated Survey dispatched:", updatedSurvey);
+    onSuccess: async (data: UpdateSurveyTitleResponse) => {
+      await updateSurveyTitleF(
+        data,
+        currentSurvey!.id,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
+      );
     },
-
     onError: (err: CustomError | unknown) => {
-      if (err instanceof CustomError) {
-        if (err.errors) {
-          setErrorState(err.errors);
-        } else {
-          setErrorState({ message: err.message });
-        }
-      } else {
-        setErrorState({ message: "Unknown  Error" });
-      }
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
 
+      setErrorState(message);
       console.error("Error updating survey title:", err);
     },
     onSettled: () => {
@@ -118,6 +106,13 @@ export const useUpdateSurvey = () => {
 export const useDuplicateSurvey = () => {
   const dispatch = useDispatch();
   const surveys = useSelector((state: RootState) => state.survey.surveys);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces
+  );
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -129,38 +124,46 @@ export const useDuplicateSurvey = () => {
       title: string;
       workspaceId: number;
       surveyId: number;
+      targetWorkspaceId: number;
       getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
     }
   >({
     mutationFn: async ({
       title,
       workspaceId,
       surveyId,
+      targetWorkspaceId,
       getCurrentLanguageTranslations,
+      currentLang,
     }) => {
       const response = await duplicateSurvey(
         title,
         workspaceId,
         surveyId,
-        getCurrentLanguageTranslations
+        targetWorkspaceId,
+        getCurrentLanguageTranslations,
+        currentLang
       );
       return response;
     },
-    onSuccess: (data: SurveyModel) => {
-      dispatch(setSurveys([...surveys, data]));
-      console.log("Survey duplicated successfully:", data);
+    onSuccess: async (data: SurveyModel) => {
+      await duplicateSurveyF(
+        data,
+        data.workspace,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
+      );
     },
     onError: (err: CustomError | unknown) => {
-      if (err instanceof CustomError) {
-        if (err.errors) {
-          setErrorState(err.errors);
-        } else {
-          setErrorState({ message: err.message });
-        }
-      } else {
-        setErrorState({ message: "Unknown Error" });
-      }
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
 
+      setErrorState(message);
       console.error("Error duplicating survey:", err);
     },
   });
@@ -184,17 +187,24 @@ export const useMoveSurvey = () => {
   const currentSurvey = useSelector(
     (state: RootState) => state.currentSurvey.currentSurvey
   );
+
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
+
   const mutation = useMutation<
     { targetWorkspaceId: number },
-    unknown,
+    CustomError | unknown,
     {
       workspaceId: number;
       surveyId: number;
       targetWorkspaceId: number;
       getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
     }
   >({
     mutationFn: async ({
@@ -202,86 +212,33 @@ export const useMoveSurvey = () => {
       surveyId,
       targetWorkspaceId,
       getCurrentLanguageTranslations,
-    }: {
-      workspaceId: number;
-      surveyId: number;
-      targetWorkspaceId: number;
-      getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang,
     }) => {
-      const response = await moveSurveyToWorkspace(
+      return await moveSurveyToWorkspace(
         workspaceId,
         surveyId,
         targetWorkspaceId,
-        getCurrentLanguageTranslations
+        getCurrentLanguageTranslations,
+        currentLang
       );
-      return response;
     },
-
-    onSuccess: (data: { targetWorkspaceId: number }) => {
-      const currentSur = currentSurvey;
-      dispatch(clearCurrentSurvey());
-      /**
-       * Remove the survey from the current workspace
-       * Add the survey to the new workspace
-       * Update the current workspace
-       * Update the surveys in the new workspace
-       * Update the workspaces
-       */
-
-      const updatedSurveys = surveys.filter(
-        (survey) => survey.id !== currentSur!.id
+    onSuccess: async ({ targetWorkspaceId: number }) => {
+      await moveSurveyF(
+        currentSurvey!.id,
+        number,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
       );
-      dispatch(setSurveys(updatedSurveys));
-      
-      const updatedWorkspaces = workspaces.map((workspace) => {
-        if (workspace.id === currentSur!.workspace) {
-          return {
-            ...workspace,
-            surveys: workspace.surveys.filter(
-              (survey) => survey.id !== currentSur!.id
-            ),
-          };
-        }
-        // 1 done
-
-        if (workspace.id === data.targetWorkspaceId) {
-          return {
-            ...workspace,
-            surveys: [
-              ...workspace.surveys,
-              { ...currentSur!, workspaceId: data.targetWorkspaceId },
-            ],
-          };
-        }
-        return workspace;
-      });
-
-      dispatch(setWorkspaces(updatedWorkspaces));
-
-      if (currentSur!.workspace !== data.targetWorkspaceId) {
-        const newWorkspace = updatedWorkspaces.filter(
-          (workspace) => workspace.id == data.targetWorkspaceId
-        );
-        if (newWorkspace) {
-          dispatch(setCurrentWorkspace(newWorkspace));
-        }
-      }
-
-      console.log("Survey moved successfully:", data);
     },
-
     onError: (err: CustomError | unknown) => {
-      if (err instanceof CustomError) {
-        if (err.errors) {
-          setErrorState(err.errors);
-        } else {
-          setErrorState({ message: err.message });
-        }
-      } else {
-        setErrorState({ message: "Unknown  Error" });
-      }
-
-      console.error("Error updating survey title:", err);
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error moving survey:", err);
     },
   });
 
@@ -304,72 +261,221 @@ export const useMoveSurvey = () => {
 export const useChangeSurveyStatus = () => {
   const dispatch = useDispatch();
   const surveys = useSelector((state: RootState) => state.survey.surveys);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces
+  );
   const currentSurvey = useSelector(
     (state: RootState) => state.currentSurvey.currentSurvey
   );
+
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
+
   const mutation = useMutation<
-    UpdateSurveyStatusResponse,
-    unknown,
+    void,
+    CustomError | unknown,
     {
       surveyId: number;
       workspaceId: number;
       getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
     }
   >({
     mutationFn: async ({
       surveyId,
       workspaceId,
       getCurrentLanguageTranslations,
+      currentLang,
     }) => {
-      const response = await updateSurveyStatus(
+      return await updateSurveyStatus(
         workspaceId,
         surveyId,
-        getCurrentLanguageTranslations
+        getCurrentLanguageTranslations,
+        currentLang
       );
-      return response;
     },
-    onSuccess: (data: UpdateSurveyStatusResponse) => {
-      const updatedCurrentSurvey = {
-        ...currentSurvey!,
-        isActive: data.isActive,
-      };
-      dispatch(setCurrentSurvey(updatedCurrentSurvey));
-
-      const updatedSurveys = surveys.map((survey) =>
-        survey.id === currentSurvey!.id
-          ? { ...survey, isActive: data.isActive }
-          : survey
+    onSuccess: async () => {
+      await toggleSurveyActiveF(
+        currentSurvey!.id,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
       );
-      dispatch(setSurveys(updatedSurveys));
-      console.log("Survey status updated successfully:", data);
     },
     onError: (err: CustomError | unknown) => {
-      if (err instanceof CustomError) {
-        if (err.errors) {
-          setErrorState(err.errors);
-        } else {
-          setErrorState({ message: err.message });
-        }
-      } else {
-        setErrorState({ message: "Unknown Error" });
-      }
-
-      console.error("Error updating survey title:", err);
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error moving survey:", err);
     },
   });
 
   const {
-    mutateAsync: hundleUpdateSurveyStatus,
+    mutateAsync: handleUpdateSurveyStatus,
     isError,
     isSuccess,
     isPending,
   } = mutation;
 
   return {
-    hundleUpdateSurveyStatus,
+    handleUpdateSurveyStatus,
+    isError,
+    isSuccess,
+    errorState,
+    isPending,
+  };
+};
+
+export const useDeleteSurvey = () => {
+  const dispatch = useDispatch();
+  const surveys = useSelector((state: RootState) => state.survey.surveys);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces
+  );
+  const currentSurvey = useSelector(
+    (state: RootState) => state.currentSurvey.currentSurvey
+  );
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+
+  const [errorState, setErrorState] = useState<Record<string, string> | null>(
+    null
+  );
+
+  const mutation = useMutation<
+    void,
+    CustomError | unknown,
+    {
+      surveyId: number;
+      workspaceId: number;
+      getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
+    }
+  >({
+    mutationFn: async ({
+      surveyId,
+      workspaceId,
+      getCurrentLanguageTranslations,
+      currentLang,
+    }) => {
+      await deleteSurveyFromWorkspace(
+        workspaceId,
+        surveyId,
+        getCurrentLanguageTranslations,
+        currentLang
+      );
+    },
+    onSuccess: async () => {
+      console.log("Survey deleted successfully");
+      await deleteSurvey(
+        currentSurvey!.id,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
+      );
+    },
+    onError: (err: CustomError | unknown) => {
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error deleting survey:", err);
+    },
+  });
+
+  const {
+    mutateAsync: handleDeleteSurvey,
+    isError,
+    isSuccess,
+    isPending,
+  } = mutation;
+
+  return {
+    handleDeleteSurvey,
+    isError,
+    isSuccess,
+    errorState,
+    isPending,
+  };
+};
+
+export const useCreateSurvey = () => {
+  const dispatch = useDispatch();
+  const surveys = useSelector((state: RootState) => state.survey.surveys);
+  const workspaces = useSelector(
+    (state: RootState) => state.workspace.workspaces
+  );
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
+  const [errorState, setErrorState] = useState<Record<string, string> | null>(
+    null
+  );
+
+  const mutation = useMutation<
+    SurveyModel,
+    CustomError | unknown,
+    {
+      title: string;
+      workspaceId: number;
+      getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
+    }
+  >({
+    mutationFn: async ({
+      title,
+      workspaceId,
+      getCurrentLanguageTranslations,
+      currentLang,
+    }) => {
+      const response = await createNewSurvey(
+        workspaceId,
+        title,
+        getCurrentLanguageTranslations,
+        currentLang
+      );
+      return response;
+    },
+    onSuccess: async (newSurvey: SurveyModel) => {
+      await addSurvey(
+        newSurvey,
+        workspaces,
+        surveys,
+        currentWorkspace!,
+        dispatch
+      );
+      console.log("Survey created successfully:", newSurvey);
+    },
+    onError: (err: CustomError | unknown) => {
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error creating new survey:", err);
+    },
+  });
+
+  const {
+    mutateAsync: handleCreateSurvey,
+    isError,
+    isSuccess,
+    isPending,
+  } = mutation;
+
+  return {
+    handleCreateSurvey,
     isError,
     isSuccess,
     errorState,

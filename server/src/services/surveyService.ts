@@ -12,9 +12,6 @@ export const addSurveyService = async (
   title: string,
   isActive?: boolean
 ) => {
-  if (isNaN(workSpaceID)) {
-    throw new CustomError("Invalid workspace ID", 400, true);
-  }
   try {
     const survey = await Survey.create({
       title,
@@ -151,13 +148,18 @@ export const moveSurveyService = async (
   }
 };
 
-export const duplicateSurveyService = async (survey: SurveyModel) => {
+export const duplicateSurveyService = async (
+  targetWorkspaceId: number,
+  survey: SurveyModel
+) => {
   console.log("duplicateSurveyService", survey);
   try {
-    await Survey.create({
+    const duplicatedSurvey = await Survey.create({
       ...survey,
       id: undefined,
+      workspace: targetWorkspaceId,
     });
+    return duplicatedSurvey;
   } catch (error) {
     throw error;
   }

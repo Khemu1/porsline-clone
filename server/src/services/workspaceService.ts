@@ -33,7 +33,6 @@ export const getWorkSpacesService = async (
 ): Promise<WorkSpaceModel[]> => {
   try {
     const userGroups = await UserGroup.findAll({ where: { userId } });
-    console.log("User Groups:", userGroups);
 
     const groupIds = userGroups.map((userGroup) => userGroup.groupId);
 

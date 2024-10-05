@@ -4,16 +4,35 @@ import { useLanguage } from "../lang/LanguageProvider";
 import UpdateSurveyTitleDialog from "../Dialog/UpdateSurveyTitleDialog";
 import MoveSurveyDialog from "../Dialog/MoveSurveyDialog";
 import DuplicateSurveyDialog from "../Dialog/DuplicateSurveyDialog";
+import { useChangeSurveyStatus, useDeleteSurvey } from "../../hooks/survey";
 
 const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
-  const { t } = useLanguage();
+  const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
+    useLanguage();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [isMoveDialogOpen, setMoveDialogOpen] = useState(false);
   const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
-
+  const { handleDeleteSurvey } = useDeleteSurvey();
   const surveyCardMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
+  const { handleUpdateSurveyStatus } = useChangeSurveyStatus();
+
+  // Function to toggle survey status
+  const toggleSurveyStatus = () => {
+    try {
+      console.log("toggleSurveyStatus", survey.id, survey.workspace);
+      handleUpdateSurveyStatus({
+        surveyId: survey.id,
+        workspaceId: survey.workspace,
+        getCurrentLanguageTranslations,
+        currentLang: getCurrentLanguage(),
+      });
+    } catch (error) {
+      console.error("Error toggling survey status:", error);
+    }
+  };
 
   const handleOpenUpdateTitleDialog = () => {
     setMenuOpen(false);
@@ -42,6 +61,7 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
     console.log("Opening update dialog");
     setIsDuplicateDialogOpen(true);
   };
+
   const handleCloseDuplicateDialog = () => {
     console.log("Closing move dialog");
     setIsDuplicateDialogOpen(false);
@@ -79,6 +99,7 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
             <div className="flex flex-col h-full w-full relative">
               <button className="survey_card_buttons">{t("preview")}</button>
               <button
+                onClick={toggleSurveyStatus} // Use the toggle function here
                 className={`survey_card_buttons ${
                   survey.isActive ? "text-red-600" : "text-green-600"
                 }`}
@@ -133,7 +154,18 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
                 >
                   {t("duplicate")}
                 </span>
-                <span className="survey_card_buttons text-red-600">
+                <span
+                  className="survey_card_buttons text-red-600"
+                  onClick={() =>
+                    handleDeleteSurvey({
+                      surveyId: survey.id,
+                      workspaceId: survey.workspace,
+                      getCurrentLanguageTranslations:
+                        getCurrentLanguageTranslations,
+                      currentLang: getCurrentLanguage(),
+                    })
+                  }
+                >
                   {t("delete")}
                 </span>
               </div>

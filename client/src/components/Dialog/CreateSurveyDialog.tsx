@@ -1,59 +1,58 @@
 import { Dialog } from "@headlessui/react";
 import { useLanguage } from "../lang/LanguageProvider";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useMoveSurvey } from "../../hooks/survey";
-import { Select } from "@headlessui/react";
-import { validateWithSchema } from "../../utils/survey";
+import { useCreateSurvey } from "../../hooks/survey"; // Assuming you have this hook
+import { newSurveySchema, validateWithSchema } from "../../utils/survey";
 
-interface MoveSurveyDialogProps {
+interface CreateSurveyDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const MoveSurveyDialog: React.FC<MoveSurveyDialogProps> = ({
+const CreateSurveyDialog: React.FC<CreateSurveyDialogProps> = ({
   isOpen,
   onClose,
 }) => {
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
     useLanguage();
+
   const currentWorkspace = useSelector(
     (state: RootState) => state.currentWorkspace.currentWorkspace
   );
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
+  const [surveyTitle, setSurveyTitle] = useState("");
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
 
-  const [targetWorkspaceId, setTargetWorkspaceId] = useState<number | null>(
-    null
-  );
-  const { handleMoveSurvey, isError, errorState, isSuccess } = useMoveSurvey();
+  const { handleCreateSurvey, isError, errorState, isSuccess } =
+    useCreateSurvey();
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors(null);
+
     try {
-      e.preventDefault();
+      // Validate the survey title
+      newSurveySchema().parse({ title: surveyTitle });
 
-      if (!targetWorkspaceId || !currentSurvey?.id || !currentWorkspace?.id) {
+      if (!currentWorkspace?.id) {
         setErrors({ chooseWorkspace: t("chooseWorkspace") });
-
         return;
       }
 
-      handleMoveSurvey({
+      const lang = getCurrentLanguageTranslations();
+
+      // Call the hook to create the survey
+      await handleCreateSurvey({
+        title: surveyTitle,
         workspaceId: currentWorkspace?.id,
-        surveyId: currentSurvey.id,
-        targetWorkspaceId,
-        getCurrentLanguageTranslations,
+        getCurrentLanguageTranslations: () => lang,
         currentLang: getCurrentLanguage(),
       });
     } catch (error) {
+      // Handle validation errors
       setErrors(validateWithSchema(error, getCurrentLanguage()));
-      console.error("Failed to move survey", error);
+      console.error("Failed to create survey", error);
     }
   };
 
@@ -70,8 +69,8 @@ const MoveSurveyDialog: React.FC<MoveSurveyDialogProps> = ({
         aria-hidden="true"
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="flex flex-col justify-center items-center text-sm text-[#BCB6AE] bg-[#1e1e1e] rounded-md py-5 w-[350px] h-[250px]">
-          <form onSubmit={handleSave} className="w-full">
+        <Dialog.Panel className="bg-[#1e1e1e] rounded-md py-5 w-[300px]">
+          <form onSubmit={handleSave}>
             <div className="flex w-full items-center border-b border-b-gray-500 pb-2 px-2">
               <button type="button" onClick={onClose}>
                 <img
@@ -80,38 +79,22 @@ const MoveSurveyDialog: React.FC<MoveSurveyDialogProps> = ({
                   className="w-[20px] h-[20px]"
                 />
               </button>
-              <span className="flex flex-1 justify-center text-sm">
-                {t("moveTo")}
+              <span className="flex flex-1 justify-center text-white">
+                {'asdsaads'}
               </span>
             </div>
 
             <div className="border-b border-b-gray-500 p-[2rem]">
-              <Select
-                value={targetWorkspaceId || ""}
-                onChange={(e) => setTargetWorkspaceId(+e.target.value)}
-                aria-label={t("selectWorkSpace")}
-                className="w-full bg-[#2a2a2a] border-none outline-none p-2 rounded-md"
-              >
-                <option value="" disabled>
-                  {t("selectWorkSpace")}
-                </option>
-                {workspaces.map((workspace) => {
-                  if (workspace.id !== currentWorkspace!.id) {
-                    return (
-                      <option key={workspace.id} value={workspace.id}>
-                        {workspace.title}
-                      </option>
-                    );
-                  }
-                  return null;
-                })}
-              </Select>
-              {((isError && errorState) ||
-                (errors && errors.chooseWorkspace)) && (
+              <input
+                type="text"
+                value={surveyTitle}
+                placeholder={"dsadasd"}
+                onChange={(e) => setSurveyTitle(e.target.value)}
+                className="w-full bg-[#2a2a2a] text-white border-none outline-none p-2 rounded-md"
+              />
+              {((isError && errorState?.title) || (errors && errors.title)) && (
                 <div className="text-red-600 text-sm mt-2 px-4 text-center">
-                  {errorState?.message ||
-                    errors?.chooseWorkspace ||
-                    t("unknownError")}
+                  {errorState?.title || errors?.title || t("unknownError")}
                 </div>
               )}
             </div>
@@ -134,7 +117,7 @@ const MoveSurveyDialog: React.FC<MoveSurveyDialogProps> = ({
                 className="bg-[#2c2f31] transition-all py-2 px-4 rounded"
                 type="submit"
               >
-                {t("move")}
+                "adsads"
               </button>
             </div>
           </form>
@@ -144,4 +127,4 @@ const MoveSurveyDialog: React.FC<MoveSurveyDialogProps> = ({
   );
 };
 
-export default MoveSurveyDialog;
+export default CreateSurveyDialog;

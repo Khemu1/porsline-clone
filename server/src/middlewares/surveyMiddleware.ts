@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { NewSurvey, SurveyModel } from "../types/types";
+import { SurveyModel } from "../types/types";
 import {
   newSurveySchema,
   updateUrlSchema,
@@ -10,35 +10,82 @@ import { CustomError } from "../errors/customError";
 import Survey from "../db/models/Survey";
 import WorkSpace from "../db/models/WorkSpace";
 import { Op } from "sequelize";
-import { title } from "process";
-import { create } from "domain";
-
+import { compareSync } from "bcrypt";
 export const validateNewSurvey = async (
-  req: Request<{ workspaceId: string }, {}, NewSurvey>,
-  res: Response,
+  req: Request<{ surveyId: string }, {}, { title: string }>,
+  res: Response<
+    {},
+    {
+      workspaceId: string;
+      groupId: string;
+      userId: string;
+      duplicateSurvey: SurveyModel;
+    }
+  >,
   next: NextFunction
 ) => {
   try {
-    const workspaceId = req.params.workspaceId;
-    if (Number.isNaN(+workspaceId) || +workspaceId < 1) {
-      throw new CustomError(
-        "Invalid workspace ID",
-        400,
-        true,
-        "invalidWorkspaceId"
-      );
-    }
-
-    const data = req.body;
+    const { title } = req.body;
     const schema = newSurveySchema(); // assuming this is your Zod schema
-    schema.parse(data); // Validates the survey data
+    schema.parse({ title }); // Validates the survey data
 
     next();
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json(validateWithSchema(error));
+      return res.status(400).json("vals");
     }
     next(error); // Pass other errors to the error handler
+  }
+};
+
+export const checkWorkspaceExistsForSurvey = async (
+  req: Request<
+    { surveyId: string },
+    {},
+    {
+      workspaceId: string;
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      workspaceId: string;
+      groupId: string;
+      userId: string;
+      duplicateSurvey: SurveyModel;
+    }
+  >,
+  next: NextFunction
+) => {
+  console.log(req.body);
+  const { workspaceId } = req.body;
+  console.log(workspaceId ?? false);
+  try {
+    if (isNaN(+workspaceId)) {
+      return next(
+        new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
+      );
+    }
+
+    const workspace = await WorkSpace.findOne({
+      where: { id: workspaceId },
+    });
+
+    if (!workspace) {
+      return next(
+        new CustomError("Workspace not found", 404, true, "workspaceNotFound")
+      );
+    }
+
+    // Store the groupId for later use
+    res.locals.groupId = workspace.groupId.toString();
+
+    next(); // Proceed to the next middleware
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -65,24 +112,9 @@ export const checkSurveyExists = async (
   next: NextFunction
 ) => {
   const { surveyId } = req.params;
-  const { workspaceId, title } = req.body;
+  const { title } = req.body;
+
   try {
-    if (isNaN(+workspaceId)) {
-      return next(
-        new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
-      );
-    }
-
-    const workspace = await WorkSpace.findOne({
-      where: { id: workspaceId },
-    });
-
-    if (!workspace) {
-      return next(
-        new CustomError("Workspace not found", 404, true, "workspaceNotFound")
-      );
-    }
-
     if (Number.isNaN(+surveyId)) {
       return next(
         new CustomError("Invalid survey ID", 400, true, "invalidSurveyId")
@@ -98,6 +130,8 @@ export const checkSurveyExists = async (
         new CustomError("Survey not found", 404, true, "surveyNotFound")
       );
     }
+
+    // Check for duplicate survey title
     if (title !== survey.title) {
       res.locals.duplicateSurvey = {
         ...survey.get(),
@@ -107,11 +141,10 @@ export const checkSurveyExists = async (
         url: title + "url",
       };
     }
-    res.locals.groupId = workspace.groupId.toString();
-    console.log("check for existince done", "done");
-    next();
+
+    next(); // Proceed to the next middleware
   } catch (error) {
-    throw error;
+    return next(error);
   }
 };
 

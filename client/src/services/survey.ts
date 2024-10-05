@@ -1,24 +1,23 @@
 import { translations } from "../components/lang/translations";
 import {
   SurveyModel,
-  UpdateSurveyStatusResponse,
   UpdateSurveyTitleResponse,
 } from "../types";
 import { CustomError } from "../utils/CustomError";
 
-  
 export const updateSurveyTitle = async (
   title: string,
   workspaceId: number,
   surveyId: number,
-  lang:() => (typeof translations)["en"]
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
 ): Promise<UpdateSurveyTitleResponse> => {
-
   try {
     const response = await fetch(`/api/survey/${surveyId}/update-title`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Language": currentLang,
       },
       body: JSON.stringify({ workspaceId, title }),
     });
@@ -56,16 +55,18 @@ export const duplicateSurvey = async (
   title: string,
   workspaceId: number,
   surveyId: number,
-  lang: () => (typeof translations)["en"]
+  targetWorkspaceId: number,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
 ): Promise<SurveyModel> => {
   try {
-
     const response = await fetch(`/api/survey/${surveyId}/duplicate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Language": currentLang,
       },
-      body: JSON.stringify({ workspaceId, title }),
+      body: JSON.stringify({ workspaceId, title, targetWorkspaceId }),
     });
 
     if (!response.ok) {
@@ -100,16 +101,18 @@ export const duplicateSurvey = async (
 export const updateSurveyStatus = async (
   workspaceId: number,
   surveyId: number,
-  lang: () => (typeof translations)["en"]
-): Promise<UpdateSurveyStatusResponse> => {
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+): Promise<void> => {
+  console.log("updateSurveyStatus", workspaceId, surveyId);
   try {
-
     const response = await fetch(`/api/survey/${surveyId}/update-status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Language": currentLang,
       },
-      body: JSON.stringify(workspaceId),
+      body: JSON.stringify({ workspaceId }),
     });
 
     if (!response.ok) {
@@ -133,7 +136,7 @@ export const updateSurveyStatus = async (
       throw err;
     }
 
-    const data: UpdateSurveyStatusResponse = await response.json();
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error(error);
@@ -145,13 +148,15 @@ export const moveSurveyToWorkspace = async (
   workspaceId: number,
   surveyId: number,
   targetWorkspaceId: number,
-  lang: () => (typeof translations)["en"]
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
 ): Promise<{ targetWorkspaceId: number }> => {
   try {
     const response = await fetch(`/api/survey/${surveyId}/move`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Language": currentLang,
       },
       body: JSON.stringify({ workspaceId, surveyId, targetWorkspaceId }),
     });
@@ -170,6 +175,96 @@ export const moveSurveyToWorkspace = async (
         errorMessage,
         response.status,
         "MoveSurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const deleteSurveyFromWorkspace = async (
+  workspaceId: number,
+  surveyId: number,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+): Promise<void> => {
+  try {
+    const response = await fetch(`/api/survey/${surveyId}/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": currentLang,
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "DELETESurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const createNewSurvey = async (
+  workspaceId: number,
+  title: string,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+): Promise<SurveyModel> => {
+  try {
+    const response = await fetch(`/api/survey/add-survey`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": currentLang,
+      },
+      body: JSON.stringify({ workspaceId, title }),
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "DELETESurveyError",
         true,
         errorData.details,
         errorData.errors

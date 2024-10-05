@@ -45,7 +45,6 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
       return;
     }
 
-    const lang = getCurrentLanguageTranslations();
 
     try {
       newSurveySchema().parse({ title });
@@ -53,7 +52,8 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
         title,
         surveyId: currentSurveyId,
         workspaceId: workspaceId,
-        getCurrentLanguageTranslations: () => lang,
+        getCurrentLanguageTranslations,
+        currentLang: getCurrentLanguage(),
       });
     } catch (error) {
       // Handle error if needed

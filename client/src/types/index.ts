@@ -63,6 +63,7 @@ export interface UpdateSurveyTitleProps {
   workspaceId: number;
   surveyId: number;
   getCurrentLanguageTranslations: () => (typeof translations)["en"];
+  currentLang: "en" | "de";
 }
 
 export interface UpdateSurveyTitleResponse {

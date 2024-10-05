@@ -41,12 +41,14 @@ export const checkGroupMembership = async (
   req: Request<
     { surveyId: string; workspaceId: string },
     {},
-    { isActive: boolean; title: string; targetWorkspaceId: string }
+    {
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+      workspaceId: string;
+    }
   >,
-  res: Response<
-    {},
-    { groupId: string; userId: string }
-  >,
+  res: Response<{}, { groupId: string; userId: string }>,
   next: NextFunction
 ) => {
   try {

@@ -14,6 +14,7 @@ import {
   checkDuplicateSurveyTitle,
   checkDuplicateSurveyUrl,
   checkSurveyExists,
+  checkWorkspaceExistsForSurvey,
   validateNewSurvey,
   validateSurveyForMoving,
 } from "../middlewares/surveyMiddleware";
@@ -22,16 +23,19 @@ import { checkGroupMembership } from "../middlewares/groupMiddleware";
 const surveyRouter = Router();
 
 surveyRouter.post(
-  "add-survey/:workspaceId",
+  "/add-survey",
   authUser,
+  checkWorkspaceExistsForSurvey,
   validateNewSurvey,
+  checkGroupMembership,
+  checkDuplicateSurveyTitle,
   addSurvey
 );
-// surveyRouter.get("get-survey/:surveyId", checkSurveyExists, getSurvey);
 
 surveyRouter.patch(
   "/:surveyId/update-title",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
   checkDuplicateSurveyTitle,
@@ -41,6 +45,7 @@ surveyRouter.patch(
 surveyRouter.patch(
   "/:surveyId/update-status",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
   updateSurvyStatus
@@ -49,6 +54,7 @@ surveyRouter.patch(
 surveyRouter.patch(
   "/:surveyId/update-url",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
   checkDuplicateSurveyUrl,
@@ -58,6 +64,7 @@ surveyRouter.patch(
 surveyRouter.delete(
   "/:surveyId/delete",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
   deleteSurvey
@@ -66,14 +73,17 @@ surveyRouter.delete(
 surveyRouter.post(
   "/:surveyId/duplicate",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
+  validateSurveyForMoving,
   duplicateSurvey
 );
 
 surveyRouter.patch(
   "/:surveyId/move",
   authUser,
+  checkWorkspaceExistsForSurvey,
   checkSurveyExists,
   checkGroupMembership,
   validateSurveyForMoving,

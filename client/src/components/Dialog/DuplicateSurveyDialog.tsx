@@ -23,7 +23,9 @@ const DuplicateSurveyDialog: React.FC<DuplicateSurveyDialogProps> = ({
   const currentSurvey = useSelector(
     (state: RootState) => state.currentSurvey.currentSurvey
   );
-
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
   const [surveyTitle, setSurveyTitle] = useState("");
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string> | null>(null);
@@ -45,9 +47,11 @@ const DuplicateSurveyDialog: React.FC<DuplicateSurveyDialogProps> = ({
 
       await handleDuplicateSurvey({
         title: surveyTitle,
-        workspaceId,
+        workspaceId: currentWorkspace!.id,
         surveyId: currentSurvey!.id,
+        targetWorkspaceId: workspaceId,
         getCurrentLanguageTranslations: () => lang,
+        currentLang: getCurrentLanguage(),
       });
     } catch (error) {
       setErrors(validateWithSchema(error, getCurrentLanguage()));

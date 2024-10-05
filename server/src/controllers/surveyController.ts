@@ -13,15 +13,18 @@ import {
 import { json } from "sequelize";
 
 export const addSurvey = async (
-  req: Request<{ workspaceId: string }, {}, NewSurvey>,
+  req: Request<
+    { workspaceId: string },
+    {},
+    { title: string; workspaceId: string }
+  >,
   res: Response<{}, { userId: string }>,
   next: NextFunction
 ) => {
   try {
-    const workspaceId = +req.params.workspaceId;
-    const { title } = req.body;
-    const surveyData = await addSurveyService(workspaceId, title);
-    res.status(200).json(surveyData);
+    const { title, workspaceId } = req.body;
+    const surveyData = await addSurveyService(+workspaceId, title);
+    res.status(201).json(surveyData);
   } catch (error) {
     next(error);
   }
@@ -97,21 +100,30 @@ export const deleteSurvey = async (
   try {
     const { surveyId } = req.params;
     await deleteSurveyService(+surveyId);
-    return res.status(204);
+    return res.status(200).json("deleted");
   } catch (error) {
     next(error);
   }
 };
 
 export const duplicateSurvey = async (
-  req: Request<{ surveyId: string }, {}, { targetWorkspaceId: string }>,
+  req: Request<
+    { surveyId: string },
+    {},
+    { workspaceId: string; targetWorkspaceId: string }
+  >,
   res: Response<{}, { duplicateSurvey: SurveyModel }>,
   next: NextFunction
 ) => {
   try {
     const { duplicateSurvey } = res.locals;
-    await duplicateSurveyService(duplicateSurvey);
-    return res.status(201).json({ duplicateSurvey });
+    const { targetWorkspaceId } = req.body;
+    const survey = await duplicateSurveyService(
+      +targetWorkspaceId,
+      duplicateSurvey
+    );
+
+    return res.status(201).json(survey);
   } catch (error) {
     next(error);
   }
