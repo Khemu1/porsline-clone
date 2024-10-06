@@ -14,6 +14,11 @@ export const commonTranslations = {
     deactivate: "Deactivate",
     moveTo: "Move to",
     enterName: "Enter name",
+    search: "Search",
+    noSurveysFound: "No surveys found",
+    noWorkspacesFound: "No workspaces found",
+    surveys: "Surveys",
+    workspaces: "Workspaces",
     // Other common translations
   },
   de: {
@@ -31,6 +36,11 @@ export const commonTranslations = {
     deactivate: "Deaktivieren",
     moveTo: "Verschieben nach",
     enterName: "Namen eingeben",
+    search: "Suchen",
+    noSurveysFound: "Keine Umfragen gefunden",
+    noWorkspacesFound: "Keine Arbeitsbereiche gefunden",
+    surveys: "Umfragen",
+    workspaces: "Arbeitsbereiche",
     // Other common translations
   },
 };

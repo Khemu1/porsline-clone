@@ -19,7 +19,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<keyof Translations>("en");
+  const [language, setLanguage] = useState<keyof Translations>("de");
 
   const t = (key: TranslationKeys) => {
     return translations[language][key] || key;
@@ -48,7 +48,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     </LanguageContext.Provider>
   );
 };
-
 
 // Custom hook for using language context
 export const useLanguage = () => {

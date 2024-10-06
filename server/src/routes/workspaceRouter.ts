@@ -2,10 +2,11 @@ import { Router } from "express";
 import { authUser } from "../middlewares/authMiddleware";
 import {
   addWorkSpace,
+  deleteWorkspace,
   getWorkSpaces,
   updateWorkspaceTitle,
 } from "../controllers/workspaceController";
-import { checkWorkspaceExists } from "../middlewares/workspaceMiddleware";
+import { checkDuplicateWorkspaceTitle, checkWorkspaceExists } from "../middlewares/workspaceMiddleware";
 import { checkGroupMembership } from "../middlewares/groupMiddleware";
 import { updateWorkspaceTitleService } from "../services/workspaceService";
 
@@ -18,13 +19,15 @@ workspaceRouter.patch(
   authUser,
   checkWorkspaceExists,
   checkGroupMembership,
+  checkDuplicateWorkspaceTitle,
   updateWorkspaceTitle
 );
 workspaceRouter.delete(
-  "/:workspacesId/delete",
+  "/:workspaceId/delete",
   authUser,
   checkWorkspaceExists,
   checkGroupMembership,
+  deleteWorkspace
 );
 
 export default workspaceRouter;

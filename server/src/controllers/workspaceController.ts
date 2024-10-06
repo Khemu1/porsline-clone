@@ -58,7 +58,7 @@ export const deleteWorkspace = async (
   try {
     const { workspaceId } = req.params;
     await deleteWorkspaceService(+workspaceId);
-    return res.status(204);
+    return res.status(204).send();
   } catch (error) {
     next(error);
   }

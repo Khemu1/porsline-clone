@@ -1,62 +1,54 @@
 import { Dialog, DialogPanel } from "@headlessui/react";
-import { useLanguage } from "../lang/LanguageProvider";
+import { useLanguage } from "../../lang/LanguageProvider";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { useUpdateSurvey } from "../../hooks/survey";
-import { newSurveySchema, validateWithSchema } from "../../utils/survey";
+import { RootState } from "../../../store/store";
+import { newSurveySchema, validateWithSchema } from "../../../utils/survey";
+import { useUpdateWorkspaceTitle } from "../../../hooks/workspace";
 
-interface UpdateSurveyTitleDialogProps {
+interface UpdateSurveyWorkspaceTitleDialog {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
-  isOpen,
-  onClose,
-}) => {
+const UpdateWorkspaceTitleDialog: React.FC<
+  UpdateSurveyWorkspaceTitleDialog
+> = ({ isOpen, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
     useLanguage();
-  const currentSurveyState = useSelector(
-    (state: RootState) => state.currentSurvey
-  );
+
   const currentWorkspaceState = useSelector(
     (state: RootState) => state.currentWorkspace
   );
 
-  const [title, setTitle] = useState(
-    currentSurveyState.currentSurvey?.title || ""
-  );
+  const [title, setTitle] = useState("");
   const [errors, setErros] = useState<Record<string, string> | null>(null);
-  const { handleUpdateSurvey, isError, errorState, isSuccess } =
-    useUpdateSurvey();
+  const { handleUpdateWorkspaceTitle, isError, errorState, isSuccess } =
+    useUpdateWorkspaceTitle();
 
   const handleSave = async (e: React.FormEvent) => {
     setErros(null);
     e.preventDefault();
     setIsSubmitting(true);
 
-    const currentSurveyId = currentSurveyState.currentSurvey?.id;
     const workspaceId = currentWorkspaceState.currentWorkspace?.id;
 
-    if (!workspaceId || !currentSurveyId) {
+    if (!workspaceId) {
       setIsSubmitting(false);
       return;
     }
 
-
     try {
       newSurveySchema().parse({ title });
-      await handleUpdateSurvey({
+      console.log("title", title);
+      await handleUpdateWorkspaceTitle({
         title,
-        surveyId: currentSurveyId,
         workspaceId: workspaceId,
         getCurrentLanguageTranslations,
         currentLang: getCurrentLanguage(),
       });
     } catch (error) {
-      // Handle error if needed
       setErros(validateWithSchema(error, getCurrentLanguage()));
       console.error("Failed to update survey", error);
     } finally {
@@ -69,7 +61,14 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
       onClose();
       console.log(getCurrentLanguage());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
+
+  useEffect(() => {
+    if (currentWorkspaceState.currentWorkspace) {
+      setTitle(currentWorkspaceState.currentWorkspace.title);
+    }
+  }, [currentWorkspaceState.currentWorkspace]);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -90,7 +89,7 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
                   />
                 </button>
                 <span className="flex flex-1 justify-center text-white">
-                  {t("renameSurvey")}
+                  {t("renameWorkspace")}
                 </span>
               </div>
 
@@ -99,6 +98,7 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
+                  placeholder={t("enterWorkspaceTitle")}
                   className="w-full bg-[#2a2a2a] text-white border-none outline-none p-2 rounded-md"
                   disabled={isSubmitting}
                 />
@@ -134,4 +134,4 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
   );
 };
 
-export default UpdateSurveyTitleDialog;
+export default UpdateWorkspaceTitleDialog;

@@ -1,14 +1,19 @@
 import Workspaces from "../workspaces/Workspaces";
 import Surveys from "../surveys/Surveys";
-import { useGetWorkspaces } from "../../hooks/workspace";
+import { useDeleteWorkspace, useGetWorkspaces } from "../../hooks/workspace";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { setWorkspaces } from "../../store/slices/workspaceSlice";
 import { useLanguage } from "../lang/LanguageProvider";
+import CreateWorkspaceDialog from "../Dialog/workspaces/CreateWorkspaceDialog";
+import UpdateWorkspaceTitleDialog from "../Dialog/workspaces/UpdateWorkspaceTitleDialog";
+import { setCurrentWorkspace } from "../../store/slices/currentWorkspaceSlice";
+import SearchDialog from "../Dialog/workspaces/searchDialog";
 
 const Home = () => {
-  const { t } = useLanguage();
+  const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
+    useLanguage();
   const { handleGetWorkspaces, loading, error, data } = useGetWorkspaces();
   const dispatch = useDispatch();
 
@@ -23,6 +28,15 @@ const Home = () => {
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
   };
+
+  const [isUpdateWorkspaceTitleOpen, setIsUpdateWorkspaceTitleOpen] =
+    useState(false);
+
+  const [isWorkspaceSearchOpen, setIsWorkspaceSearchOpen] = useState(false);
+
+  const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
+
+  const { handleDeleteWorkspace } = useDeleteWorkspace();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,6 +64,7 @@ const Home = () => {
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
       dispatch(setWorkspaces(data));
+      dispatch(setCurrentWorkspace(data[0]));
     }
   }, [data, dispatch]);
 
@@ -58,7 +73,7 @@ const Home = () => {
   }
 
   if (error) {
-    return <div>{t("unknownError")}</div>; // Using translation for unknown error
+    return <div>{t("unknownError")}</div>;
   }
 
   return (
@@ -70,6 +85,7 @@ const Home = () => {
             <button
               className="p-1 cursor-pointer transition-all hover:bg-[#6272a4] rounded-md"
               aria-label="Add Workspace"
+              onClick={() => setIsCreateWorkspaceOpen(true)}
             >
               <img
                 src="/assets/icons/plus.svg"
@@ -78,6 +94,7 @@ const Home = () => {
               />
             </button>
             <button
+              onClick={() => setIsWorkspaceSearchOpen(true)}
               className="p-1 cursor-pointer transition-all hover:bg-[#6272a4] rounded-md"
               aria-label="Search Workspaces"
             >
@@ -93,8 +110,8 @@ const Home = () => {
       </aside>
 
       <section>
-        <div className="flex items-end gap-5 mb-5 relative">
-          <p className="font-extrabold text-gray-300 text-xl">
+        <div className="flex items-end gap-5 mb-5 relative w-max">
+          <p className="font-extrabold text-gray-300 text-xl max-w-[250px] text-ellipsis overflow-hidden">
             {currentWorkspace?.title}
           </p>
           <button
@@ -110,11 +127,27 @@ const Home = () => {
           </button>
           {menuOpen && (
             <div
-              className="flex flex-col text-left right-0 top-[30px] text-sm absolute font-semibold bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
+              className="flex w-[150px] flex-col text-left right-0 top-[30px] text-sm absolute font-semibold bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
               ref={workspaceChangeMenuRef}
             >
-              <span className="survey_card_buttons">{t("rename")} </span>
-              <span className="survey_card_buttons text-red-600">
+              <span
+                className="survey_card_buttons"
+                onClick={() => setIsUpdateWorkspaceTitleOpen(true)}
+              >
+                {t("renameWorkspace")}{" "}
+              </span>
+              <span
+                className="survey_card_buttons text-red-600"
+                onClick={() => {
+                  handleDeleteWorkspace({
+                    workspaceId: currentWorkspace!.id,
+                    getCurrentLanguageTranslations,
+                    currentLang: getCurrentLanguage(),
+                  });
+                  setMenuOpen(false);
+                  
+                }}
+              >
                 {t("delete")}{" "}
               </span>
             </div>
@@ -122,6 +155,19 @@ const Home = () => {
         </div>
         <Surveys />
       </section>
+
+      <CreateWorkspaceDialog
+        isOpen={isCreateWorkspaceOpen}
+        onClose={() => setIsCreateWorkspaceOpen(false)}
+      />
+      <UpdateWorkspaceTitleDialog
+        isOpen={isUpdateWorkspaceTitleOpen}
+        onClose={() => setIsUpdateWorkspaceTitleOpen(false)}
+      />
+      <SearchDialog
+        isOpen={isWorkspaceSearchOpen}
+        onClose={() => setIsWorkspaceSearchOpen(false)}
+      />
     </div>
   );
 };

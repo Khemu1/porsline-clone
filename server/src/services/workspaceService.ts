@@ -21,8 +21,7 @@ export const addWorkSpaceService = async (userId: number, title: string) => {
       maker: userId,
       groupId: group.groupId,
     });
-    const { title: _, createdAt, ...worksapceData } = workspace.get();
-    return worksapceData;
+    return workspace.get();
   } catch (error) {
     throw error;
   }

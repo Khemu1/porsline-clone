@@ -65,7 +65,7 @@ nav {
 }
 
 .home aside {
-  @apply w-[280px] bg-[#1e1e1e] p-3 flex flex-col items-center  border-r-gray-600;
+  @apply w-[280px]  bg-[#1e1e1e] p-3 flex flex-col items-center  border-r-gray-600;
   border-top: 0.5px solid rgba(128, 128, 128, 0.349);
   border-right: 0.5px solid rgba(128, 128, 128, 0.349);
 }
@@ -73,7 +73,7 @@ nav {
   @apply w-full flex gap-2 items-center justify-between cursor-pointer py-[.5rem] px-2  rounded-md;
 }
 .survey {
-  @apply relative flex items-center justify-center gap-5 w-[292px] cursor-pointer h-[212px] bg-[#1d2022] rounded-lg overflow-hidden;
+  @apply relative flex items-center justify-center gap-5 w-[292px] h-[212px] bg-[#1d2022] rounded-lg overflow-hidden;
 }
 
 .survey:hover .status {
@@ -89,7 +89,7 @@ nav {
 }
 
 .survey_card_buttons {
-  @apply text-left font-semibold  w-full transition-all hover:bg-[#6272a4] hover:text-white py-2 px-1 rounded-md;
+  @apply text-left font-semibold cursor-pointer  w-full transition-all hover:bg-[#6272a4] hover:text-white py-2 px-1 rounded-md;
 }
 .workspace_selected {
   background-color: rgba(47, 43, 114, 0.15);

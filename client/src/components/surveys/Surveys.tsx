@@ -4,9 +4,11 @@ import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
 import { RootState } from "../../store/store";
 import { SurveyModel } from "../../types";
 import Survey from "./Survey";
-import CreateSurveyDialog from "../Dialog/CreateSurveyDialog";
+import CreateSurveyDialog from "../Dialog/survey/CreateSurveyDialog";
+import { useLanguage } from "../lang/LanguageProvider";
 
 const Surveys = () => {
+  const { t } = useLanguage();
   const dispatch = useDispatch();
 
   const surveys = useSelector((state: RootState) => state.survey.surveys);
@@ -20,7 +22,6 @@ const Surveys = () => {
     setSelectedSurvey(survey);
     dispatch(setCurrentSurvey(survey));
   };
-
 
   return (
     <>
@@ -36,7 +37,7 @@ const Surveys = () => {
               className="w-[20px] h-[20px]"
             />
           </button>
-          <p className="text-[#859fd1] font-semibold">Create new survey</p>
+          <p className="text-[#859fd1] font-semibold">{t("createSurvey")}</p>
         </div>
 
         {surveys.map((survey) => (

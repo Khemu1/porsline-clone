@@ -1,10 +1,11 @@
 import { SurveyProps } from "../../types";
 import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lang/LanguageProvider";
-import UpdateSurveyTitleDialog from "../Dialog/UpdateSurveyTitleDialog";
-import MoveSurveyDialog from "../Dialog/MoveSurveyDialog";
-import DuplicateSurveyDialog from "../Dialog/DuplicateSurveyDialog";
+import UpdateSurveyTitleDialog from "../Dialog/survey/UpdateSurveyTitleDialog";
+import MoveSurveyDialog from "../Dialog/survey/MoveSurveyDialog";
+import DuplicateSurveyDialog from "../Dialog/survey/DuplicateSurveyDialog";
 import { useChangeSurveyStatus, useDeleteSurvey } from "../../hooks/survey";
+import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
 
 const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
@@ -19,11 +20,10 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const { handleUpdateSurveyStatus } = useChangeSurveyStatus();
 
-  // Function to toggle survey status
-  const toggleSurveyStatus = () => {
+  const toggleSurveyStatus = async () => {
     try {
-      console.log("toggleSurveyStatus", survey.id, survey.workspace);
-      handleUpdateSurveyStatus({
+      setCurrentSurvey(survey);
+      await handleUpdateSurveyStatus({
         surveyId: survey.id,
         workspaceId: survey.workspace,
         getCurrentLanguageTranslations,
@@ -88,9 +88,9 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
 
   return (
     <>
-      <div className="survey" onClick={() => onSelect(survey)}>
+      <div className="survey">
         <div className="flex w-full h-full">
-          <div className="flex item h-full pl-2 border-r border-r-gray-500 w-[60%]">
+          <div className="flex item h-full pl-2 border-r cursor-pointer border-r-gray-500 w-[60%]">
             <p className="m-auto text-[#859fd1] font-semibold text-ellipsis overflow-hidden px-2 text-nowrap whitespace-nowrap">
               {survey.title}
             </p>
@@ -122,7 +122,10 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
             <button
               ref={toggleButtonRef}
               className="border opacity-100 border-gray-500 w-max h-max rounded-md"
-              onClick={() => setMenuOpen((prev) => !prev)}
+              onClick={() => {
+                setMenuOpen((prev) => !prev);
+                onSelect(survey);
+              }}
             >
               <img
                 src="/assets/icons/dots.svg"

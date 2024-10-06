@@ -35,6 +35,7 @@ export const newSurveySchema = () => {
   });
 };
 
+
 export const updateUrlSchema = () => {
   return object({
     url: string()

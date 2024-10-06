@@ -24,7 +24,6 @@ export const mapSurveyErrorsTranslations = (translations: string) => {
   });
 };
 
-// Function to Map Workspace Translations
 export const mapWorkspaceTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, workspace]) => {
     return {
@@ -238,16 +237,13 @@ export const toggleSurveyActiveF = async (
     console.log("toggleSurveyActiveF", surveyId);
 
     const surveyToToggle = surveys.find((survey) => survey.id === surveyId);
-
-    if (!surveyToToggle) {
-      throw new Error("Survey not found");
-    }
+    console.log("surveyToToggle", surveyToToggle);
 
     const updatedSurvey: SurveyModel = {
-      ...surveyToToggle,
-      isActive: !surveyToToggle.isActive,
+      ...surveyToToggle!,
+      isActive: !surveyToToggle!.isActive,
     };
-
+    console.log("updatedSurvey", updatedSurvey);
     const updatedSurveys = surveys.map((survey) =>
       survey.id === surveyId ? updatedSurvey : survey
     );
@@ -269,8 +265,84 @@ export const toggleSurveyActiveF = async (
     dispatch(setSurveys(updatedSurveys));
     dispatch(setWorkspaces(updatedWorkspaces));
     dispatch(setCurrentWorkspace(newCurrentWorkspace));
-    dispatch(clearCurrentSurvey());
+    dispatch(setCurrentSurvey(updatedSurvey));
   } catch (error) {
     console.error("Error toggling survey active status:", error);
   }
+};
+
+export const updateWorkspaceTitleF = async (
+  title: string,
+  workspaces: WorkSpaceModel[],
+  currentWorkspace: WorkSpaceModel,
+  dispatch: Dispatch
+) => {
+  try {
+    const updatedCurrentWorkspace: WorkSpaceModel = {
+      ...currentWorkspace,
+      title: title,
+    };
+
+    const updatedWorkspaces = workspaces.map((workspace) =>
+      workspace.id === updatedCurrentWorkspace.id
+        ? updatedCurrentWorkspace
+        : workspace
+    );
+
+    dispatch(setCurrentWorkspace(updatedCurrentWorkspace));
+    dispatch(setWorkspaces(updatedWorkspaces));
+  } catch (error) {
+    console.error("Error updating survey title:", error);
+  }
+};
+
+export const deleteWorkspaceF = async (
+  workspaces: WorkSpaceModel[],
+  currentWorkSpace: WorkSpaceModel,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    const updatedWorkspaces = workspaces.filter(
+      (workspace) => workspace.id !== currentWorkSpace.id
+    );
+
+    dispatch(setWorkspaces(updatedWorkspaces));
+    dispatch(setCurrentWorkspace(updatedWorkspaces[0]));
+    dispatch(setSurveys(updatedWorkspaces[0].surveys || []));
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const addNewWorkspaceF = async (
+  newWorkspace: WorkSpaceModel,
+  workspaces: WorkSpaceModel[],
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    const modifiedWorkspaces = { ...newWorkspace, surveys: [] };
+    const updatedWorkspaces = [...workspaces, modifiedWorkspaces];
+    dispatch(setWorkspaces(updatedWorkspaces));
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const retrunSearchData = (
+  allWorkspaces: WorkSpaceModel[],
+  searchTerm: string
+) => {
+  const allSurveys = allWorkspaces.map((workspace) => workspace.surveys).flat();
+  const workspaceList = allWorkspaces.map((workspace) => workspace.title);
+  const filteredWorkspaces = workspaceList.filter((workspace) =>
+    workspace.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const filteredSurveys = allSurveys.filter((survey) =>
+    survey.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return {
+    workspaces: filteredWorkspaces,
+    surveys: filteredSurveys,
+  };
 };

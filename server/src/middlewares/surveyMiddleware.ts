@@ -30,9 +30,9 @@ export const validateNewSurvey = async (
 
     next();
   } catch (error) {
+    const { headers } = req;
+    const currentLang = headers["accept-language"] as "en" | "de";
     if (error instanceof ZodError) {
-      const { headers } = req;
-      const currentLang = headers["accept-language"] as "en" | "de";
       console.log(validateWithSchema(error, currentLang));
       next(
         new CustomError(
@@ -45,7 +45,7 @@ export const validateNewSurvey = async (
         )
       );
     }
-    next(error); // Pass other errors to the error handler
+    next(error);
   }
 };
 
