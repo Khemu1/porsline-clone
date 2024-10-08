@@ -6,6 +6,7 @@ import {
   Home,
   SignIn,
   NotFound,
+  SurveyBuilder,
 } from "./components";
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         {/* Private Routes */}
         <Route element={<PrivateLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/survey/:workspaceId/:surveyId/build" element={<SurveyBuilder />} />
         </Route>
 
         {/* Catch-All Route */}

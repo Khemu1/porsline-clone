@@ -1,9 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createNewSurvey,
   deleteSurveyFromWorkspace,
   duplicateSurvey,
+  getSurvey,
   moveSurveyToWorkspace,
   updateSurveyStatus,
   updateSurveyTitle,
@@ -481,4 +482,43 @@ export const useCreateSurvey = () => {
     errorState,
     isPending,
   };
+};
+
+export const useGetSurvey = (
+  workspaceId: number,
+  surveyId: number,
+  getCurrentLanguageTranslations: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+) => {
+  const [errorState, setErrorState] = useState<Record<string, string> | null>(
+    null
+  );
+
+  const {
+    data: survey,
+    isError,
+    isLoading,
+  } = useQuery<SurveyModel, CustomError>({
+    queryKey: ["getSurvey", workspaceId, surveyId],
+    queryFn: async () => {
+      try {
+        const survey = await getSurvey(
+          workspaceId,
+          surveyId,
+          getCurrentLanguageTranslations,
+          currentLang
+        );
+        return survey;
+      } catch (error) {
+        const message =
+          error instanceof CustomError
+            ? error.errors || { message: error.message }
+            : { message: "Unknown Error" };
+        setErrorState(message);
+        throw error;
+      }
+    },
+  });
+
+  return { survey, isError, isLoading, errorState };
 };

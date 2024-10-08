@@ -1,0 +1,36 @@
+export const surveyBuilderTranslations = {
+  en: {
+    welcomePage: "Welcome Page",
+    text: "Text",
+    endings: "Endings",
+    Label: "Label",
+    buttonText: "Button Text",
+    description: "Description",
+    image: "Image",
+    labelRequired: "Label is required",
+    labelIsTooLong: "Label is too long",
+    buttonTextRequired: "Button text is required",
+    buttonTextTooLong: "Button text is too long",
+    descriptionRequired: "Description is required",
+    descriptionTooLong: "Description is too long",
+    invalidImage: "Invalid image file",
+    mainfieldsEmpty:"Please Enable label or description or image"
+  },
+  de: {
+    welcomePage: "Willkommensseite",
+    text: "Text",
+    endings: "Endungen",
+    Label: "Etikett",
+    buttonText: "Schaltflächentext",
+    description: "Beschreibung",
+    image: "Bild",
+    labelRequired: "Etikett ist erforderlich",
+    labelIsTooLong: "Etikett ist zu lang",
+    buttonTextRequired: "Schaltflächentext ist erforderlich",
+    buttonTextTooLong: "Schaltflächentext ist zu lang",
+    descriptionRequired: "Beschreibung ist erforderlich",
+    descriptionTooLong: "Beschreibung ist zu lang",
+    invalidImage: "Ungültiges Bild",
+    mainfieldsEmpty:"Bitte aktiviere das Label oder Beschreibung oder Bild"
+  },
+};

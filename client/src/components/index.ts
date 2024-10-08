@@ -9,6 +9,7 @@ import Workspaces from "./workspaces/Workspaces";
 import Workspace from "./workspaces/Workspace";
 import Surveys from "./surveys/Surveys";
 import Survey from "./surveys/Survey";
+import SurveyBuilder from "./surveys/SurveyBuilder";
 
 export {
   Loading,
@@ -22,4 +23,5 @@ export {
   Workspaces,
   Survey,
   Surveys,
+  SurveyBuilder,
 };

@@ -90,3 +90,28 @@ export interface UpdateWorkspaceOwnerResponse {
   ownerId: number;
   updatedAt: Date;
 }
+
+export interface InputSwitchFieldProps {
+  label: string;
+  value: string;
+  onChange?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  switchChecked?: boolean;
+  onSwitchChange?: (checked: boolean) => void;
+  placeholder?: string;
+  disabled?: boolean;
+  isSubmitting?: boolean;
+  hasSwitch: boolean;
+  required: boolean;
+  errorMessage?: string;
+  type: string;
+  border: boolean;
+}
+
+export interface FileUploaderProps {
+  file: File | null | undefined;
+  setFile: (file: File | null) => void;
+  title: string;
+  initialImage?: string;
+}

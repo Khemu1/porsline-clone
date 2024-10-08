@@ -1,0 +1,26 @@
+export const GenericTextTranslations = {
+  en: {
+    min: "min",
+    max: "max",
+    invalidMin: "Invalid minimum value.",
+    invalidMax: "Invalid maximum value.",
+    minRequired: "Minimum value is required.",
+    maxRequired: "Maximum value is required.",
+    minGreaterThanMax: "Minimum value must be less than maximum value.",
+    MaxLesserThanMin: "Maximum value must be greater than minimum value.",
+    isRequired: "Required",
+    hideQuestionNumber: "Hide question number",
+  },
+  de: {
+    min: "min",
+    max: "max",
+    invalidMin: "Ungültiger Mindestwert.",
+    invalidMax: "Ungültiger Maximalwert.",
+    minRequired: "Mindestwert ist erforderlich.",
+    maxRequired: "Maximalwert ist erforderlich.",
+    minGreaterThanMax: "Mindestwert muss kleiner sein als Maximalwert.",
+    MaxLesserThanMin: "Maximalwert muss größer sein als Mindestwert.",
+    isRequired: "Erforderlich",
+    hideQuestionNumber: "Frage-Nummer ausblenden",
+  },
+};

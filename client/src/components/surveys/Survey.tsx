@@ -6,6 +6,9 @@ import MoveSurveyDialog from "../Dialog/survey/MoveSurveyDialog";
 import DuplicateSurveyDialog from "../Dialog/survey/DuplicateSurveyDialog";
 import { useChangeSurveyStatus, useDeleteSurvey } from "../../hooks/survey";
 import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
@@ -19,7 +22,9 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const surveyCardMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const { handleUpdateSurveyStatus } = useChangeSurveyStatus();
-
+  const currentWorkspace = useSelector(
+    (state: RootState) => state.currentWorkspace.currentWorkspace
+  );
   const toggleSurveyStatus = async () => {
     try {
       setCurrentSurvey(survey);
@@ -90,11 +95,14 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
     <>
       <div className="survey">
         <div className="flex w-full h-full">
-          <div className="flex item h-full pl-2 border-r cursor-pointer border-r-gray-500 w-[60%]">
+          <Link
+            to={`/survey/${currentWorkspace?.id}/${survey.id}/build`}
+            className="flex item h-full pl-2 border-r cursor-pointer border-r-gray-500 w-[60%]"
+          >
             <p className="m-auto text-[#859fd1] font-semibold text-ellipsis overflow-hidden px-2 text-nowrap whitespace-nowrap">
               {survey.title}
             </p>
-          </div>
+          </Link>
           <div className="flex flex-col justify-end h-full w-[40%] bg-[#1b1b1b] p-2 gap-1">
             <div className="flex flex-col h-full w-full relative">
               <button className="survey_card_buttons">{t("preview")}</button>

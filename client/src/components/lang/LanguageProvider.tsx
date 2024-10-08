@@ -19,7 +19,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<keyof Translations>("de");
+  const [language, setLanguage] = useState<keyof Translations>("en");
 
   const t = (key: TranslationKeys) => {
     return translations[language][key] || key;

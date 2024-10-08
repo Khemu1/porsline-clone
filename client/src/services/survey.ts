@@ -279,3 +279,51 @@ export const createNewSurvey = async (
     throw error;
   }
 };
+
+
+export const getSurvey = async (
+  workspaceId: number,
+  surveyId: number,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+): Promise<SurveyModel> => {
+  try {
+    const response = await fetch(`/api/survey/get-survey`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": currentLang,
+      },
+      body: JSON.stringify({ workspaceId, surveyId }),
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "getSurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+

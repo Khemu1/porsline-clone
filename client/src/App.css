@@ -31,7 +31,7 @@ body {
 }
 
 nav {
-  @apply flex w-full justify-end items-end bg-[#1e1e1e] p-3;
+  @apply flex w-full  items-end bg-[#1e1e1e] p-3;
 }
 
 .btn-secondary {
@@ -97,5 +97,53 @@ nav {
 }
 
 .home section {
-  padding: 1.5rem 0 5.5rem 2.5rem;
+  padding: 1.5rem 1rem 5.5rem 2.5rem;
+}
+
+.survey_builder {
+  @apply flex flex-grow;
+}
+
+.survey_builder aside {
+  @apply w-[220px]  bg-[#1e1e1e] p-3 flex flex-col items-center  border-r-gray-600;
+  border-top: 0.5px solid rgba(128, 128, 128, 0.349);
+}
+
+.survey_builder section {
+  width: 100%;
+  padding: 1.5rem 1rem 5.5rem 2.5rem;
+}
+
+.welcome_page_style {
+  @apply flex justify-center  py-2 px-3 gap-2 rounded-lg cursor-pointer w-full;
+  border: 0.0625rem dashed #bbbcc0;
+}
+
+.input_error {
+  outline: red;
+}
+
+.mobile_res {
+  width: 400px;
+  margin-inline: auto;
+  transition: all 250ms ease-in-out;
+}
+.pc_res {
+  width: 100%;
+  transition: all 250ms ease-in-out;
+  margin-inline: auto;
+}
+
+.main_text {
+  color: #bcb6ae;
+}
+.main_text_bold {
+  color: #bcb6ae;
+  font-weight: bold;
+}
+.input_border {
+  border : 1px solid #bbbcc0;
+}
+.input_error_border {
+  border : 1px solid rgb(165, 5, 5);
 }
