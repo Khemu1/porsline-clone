@@ -6,7 +6,7 @@ import {
   ListboxOption,
   ListboxButton,
 } from "@headlessui/react";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "../../lang/LanguageProvider";
 import InputSwitchField from "../InputSwitchField";
 import ImageUploadField from "../ImageUploadField";
@@ -14,8 +14,30 @@ import { validateWithSchema } from "../../../utils/survey";
 import PreviewGenericTextArea from "./PreviewGenericTextArea";
 import SwitchContainer from "../SwitchContainer";
 import { genericTextSchema } from "../../../utils/genericText";
+import { RootState } from "../../../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setDescription,
+  setLabel,
+  setIsDescriptionEnabled,
+  setIsImageUploadEnabled,
+  setImageFile,
+  setPreviewImageUrl,
+} from "../../../store/slices/sharedFormSlice";
+import {
+  setAnswerFormat,
+  setHideQuestionNumber,
+  setIsRequired,
+  setMaxLength,
+  setMinLength,
+  setRegex,
+  setRegexErrorMessage,
+  setRegexPlaceHolder,
+} from "../../../store/slices/genericTextSlice";
+import { handleMinMaxChange, returnFileAndUrl } from "../../../utils";
 
 const GenericTextQuestion = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
     string
@@ -26,87 +48,66 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
     { id: 1, name: "Text" },
     { id: 2, name: "Custom Pattern" },
   ];
+
   const { t, getCurrentLanguage } = useLanguage();
-  const [label, setLabel] = useState("");
-  const [description, setDescription] = useState("");
+  const {
+    label,
+    description,
+    isImageUploadEnabled,
+    isDescriptionEnabled,
+    previewImageUrl,
+    hideQuestionNumber,
+    isRequired,
+    maxLength,
+    minLength,
+    regex,
+    regexPlaceHolder,
+    regexErrorMessage,
+    answerFormat,
+  } = useSelector((state: RootState) => ({
+    label: state.sharedForm.label,
+    description: state.sharedForm.description,
+    imageFile: state.sharedForm.fileImage,
+    isImageUploadEnabled: state.sharedForm.isImageUploadEnabled,
+    isDescriptionEnabled: state.sharedForm.isDescriptionEnabled,
+    previewImageUrl: state.sharedForm.previewImageUrl,
+    hideQuestionNumber: state.genericText.hideQuestionNumber,
+    isRequired: state.genericText.isRequired,
+    maxLength: state.genericText.maxLength,
+    minLength: state.genericText.minLength,
+    regex: state.genericText.regex,
+    regexPlaceHolder: state.genericText.regexPlaceHolder,
+    regexErrorMessage: state.genericText.regexErrorMessage,
+    answerFormat: state.genericText.answerFormat,
+  }));
+
+  const [file, setFile] = useState<File | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isRequired, setIsRequired] = useState(false);
-  const [hideQuestionNumber, setHideQuestionNumber] = useState(false);
-  const [isImageUploadEnabled, setIsImageUploadEnabled] = useState(false);
-  const [isDescriptionEnabled, setIsDescriptionEnabled] = useState(false);
-  const [minLength, setMinLength] = useState<string | number>(0);
-  const [maxLength, setMaxLength] = useState<string | number>(1);
-  const [regex, setRegex] = useState("");
-  const [regexPlaceHolder, setRegexPlaceHolder] = useState("");
-  const [regexErrorMessage, setRegexErrorMessage] = useState("");
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | undefined>(
-    ""
-  );
 
-  const validateMinMax = (minValue: number, maxValue: number) => {
-    let newErrors = {};
+  const handleFileChange = async (file: File | null) => {
+    const { file: _file, url } = await returnFileAndUrl(file);
 
-    if (maxValue === undefined || maxValue === null) {
-      newErrors = {
-        ...newErrors,
-        max: t("maxRequired"),
-      };
-    } else if (Number(maxValue) === 0) {
-      newErrors = {
-        ...newErrors,
-        max: t("maxMustAtleastOne"),
-      };
-    }
-
-    if (minValue === undefined || minValue === null) {
-      newErrors = {
-        ...newErrors,
-        min: t("minRequired"),
-      };
-    }
-
-    if (
-      minValue !== undefined &&
-      maxValue !== undefined &&
-      Number(minValue) > Number(maxValue)
-    ) {
-      newErrors = {
-        ...newErrors,
-        min: t("minGreaterThanMax"),
-      };
-    }
-
-    if (
-      minValue !== undefined &&
-      maxValue !== undefined &&
-      Number(maxValue) < Number(minValue)
-    ) {
-      newErrors = {
-        ...newErrors,
-        max: t("MaxLesserThanMin"),
-      };
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setValidationErrors(newErrors);
-      return false;
-    }
-
-    setValidationErrors(null);
-    return true;
+    setFile(_file);
+    dispatch(setImageFile({ fileType: _file?.type, fileSize: _file?.size }));
+    dispatch(setPreviewImageUrl(url));
   };
 
-  const handleMinMaxChange = (type: "min" | "max", value: string) => {
-    const parsedValue = Number(value);
-    if (type === "min") {
-      setMinLength(parsedValue);
-      validateMinMax(parsedValue, Number(maxLength));
-    } else {
-      setMaxLength(parsedValue);
-      validateMinMax(Number(minLength), parsedValue);
-    }
-  };
+  const handleSwitchChange =
+    (
+      field: "isRequired" | "description" | "imageUpload" | "hideQuestionNumber"
+    ) =>
+    (enabled: boolean) => {
+      if (field === "isRequired") {
+        dispatch(setIsRequired(enabled));
+      } else if (field === "description") {
+        dispatch(setIsDescriptionEnabled(enabled));
+      } else if (field === "imageUpload") {
+        dispatch(setIsImageUploadEnabled(enabled));
+      } else if (field === "hideQuestionNumber") {
+        dispatch(setHideQuestionNumber(enabled));
+      }
+    };
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -114,9 +115,6 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
       e.preventDefault();
       setIsSubmitting(true);
 
-      // const isValid = validateMinMax(Number(minLength), Number(maxLength));
-      // if (!isValid) return;
-      console.log(selected);
       const isCustomPattern = selected.toLowerCase() === "custom pattern";
       const isText = selected.toLowerCase() === "text";
 
@@ -134,7 +132,7 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
       const formData = {
         label,
         ...(isDescriptionEnabled && { description }),
-        ...(isImageUploadEnabled && { imageFile }),
+        ...(isImageUploadEnabled && { file }),
         ...(isCustomPattern && { regex, regexErrorMessage }),
         ...(regexPlaceHolder.trim().length !== 0 && { regexPlaceHolder }),
         ...(isText && { minLength, maxLength }),
@@ -152,19 +150,20 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleFileChange = (file: File | null) => {
-    setImageFile(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewImageUrl(undefined);
-    }
-  };
+  const handleChange = (type: "min" | "max", value: string) => {
+    const { updatedMin, updatedMax, validationErrors } = handleMinMaxChange(
+      type,
+      value,
+      Number(minLength),
+      Number(maxLength),
+      t
+    );
+    console.log(updatedMin, updatedMax, validationErrors);
 
+    dispatch(setMinLength(updatedMin));
+    dispatch(setMaxLength(updatedMax));
+    setValidationErrors(validationErrors);
+  };
   return (
     <Dialog
       open={isOpen}
@@ -189,36 +188,34 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
           </div>
           <div className="flex h-full overflow-y-auto">
             <form
-              onSubmit={handleSave}
               className="flex flex-col space-y-4 w-full h-full overflow-y-scroll md:w-1/4 border-r border-r-gray-600 pb-4 pt-2 px-3"
+              onSubmit={handleSave}
             >
               <div className="flex flex-col flex-grow gap-5 px-4">
                 <InputSwitchField
                   label={t("Label")}
                   value={label}
-                  onChange={(e) => setLabel(e.target.value)}
+                  onChange={(e) => dispatch(setLabel(e.target.value))}
                   switchChecked={true}
                   placeholder={t("Label")}
-                  disabled={isSubmitting}
                   required={false}
                   hasSwitch={false}
+                  type={"editor"}
+                  border={false}
                   errorMessage={validationErrors?.label}
-                  type="textarea"
-                  border={true}
                 />
                 <InputSwitchField
                   label={t("description")}
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => dispatch(setDescription(e.target.value))}
                   switchChecked={isDescriptionEnabled}
-                  onSwitchChange={setIsDescriptionEnabled}
+                  onSwitchChange={handleSwitchChange("description")}
                   placeholder={t("description")}
-                  disabled={isSubmitting}
                   required={false}
                   hasSwitch={true}
+                  type={"editor"}
+                  border={false}
                   errorMessage={validationErrors?.description}
-                  type="textarea"
-                  border={true}
                 />
                 <div className="flex justify-between gap-4 p-4 main_text items-center flex-wrap">
                   <span className="main_text_bold">Answer Format</span>
@@ -226,19 +223,14 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     value={selected}
                     onChange={(value) => {
                       setSelected(value);
-                      setRegex("");
-                      setRegexPlaceHolder("");
-                      setRegexErrorMessage("");
-                      setMaxLength(1);
-                      setMinLength(0);
+                      dispatch(setAnswerFormat(value));
                     }}
                   >
                     <div className="relative">
-                      <ListboxButton className="relative  cursor-default py-2 px-4 w-[150px] text-left bg-transparent border border-[#85808025]">
+                      <ListboxButton className="cursor-default py-2 px-4 w-[150px] text-left bg-transparent border border-[#85808025]">
                         <span className="block truncate">{selected}</span>
                       </ListboxButton>
-                      <ListboxOptions className="absolute mt-1 bg-transparent border w-[200px] border-[#85808025] shadow-lg max-h-60 rounded-md overflow-auto z-[51]">
-                        {" "}
+                      <ListboxOptions className="absolute mt-1 bg-black border w-full top-8 border-[#85808025] shadow-lg max-h-60 overflow-y-auto z-[51]">
                         {options.map((option) => (
                           <ListboxOption
                             key={option.id}
@@ -247,13 +239,13 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                               `cursor-pointer select-none relative text-white w-full ${
                                 active
                                   ? "bg-[#141414] font-semibold"
-                                  : "bg-black  font-semibold"
+                                  : "bg-black font-semibold"
                               }`
                             }
                           >
                             {({ selected }) => (
                               <span
-                                className={`block truncate p-2  ${
+                                className={`block truncate p-2 ${
                                   selected
                                     ? "font-medium bg-blue-600"
                                     : "font-normal"
@@ -268,12 +260,14 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     </div>
                   </Listbox>
                 </div>
+
+                {/* Conditional Fields */}
                 {selected.toLowerCase() === "custom pattern" && (
                   <>
                     <InputSwitchField
                       label="Pattern(RegEx validation)"
                       value={regex}
-                      onChange={(e) => setRegex(e.target.value)}
+                      onChange={(e) => dispatch(setRegex(e.target.value))}
                       hasSwitch={false}
                       switchChecked={true}
                       required={false}
@@ -284,7 +278,9 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     <InputSwitchField
                       label="Example"
                       value={regexPlaceHolder}
-                      onChange={(e) => setRegexPlaceHolder(e.target.value)}
+                      onChange={(e) =>
+                        dispatch(setRegexPlaceHolder(e.target.value))
+                      }
                       hasSwitch={false}
                       switchChecked={true}
                       required={false}
@@ -295,7 +291,9 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     <InputSwitchField
                       label="Message to display when answer does not pass RegEx "
                       value={regexErrorMessage}
-                      onChange={(e) => setRegexErrorMessage(e.target.value)}
+                      onChange={(e) =>
+                        dispatch(setRegexErrorMessage(e.target.value))
+                      }
                       hasSwitch={false}
                       switchChecked={true}
                       required={false}
@@ -311,9 +309,7 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     <InputSwitchField
                       label={t("min")}
                       value={minLength.toString()}
-                      onChange={(e) =>
-                        handleMinMaxChange("min", e.target.value)
-                      }
+                      onChange={(e) => handleChange("min", e.target.value)}
                       switchChecked={true}
                       placeholder={t("min")}
                       disabled={isSubmitting}
@@ -326,9 +322,7 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     <InputSwitchField
                       label={t("max")}
                       value={maxLength.toString()}
-                      onChange={(e) =>
-                        handleMinMaxChange("max", e.target.value)
-                      }
+                      onChange={(e) => handleChange("max", e.target.value)}
                       switchChecked={true}
                       placeholder={t("max")}
                       disabled={isSubmitting}
@@ -340,25 +334,26 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                     />
                   </div>
                 )}
+
                 <ImageUploadField
-                  file={imageFile}
+                  file={file}
                   setFile={handleFileChange}
                   title=""
                   label="Image"
                   switchChecked={isImageUploadEnabled}
-                  onSwitchChange={setIsImageUploadEnabled}
+                  onSwitchChange={handleSwitchChange("imageUpload")}
                   errorMessage={validationErrors?.imageFile}
                 />
                 <SwitchContainer
                   label={t("isRequired")}
                   isRequired={isRequired}
-                  setIsRequired={setIsRequired}
+                  setIsRequired={handleSwitchChange("isRequired")}
                   errorMessage={validationErrors?.isRequired}
                 />
                 <SwitchContainer
                   label={t("hideQuestionNumber")}
                   isRequired={hideQuestionNumber}
-                  setIsRequired={setHideQuestionNumber}
+                  setIsRequired={handleSwitchChange("hideQuestionNumber")}
                   errorMessage={validationErrors?.hideQuestionNumber}
                 />
               </div>
@@ -388,12 +383,16 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
                   onClick={onClose}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
               </div>
             </form>
             <PreviewGenericTextArea
-              imageUrl={isImageUploadEnabled ? previewImageUrl : undefined}
+              imageUrl={
+                isImageUploadEnabled && previewImageUrl
+                  ? previewImageUrl
+                  : undefined
+              }
               label={label ? label : undefined}
               description={isDescriptionEnabled ? description : undefined}
               isRequired={isRequired}
@@ -402,7 +401,7 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
               regexPlaceHolder={regexPlaceHolder}
               max={+maxLength}
               min={+minLength}
-              answerFormat={selected}
+              answerFormat={answerFormat}
               hideQuestionNumber={hideQuestionNumber}
             />
           </div>

@@ -11,6 +11,7 @@ import {
 import { setSurveys } from "../store/slices/surveySlice";
 import { setWorkspaces } from "../store/slices/workspaceSlice";
 import { setCurrentWorkspace } from "../store/slices/currentWorkspaceSlice";
+import { TranslationKeys } from "./genericText";
 
 export const mapSurveyErrorsTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, errors]) => {
@@ -345,4 +346,115 @@ export const retrunSearchData = (
     workspaces: filteredWorkspaces,
     surveys: filteredSurveys,
   };
+};
+
+export const validateMinMax = (
+  minValue: number,
+  maxValue: number,
+  t: (key: TranslationKeys) => string
+) => {
+  const errors: { minLength?: string; maxLength?: string } = {};
+
+  if (minValue === undefined || typeof minValue !== "number") {
+    errors.minLength = t("minRequired");
+  }
+
+  if (maxValue === undefined || typeof maxValue !== "number") {
+    errors.maxLength = t("maxRequired");
+  }
+  if (maxValue < 1) {
+    errors.maxLength = t("maxMustAtleastOne");
+  }
+  if (minValue && maxValue && minValue > maxValue) {
+    errors.minLength = t("minGreaterThanMax");
+    errors.maxLength = t("maxLesserThanMin");
+  }
+
+  return Object.keys(errors).length ? errors : null;
+};
+
+export const handleMinMaxChange = (
+  type: "min" | "max",
+  value: string,
+  minLength: number,
+  maxLength: number,
+  t: (key: TranslationKeys) => string
+) => {
+  const parsedValue = Number(value);
+  let updatedMin = minLength;
+  let updatedMax = maxLength;
+
+  if (type === "min") {
+    updatedMin = parsedValue;
+  } else {
+    updatedMax = parsedValue;
+  }
+
+  const validationErrors = validateMinMax(updatedMin, updatedMax, t);
+
+  return { updatedMin, updatedMax, validationErrors };
+};
+
+export const returnFileAndUrl = (
+  file: File | null
+): Promise<{ file: File | null; url: string | undefined }> => {
+  try {
+    return new Promise((resolve) => {
+      let url: string | undefined = undefined;
+
+      if (file) {
+        // asynchronous
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          url = reader.result as string;
+          resolve({ file, url });
+        };
+        reader.readAsDataURL(file);
+      } else {
+        resolve({ file, url });
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const validateMinMaxPreview = (
+  minValue: number | undefined,
+  maxValue: number | undefined,
+  value: string,
+  t: (key: TranslationKeys) => string
+): { minMax?: string } | null => {
+  const errors: { minMax?: string } = {};
+  if (
+    maxValue === undefined ||
+    minValue === undefined ||
+    value.trim().length === 0
+  ) {
+    return null;
+  }
+
+  if (value.length < minValue || value.length > maxValue) {
+    const error = t("MinMax");
+    const modifiedError = error
+      .replace("{min}", minValue.toString())
+      .replace("{max}", maxValue.toString());
+
+    errors.minMax = modifiedError;
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+};
+
+export const validateRegex = (
+  value: string,
+  regexValue: string | undefined
+) => {
+  if (regexValue !== undefined) {
+    const regexExp = new RegExp(regexValue);
+    if (!regexExp.test(value)) {
+      return true;
+    }
+  }
 };

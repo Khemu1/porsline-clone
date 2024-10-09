@@ -15,7 +15,7 @@ const SwitchContainer: React.FC<SwitchContainerProps> = ({
   errorMessage,
 }) => {
   return (
-    <div className="flex justify-between main_text_bold flex-wrap p-4  border-b border-b-[#85808025]">
+    <div className="flex justify-between main_text_bold flex-wrap p-4 border-b border-b-[#85808025]">
       <label>{label}</label>
       <Switch
         checked={isRequired}

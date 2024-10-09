@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  ul,
+  ol,
+  li {
+    list-style: unset;
+    padding: unset;
+    margin-left: 20px !important;
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -25,9 +35,6 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-}
-
-.btn-primay {
 }
 
 nav {
@@ -142,8 +149,8 @@ nav {
   font-weight: bold;
 }
 .input_border {
-  border : 1px solid #bbbcc0;
+  border: 1px solid #bbbcc0;
 }
 .input_error_border {
-  border : 1px solid rgb(165, 5, 5);
+  border: 1px solid rgb(165, 5, 5);
 }

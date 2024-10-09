@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Switch } from "@headlessui/react";
 import { InputSwitchFieldProps } from "../../types";
+import EditorComponent from "./EditorComponent"; // Adjust the path as necessary
 
 const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
   label,
@@ -16,6 +17,8 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
   type,
   border,
 }) => {
+  const editorRef = useRef(null); // Create a ref for the editor instance
+
   return (
     <div
       className={`w-full p-4  ${
@@ -29,8 +32,8 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
             label.toLowerCase() !== "Example".toLowerCase() ||
             label.toLowerCase() !==
               "Message to display when answer does not pass RegEx".toLowerCase()
-              ? "main_text"
-              : "main_text_bold"
+              ? "main_text_bold"
+              : "main_text"
           }`}
         >
           {label}
@@ -66,17 +69,11 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
               required={required}
             />
           )}
-          {type === "textarea" && (
-            <textarea
+          {type === "editor" && (
+            <EditorComponent
+              editorRef={editorRef}
+              id={`${label}-editor`}
               value={value}
-              onChange={onChange}
-              className={`w-full bg-[#2a2a2a] text-white p-2 rounded-sm mt-2 ${
-                errorMessage ? "input_error_border" : "input_border"
-              }`}
-              placeholder={placeholder}
-              disabled={isSubmitting}
-              required={required}
-              rows={5} // Add a default rows size for textarea
             />
           )}
           {type === "number" && (

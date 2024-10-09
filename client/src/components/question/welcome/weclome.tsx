@@ -1,30 +1,59 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Dialog, DialogPanel } from "@headlessui/react";
-import React, { useState } from "react";
-import { useLanguage } from "../../lang/LanguageProvider";
 import InputSwitchField from "../InputSwitchField";
 import ImageUploadField from "../ImageUploadField";
 import PreviewArea from "./PreviewWelcomeArea";
-import { validateWithSchema } from "../../../utils/survey";
-import { welcomeFormSchema } from "../../../utils/welcomeQuestion";
+import {
+  setDescription,
+  setImageFile,
+  setIsDescriptionEnabled,
+  setIsImageUploadEnabled,
+  setIsSubmitting,
+  setLabel,
+  setPreviewImageUrl,
+} from "../../../store/slices/sharedFormSlice";
+import { RootState } from "../../../store/store";
+import { useLanguage } from "../../lang/LanguageProvider";
+import {
+  validateWithSchema,
+  welcomeFormSchema,
+} from "../../../utils/welcomeQuestion";
+import {
+  setButtonText,
+  setIsLabelEnabled,
+} from "../../../store/slices/welcomePageSlice";
+import { returnFileAndUrl } from "../../../utils";
 
 const Welcome = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
-    string
+    string | undefined
   > | null>(null);
   const { t, getCurrentLanguage } = useLanguage();
-  const [label, setLabel] = useState("");
-  const [buttonText, setButtonText] = useState("");
-  const [description, setDescription] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isImageUploadEnabled, setIsImageUploadEnabled] = useState(false);
-  const [isDescriptionEnabled, setIsDescriptionEnabled] = useState(false);
-  const [isButtonEnabled, setIsButtonEnabled] = useState(true);
-  const [isLabelEnabled, setIsLabelEnabled] = useState(true);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | undefined>(
-    ""
-  );
+  const {
+    isButtonEnabled,
+    isLabelEnabled,
+    buttonText,
+    label,
+    description,
+    isImageUploadEnabled,
+    isDescriptionEnabled,
+    previewImageUrl,
+  } = useSelector((state: RootState) => ({
+    isButtonEnabled: state.welcomePage.isButtonEnabled,
+    isLabelEnabled: state.welcomePage.isLabelEnabled,
+    buttonText: state.welcomePage.buttonText,
+    label: state.sharedForm.label,
+    description: state.sharedForm.description,
+    fileImage: state.sharedForm.fileImage,
+    isImageUploadEnabled: state.sharedForm.isImageUploadEnabled,
+    isDescriptionEnabled: state.sharedForm.isDescriptionEnabled,
+    previewImageUrl: state.sharedForm.previewImageUrl,
+  }));
+
+  const [file, setFile] = useState<File | null>(null);
 
   const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
     try {
@@ -39,7 +68,7 @@ const Welcome = ({ isOpen, onClose }) => {
       const formData = {
         ...(isLabelEnabled && { label }),
         ...(isDescriptionEnabled && { description }),
-        ...(isImageUploadEnabled && { imageFile }),
+        ...(isImageUploadEnabled && { file }),
       };
       const data = schema.parse(formData);
       console.log(data);
@@ -50,20 +79,45 @@ const Welcome = ({ isOpen, onClose }) => {
       setIsSubmitting(false);
     }
   };
-
-  const handleFileChange = (file: File | null) => {
-    setImageFile(file);
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const check3Fields = () => {
+    if (
+      isLabelEnabled === false &&
+      isDescriptionEnabled === false &&
+      isImageUploadEnabled === false
+    ) {
+      console.log("yes");
+      setValidationErrors({ buttonText: t("mainfieldsEmpty") });
     } else {
-      setPreviewImageUrl(undefined);
+      setValidationErrors({});
     }
   };
+  const handleSwitchChange =
+    (field: "label" | "description" | "imageUpload") => (enabled: boolean) => {
+      if (field === "label") {
+        dispatch(setIsLabelEnabled(enabled));
+      } else if (field === "description") {
+        dispatch(setIsDescriptionEnabled(enabled));
+      } else if (field === "imageUpload") {
+        dispatch(setIsImageUploadEnabled(enabled));
+      }
+    };
+  useEffect(() => {
+    check3Fields();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    isLabelEnabled,
+    isDescriptionEnabled,
+    isImageUploadEnabled,
+    isButtonEnabled,
+  ]);
 
+  const handleFileChange = async (file: File | null) => {
+    const { file: _file, url } = await returnFileAndUrl(file);
+
+    setFile(_file);
+    dispatch(setImageFile({ fileType: _file?.type, fileSize: _file?.size }));
+    dispatch(setPreviewImageUrl(url));
+  };
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div
@@ -80,110 +134,88 @@ const Welcome = ({ isOpen, onClose }) => {
                 className="w-[20px] h-[20px]"
               />
             </button>
-            <span className="text-lg main_text_bold">{t("welcomePage")}</span>
+            <span className="text-lg main_text_bold">Welcome Page</span>
           </div>
           <div className="flex h-full overflow-y-auto">
-            {" "}
-            {/* Enable vertical scrolling */}
             <form
               onSubmit={handleSave}
               className="flex flex-col space-y-4 w-full h-full overflow-y-scroll md:w-1/4 border-r border-r-gray-600 pb-4 pt-2 px-3"
             >
               <div className="flex flex-col flex-grow gap-5">
                 <ImageUploadField
-                  file={imageFile}
+                  file={file}
                   setFile={handleFileChange}
-                  title=""
                   label="Image"
+                  title=""
                   switchChecked={isImageUploadEnabled}
-                  onSwitchChange={setIsImageUploadEnabled}
+                  onSwitchChange={handleSwitchChange("imageUpload")}
                   errorMessage={validationErrors?.imageFile}
                 />
+
                 <InputSwitchField
                   label={t("Label")}
                   value={label}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-                  ) => setLabel(e.target.value)}
+                  onChange={(e) => dispatch(setLabel(e.target.value))}
                   switchChecked={isLabelEnabled}
-                  onSwitchChange={setIsLabelEnabled}
+                  onSwitchChange={handleSwitchChange("label")}
                   placeholder={t("Label")}
-                  disabled={isSubmitting}
                   required={false}
                   hasSwitch={true}
+                  type={"editor"}
+                  border={false}
                   errorMessage={validationErrors?.label}
-                  type="text"
                 />
+
                 <InputSwitchField
                   label={t("description")}
                   value={description}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-                  ) => setDescription(e.target.value)}
+                  onChange={(e) => dispatch(setDescription(e.target.value))}
                   switchChecked={isDescriptionEnabled}
-                  onSwitchChange={setIsDescriptionEnabled}
+                  onSwitchChange={handleSwitchChange("description")}
                   placeholder={t("description")}
-                  disabled={isSubmitting}
                   required={false}
                   hasSwitch={true}
+                  type={"editor"}
+                  border={false}
                   errorMessage={validationErrors?.description}
-                  type="textarea"
                 />
+
                 <InputSwitchField
                   label={t("buttonText")}
                   value={buttonText}
-                  onChange={(
-                    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-                  ) => setButtonText(e.target.value)}
-                  switchChecked={isButtonEnabled}
-                  onSwitchChange={setIsButtonEnabled}
-                  placeholder="Add button text"
-                  disabled={isSubmitting}
+                  onChange={(e) => dispatch(setButtonText(e.target.value))}
+                  switchChecked={true}
+                  placeholder={t("buttonText")}
                   required={false}
                   hasSwitch={false}
-                  errorMessage={
-                    !isLabelEnabled &&
-                    !isImageUploadEnabled &&
-                    !isDescriptionEnabled &&
-                    isButtonEnabled
-                      ? t("mainfieldsEmpty")
-                      : validationErrors?.buttonText
-                  }
-                  type="text"
+                  type={"text"}
+                  border={false}
+                  errorMessage={validationErrors?.buttonText}
                 />
               </div>
 
               <div className="flex justify-start gap-5 items-center p-4">
                 <button
-                  disabled={
-                    isSubmitting ||
-                    (!isLabelEnabled &&
-                      !isImageUploadEnabled &&
-                      !isDescriptionEnabled &&
-                      isButtonEnabled)
-                  }
+                  disabled={!isLabelEnabled && !isDescriptionEnabled}
                   type="submit"
                   className={`${
-                    isSubmitting ||
-                    (!isLabelEnabled &&
-                      !isImageUploadEnabled &&
-                      !isDescriptionEnabled &&
-                      isButtonEnabled)
+                    !isLabelEnabled && !isDescriptionEnabled
                       ? "bg-[#0000001e]"
                       : "bg-[#2f2b72] "
                   } transition-all main_text_bold py-2 px-4 rounded`}
                 >
-                  {t("save")}
+                  Save
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  {t("cancel")}
+                  Cancel
                 </button>
               </div>
             </form>
+
             <PreviewArea
               imageUrl={isImageUploadEnabled ? previewImageUrl : undefined}
               label={isLabelEnabled ? label : undefined}
@@ -196,5 +228,4 @@ const Welcome = ({ isOpen, onClose }) => {
     </Dialog>
   );
 };
-
 export default Welcome;

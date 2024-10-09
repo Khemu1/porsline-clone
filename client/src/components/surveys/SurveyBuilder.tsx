@@ -94,6 +94,12 @@ const SurveyBuilder = () => {
           console.log("Closing welcome page");
         }}
       />
+      {/* <Welcome
+        isOpen={true}
+        onClose={() => {
+          console.log("Closing welcome page");
+        }}
+      /> */}
     </div>
   );
 };
