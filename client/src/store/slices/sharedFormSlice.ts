@@ -7,6 +7,7 @@ interface SharedFormState {
   isSubmitting: boolean;
   fileImage: FileImage | null;
   isRequired: boolean;
+  defaultEnding: boolean;
   hideQuestionNumber: boolean;
   isImageUploadEnabled: boolean;
   isDescriptionEnabled: boolean;
@@ -28,6 +29,7 @@ const initialState: SharedFormState = {
   isImageUploadEnabled: false,
   isDescriptionEnabled: false,
   previewImageUrl: undefined,
+  defaultEnding: false,
 };
 
 const sharedFormSlice = createSlice({
@@ -65,6 +67,9 @@ const sharedFormSlice = createSlice({
     setPreviewImageUrl: (state, action: PayloadAction<string | undefined>) => {
       state.previewImageUrl = action.payload;
     },
+    setDefaultEnding: (state, action: PayloadAction<boolean>) => {
+      state.defaultEnding = action.payload;
+    },
   },
 });
 
@@ -76,6 +81,7 @@ export const {
   setIsImageUploadEnabled,
   setIsDescriptionEnabled,
   setPreviewImageUrl,
+  setDefaultEnding,
 } = sharedFormSlice.actions;
 
 export default sharedFormSlice.reducer;

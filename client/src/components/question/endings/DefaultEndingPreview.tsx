@@ -1,19 +1,33 @@
 import React, { useState } from "react";
-import DescriptionPreivew from "../preview/DescriptionPreivew";
+import ShareSurvey from "../preview/ShareSurvey";
 import LabelPreivew from "../preview/LabelPreivew";
+import DescriptionPreivew from "../preview/DescriptionPreivew";
+import { formatTime } from "../../../utils";
+import { Link } from "react-router-dom";
 
 interface PreviewProps {
   imageUrl?: string;
   label?: string;
   description?: string;
   buttonText?: string;
+  shareSurvey?: boolean;
+  reloadOrRedirectButton?: boolean;
+  autoReload?: boolean;
+  reloadTimeInSeconds: number;
+  redirectToWhat?: string;
+  anotherLink?: string;
 }
-
-const Preview: React.FC<PreviewProps> = ({
+const DefaultEndingPreview: React.FC<PreviewProps> = ({
   imageUrl,
   label,
   description,
   buttonText,
+  shareSurvey,
+  reloadOrRedirectButton,
+  autoReload,
+  reloadTimeInSeconds,
+  redirectToWhat,
+  anotherLink,
 }) => {
   const [res, setRes] = useState<"pc" | "mobile">("pc");
 
@@ -49,7 +63,7 @@ const Preview: React.FC<PreviewProps> = ({
 
       {/* Preview Area */}
       <div
-        className={`flex flex-col h-full flex-grow justify-center items-center bg-[#0000003b] overflow-scroll ${
+        className={`flex flex-col h-full flex-grow justify-center items-center bg-[#0000003b] overflow-scroll gap-3 ${
           res === "pc" ? "pc_res" : " mobile_res mx-auto"
         }`}
       >
@@ -68,14 +82,32 @@ const Preview: React.FC<PreviewProps> = ({
         )}
         {label && <LabelPreivew label={label} />}
         {description && <DescriptionPreivew description={description} />}
-        {buttonText && (
-          <button className="mt-2  bg-blue-700 p-2 rounded-md min-w-[100px] main_text_bold">
-            {buttonText}
-          </button>
+        {buttonText &&
+          redirectToWhat &&
+          redirectToWhat.toLowerCase() === "another link" &&
+          anotherLink && (
+            <Link
+              target="_blank"
+              to={anotherLink}
+              className="flex justify-center mt-2  bg-blue-700 p-2 rounded-md min-w-[100px] main_text_bold"
+            >
+              {buttonText}
+            </Link>
+          )}
+        {buttonText &&
+          redirectToWhat &&
+          redirectToWhat.toLowerCase() !== "another link" && (
+            <button className="flex justify-center mt-2  bg-blue-700 p-2 rounded-md min-w-[100px] main_text_bold">
+              {buttonText}
+            </button>
+          )}
+        {shareSurvey && <ShareSurvey />}
+        {autoReload && (
+          <span>{formatTime(reloadTimeInSeconds)} Auto reload in</span>
         )}
       </div>
     </div>
   );
 };
 
-export default Preview;
+export default DefaultEndingPreview;

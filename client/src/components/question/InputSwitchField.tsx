@@ -31,7 +31,8 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
             label.toLowerCase() !== "Pattern(RegEx validation)".toLowerCase() ||
             label.toLowerCase() !== "Example".toLowerCase() ||
             label.toLowerCase() !==
-              "Message to display when answer does not pass RegEx".toLowerCase()
+              "Message to display when answer does not pass RegEx".toLowerCase() ||
+            label.toLowerCase() !== "Redirect To".toLowerCase()
               ? "main_text_bold"
               : "main_text"
           }`}
@@ -88,6 +89,25 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
               disabled={isSubmitting}
               required={required}
             />
+          )}
+          {type === "timer" && (
+            <div className="flex gap-2 items-center">
+              <span className="text-sm">After</span>
+              <input
+                type="number"
+                value={value}
+                onChange={onChange}
+                className={`bg-[#2a2a2a] text-white p-1 rounded-sm mt-2 w-[70px] h-[2rem] ${
+                  errorMessage ? "input_error_border" : "input_border"
+                }`}
+                placeholder={placeholder}
+                disabled={isSubmitting}
+                required={required}
+              />
+              <span className="text-sm">
+                second(s), reload the survey automatically.
+              </span>
+            </div>
           )}
           {errorMessage && (
             <p className="text-[#ff484f] font-semibold bg-[#4f000a] mt-2 py-1 px-2 rounded-md">

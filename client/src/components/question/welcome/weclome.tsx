@@ -25,7 +25,7 @@ import {
 } from "../../../store/slices/welcomePageSlice";
 import { returnFileAndUrl } from "../../../utils";
 
-const Welcome = ({ isOpen, onClose }) => {
+const Welcome = () => {
   const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,

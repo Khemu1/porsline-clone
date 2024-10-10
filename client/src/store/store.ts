@@ -7,6 +7,8 @@ import currentSurveyReducer from "./slices/currentSurveySlice";
 import sharedFormReducer from "./slices/sharedFormSlice";
 import welcomePageReducer from "./slices/welcomePageSlice";
 import genericTextReducer from "./slices/genericTextSlice";
+import defaultEndingReducer from "./slices/defaultEnding";
+import redirectEndingSlice from "./slices/redirectEnding";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -17,6 +19,8 @@ const store = configureStore({
     sharedForm: sharedFormReducer,
     welcomePage: welcomePageReducer,
     genericText: genericTextReducer,
+    defaultEnding: defaultEndingReducer,
+    redirectEnding: redirectEndingSlice,
   },
 });
 

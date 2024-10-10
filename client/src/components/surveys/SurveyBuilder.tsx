@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import Welcome from "../question/welcome/weclome";
 import GenericTextQuestion from "../question/genericText/GenericTextQuestion";
+import Endings from "../question/endings/Endings";
 const SurveyBuilder = () => {
   const NavigatTo = useNavigate();
 
@@ -88,12 +89,18 @@ const SurveyBuilder = () => {
           </div>
         </div>
       </section>
-      <GenericTextQuestion
+      <Endings
         isOpen={true}
         onClose={() => {
           console.log("Closing welcome page");
         }}
       />
+      {/* <GenericTextQuestion
+        isOpen={true}
+        onClose={() => {
+          console.log("Closing welcome page");
+        }}
+      /> */}
       {/* <Welcome
         isOpen={true}
         onClose={() => {

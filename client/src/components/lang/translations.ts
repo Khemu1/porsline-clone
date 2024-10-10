@@ -1,4 +1,5 @@
 import { commonTranslations } from "../../locals/commonTranslations";
+import { defaultEnding } from "../../locals/defaultEnding";
 import { GenericTextTranslations } from "../../locals/GenericText";
 import { GenericTextErrorTranslations } from "../../locals/GenericTextError";
 import { surveyTranslations } from "../../locals/survey";
@@ -15,6 +16,7 @@ export const translations = {
     ...surveyBuilderTranslations.en,
     ...GenericTextErrorTranslations.en,
     ...GenericTextTranslations.en,
+    ...defaultEnding.en,
   },
   de: {
     ...surveyTranslations.de,
@@ -24,5 +26,6 @@ export const translations = {
     ...surveyBuilderTranslations.de,
     ...GenericTextErrorTranslations.de,
     ...GenericTextTranslations.de,
+    ...defaultEnding.de,
   },
 };

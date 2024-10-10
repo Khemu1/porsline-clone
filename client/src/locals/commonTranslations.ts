@@ -19,6 +19,7 @@ export const commonTranslations = {
     noWorkspacesFound: "No workspaces found",
     surveys: "Surveys",
     workspaces: "Workspaces",
+    enterLink: "Enter Link",
     // Other common translations
   },
   de: {
@@ -41,6 +42,7 @@ export const commonTranslations = {
     noWorkspacesFound: "Keine Arbeitsbereiche gefunden",
     surveys: "Umfragen",
     workspaces: "Arbeitsbereiche",
+    enterLink: "Link eingeben",
     // Other common translations
   },
 };
