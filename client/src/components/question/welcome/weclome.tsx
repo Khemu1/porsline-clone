@@ -23,15 +23,24 @@ import {
   setButtonText,
   setIsLabelEnabled,
 } from "../../../store/slices/welcomePageSlice";
-import { returnFileAndUrl } from "../../../utils";
+import { returnFileAndUrl, transformDataIntoFormData } from "../../../utils";
+import { useAddWelcomePart } from "../../../hooks/welcomePart";
+import { useParams } from "react-router-dom";
 
-const Welcome = () => {
+interface WelcomeProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
+  const { workspaceId, surveyId } = useParams();
+
   const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
     string | undefined
   > | null>(null);
-  const { t, getCurrentLanguage } = useLanguage();
+  const { t, getCurrentLanguage, getCurrentLanguageTranslations } =
+    useLanguage();
   const {
     isButtonEnabled,
     isLabelEnabled,
@@ -53,32 +62,55 @@ const Welcome = () => {
     previewImageUrl: state.sharedForm.previewImageUrl,
   }));
 
+  const { handleAddWelcomePart } = useAddWelcomePart();
+
   const [file, setFile] = useState<File | null>(null);
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      setValidationErrors(null);
       e.preventDefault();
+      setValidationErrors(null);
       setIsSubmitting(true);
-      const schema = welcomeFormSchema(
+
+      const options = {
         isLabelEnabled,
         isDescriptionEnabled,
-        isImageUploadEnabled
-      );
-      const formData = {
+        isImageUploadEnabled,
+      };
+
+      const schema = welcomeFormSchema(options);
+
+      const welcomeData = {
         ...(isLabelEnabled && { label }),
         ...(isDescriptionEnabled && { description }),
-        ...(isImageUploadEnabled && { file }),
+        ...(isImageUploadEnabled && { imageUrl: previewImageUrl }),
       };
-      const data = schema.parse(formData);
-      console.log(data);
-    } catch (error) {
-      setValidationErrors(validateWithSchema(error, getCurrentLanguage()));
-      console.log("Error saving survey:", validationErrors);
-    } finally {
+
+      const data = schema.parse(welcomeData);
+
+      const formData = new FormData();
+
+      transformDataIntoFormData(data, formData);
+      transformDataIntoFormData(
+        { workspaceId: +workspaceId!, surveyId: +surveyId! },
+        formData
+      );
+      transformDataIntoFormData(options, formData);
+
+      await handleAddWelcomePart({
+        welcomePart:formData,
+        getCurrentLanguageTranslations,
+        currentLang: getCurrentLanguage(),
+      });
+
       setIsSubmitting(false);
+    } catch (err: unknown) {
+      setIsSubmitting(false);
+      setValidationErrors(validateWithSchema(err, getCurrentLanguage()));
+      console.error("Error saving welcome part:", err);
     }
   };
+
   const check3Fields = () => {
     if (
       isLabelEnabled === false &&
@@ -126,21 +158,21 @@ const Welcome = () => {
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="bg-[#1e1e1e] rounded-md w-full h-full flex flex-col">
-          <div className="flex items-center gap-5 border-b border-b-gray-500 pb-2 px-2">
-            <button type="button" onClick={onClose}>
-              <img
-                src="/assets/icons/close.svg"
-                alt="Close"
-                className="w-[20px] h-[20px]"
-              />
-            </button>
-            <span className="text-lg main_text_bold">Welcome Page</span>
-          </div>
           <div className="flex h-full overflow-y-auto">
             <form
               onSubmit={handleSave}
               className="flex flex-col space-y-4 w-full h-full overflow-y-scroll md:w-1/4 border-r border-r-gray-600 pb-4 pt-2 px-3"
             >
+              <div className="flex gap-5 items-center text-lg main_text_bold border-b border-b-[#85808025] py-4">
+                <button type="button" onClick={onClose}>
+                  <img
+                    src="/assets/icons/close.svg"
+                    alt="Close"
+                    className="w-[30px] h-[30px]"
+                  />
+                </button>
+                <span>{t("welcomePage")}</span>
+              </div>
               <div className="flex flex-col flex-grow gap-5">
                 <ImageUploadField
                   file={file}

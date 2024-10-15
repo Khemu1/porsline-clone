@@ -7,7 +7,9 @@ export const defaultEnding = {
     redirectTo: "Redirect To",
     autoReload: "Auto Reload",
     reloadTimeInSeconds: "Reload Time in Seconds",
-  }, de: {
+    missingAnotherLink: "Link is required",
+  },
+  de: {
     shareSurvey: "Umfrage teilen",
     defaultEnding: "Standard-Ending",
     ReloadOrDirectButton: "Neu laden oder Direkt-Button",
@@ -15,5 +17,6 @@ export const defaultEnding = {
     redirectTo: "Weiterleiten zu",
     autoReload: "Automatisch neu laden",
     reloadTimeInSeconds: "Neu laden Zeit in Sekunden",
-  }
-}
+    missingAnotherLink: "Link ist erforderlich",
+  },
+};

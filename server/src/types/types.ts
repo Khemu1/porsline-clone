@@ -52,15 +52,7 @@ export interface UpdateSurveyModel {
   createdAt?: Date;
   updatedAt?: Date;
 }
-export interface WelcomePartModel {
-  id: number;
-  surveyId: number;
-  label: string;
-  description?: string;
-  buttonText?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+
 export interface EndPartModel {
   id: number;
   surveyId: number;
@@ -69,16 +61,7 @@ export interface EndPartModel {
   createdAt?: Date;
   updatedAt?: Date;
 }
-export interface GeneralTextModel {
-  id: number;
-  surveyId: number;
-  label: string;
-  description?: string;
-  min: number;
-  max: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+
 export interface SignUpParams {
   username: string;
   password: string;
@@ -139,4 +122,63 @@ export interface UpdateWorkspaceDescriptionResponse {
 export interface UpdateWorkspaceOwnerResponse {
   ownerId: number;
   updatedAt: Date;
+}
+
+export interface WelcomePartModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  description?: string;
+  buttonText?: string;
+  imageUrl?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface NewWelcomePart {
+  surveyId: number;
+  label?: string;
+  imageUrl?: string;
+  description?: string;
+  buttonText?: string;
+}
+
+export interface welcomePartOptions {
+  isLabelEnabled: boolean;
+  isDescriptionEnabled: boolean;
+  isImageUploadEnabled: boolean;
+}
+
+export interface GenericTextModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  description?: string;
+  answerFormat: "text" | "regex";
+  imageUrl?: string;
+  required?: boolean;
+  hideQuestionNumber?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  generalTexts?: GeneralTextModel[];
+  generalRegexes?: GeneralRegexModel[];
+}
+
+export interface GeneralTextModel {
+  id: number;
+  questionId: number;
+  min: number;
+  max: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GeneralRegexModel {
+  id: number;
+  questionId: number;
+  regex: string;
+  regexErrorMessage: string;
+  regexPlaceHolder?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

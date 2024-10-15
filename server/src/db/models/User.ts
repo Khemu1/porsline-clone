@@ -5,6 +5,10 @@ import WorkSpace from "./WorkSpace";
 import Survey from "./Survey";
 import Group from "./Group";
 import UserGroup from "./UserGroup";
+import WelcomePart from "./WelcomePart";
+import GenericText from "./GenericText";
+import GeneralText from "./GeneralText";
+import GeneralRegex from "./GeneralRegex";
 
 interface UserModelCreationAttributes
   extends Optional<
@@ -54,6 +58,27 @@ class User
     // User to UserGroup
     User.hasMany(UserGroup, { foreignKey: "userId" }); // User can join multiple groups through UserGroup
     UserGroup.belongsTo(User, { foreignKey: "userId" }); // UserGroup belongs to one user
+
+    WelcomePart.belongsTo(Survey, {
+      foreignKey: "surveyId",
+    });
+    Survey.hasMany(WelcomePart, { foreignKey: "surveyId", as: "welcomePart" });
+
+    GenericText.hasMany(GeneralText, {
+      foreignKey: "questionId",
+      as: "generalTexts",
+    });
+
+    GeneralText.belongsTo(GenericText, { foreignKey: "questionId" });
+
+    GenericText.hasMany(GeneralRegex, {
+      foreignKey: "questionId",
+      as: "generalRegexes",
+    });
+    GeneralRegex.belongsTo(GenericText, { foreignKey: "questionId" });
+
+    Survey.hasMany(GenericText, { foreignKey: "surveyId", as: "genericTexts" });
+    GenericText.belongsTo(Survey, { foreignKey: "surveyId" });
   }
 }
 

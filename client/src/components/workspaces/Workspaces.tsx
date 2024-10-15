@@ -18,8 +18,13 @@ const Workspaces = () => {
   useEffect(() => {
     if (workspaces.length > 0 && !currentWorkspace) {
       const initialWorkspace = workspaces[0];
+
       dispatch(setCurrentWorkspace(initialWorkspace));
-      dispatch(setSurveys(initialWorkspace.surveys || []));
+      if (initialWorkspace.surveys && initialWorkspace.surveys.length > 0) {
+        dispatch(setSurveys(initialWorkspace.surveys));
+      } else {
+        dispatch(setSurveys([]));
+      }
     }
   }, [workspaces, currentWorkspace, dispatch]);
 

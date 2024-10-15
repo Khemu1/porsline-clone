@@ -14,11 +14,14 @@ module.exports = {
       survey_id: {
         type: DataTypes.INTEGER,
         references: {
-          model: "survey", 
+          model: "survey",
           key: "id",
         },
         onDelete: "CASCADE",
         allowNull: false,
+      },
+      imageUrl: {
+        type: DataTypes.TEXT,
       },
       label: {
         type: DataTypes.TEXT,

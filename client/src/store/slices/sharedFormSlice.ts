@@ -70,6 +70,18 @@ const sharedFormSlice = createSlice({
     setDefaultEnding: (state, action: PayloadAction<boolean>) => {
       state.defaultEnding = action.payload;
     },
+    clearSharedFormFields: (state) => {
+      state.label = "";
+      state.description = "";
+      state.isSubmitting = false;
+      state.fileImage = null;
+      state.isRequired = false;
+      state.hideQuestionNumber = false;
+      state.isImageUploadEnabled = false;
+      state.isDescriptionEnabled = false;
+      state.previewImageUrl = undefined;
+      state.defaultEnding = false;
+    },
   },
 });
 
@@ -82,6 +94,7 @@ export const {
   setIsDescriptionEnabled,
   setPreviewImageUrl,
   setDefaultEnding,
+  clearSharedFormFields,
 } = sharedFormSlice.actions;
 
 export default sharedFormSlice.reducer;

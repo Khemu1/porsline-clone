@@ -9,16 +9,20 @@ import cookieParser from "cookie-parser";
 import groupRouter from "./routes/groupRouter";
 import workspaceRouter from "./routes/workspaceRouter";
 import surveyRouter from "./routes/surveyRouter";
-
+import welcomePartRouter from "./routes/welcomePartRouter";
+import multer from "multer";
 const app = express();
+const upload = multer();
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(morgan("dev"));
-
+app.use(upload.fields([]));
 app.use("/auth", authRouter);
 app.use("/group", groupRouter);
 app.use("/workspace", workspaceRouter);
 app.use("/survey", surveyRouter);
+app.use("/welcomepart/", welcomePartRouter);
 
 // Handle unmatched routes
 app.use("*", (req, res, next) => {

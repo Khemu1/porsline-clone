@@ -149,8 +149,35 @@ nav {
   font-weight: bold;
 }
 .input_border {
-  border: 1px solid #bbbcc0;
+  border: 1px solid #42484b;
 }
 .input_error_border {
   border: 1px solid rgb(165, 5, 5);
+}
+input {
+  width: 100%;
+  padding: 0.7rem;
+  border-radius: 5px;
+  border: 0px;
+  transition: all 100ms ease-in-out;
+  background: transparent !important;
+  border: 1px solid #42484b !important;
+}
+
+input:focus-within {
+  outline: none;
+  outline-offset: none;
+}
+input:hover {
+  border: 1px solid #3b368e !important;
+}
+
+.survey_builder_icon_welcome_style {
+  display: flex;
+  height: 2rem;
+  min-width: 2rem;
+  justify-content: center;
+  align-items: center;
+  transform: rotate(180deg);
+  background-color: rgba(102, 104, 105, 0.083);
 }

@@ -9,6 +9,7 @@ import welcomePageReducer from "./slices/welcomePageSlice";
 import genericTextReducer from "./slices/genericTextSlice";
 import defaultEndingReducer from "./slices/defaultEnding";
 import redirectEndingSlice from "./slices/redirectEnding";
+import welcomePartSlice from "./slices/welcomePartSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -21,6 +22,7 @@ const store = configureStore({
     genericText: genericTextReducer,
     defaultEnding: defaultEndingReducer,
     redirectEnding: redirectEndingSlice,
+    welcomePart: welcomePartSlice,
   },
 });
 

@@ -32,7 +32,7 @@ const DefaultEndingPreview: React.FC<PreviewProps> = ({
   const [res, setRes] = useState<"pc" | "mobile">("pc");
 
   return (
-    <div className="flex flex-col w-full h-full gap-5 relative main_text">
+    <div className="flex flex-col flex-grow h-full gap-5 relative main_text">
       {/* Buttons container */}
       <div className="flex gap-2 absolute top-5 left-1/2  mx-auto h-max   z-10 bg-black">
         <button
@@ -82,7 +82,8 @@ const DefaultEndingPreview: React.FC<PreviewProps> = ({
         )}
         {label && <LabelPreivew label={label} />}
         {description && <DescriptionPreivew description={description} />}
-        {buttonText &&
+        {reloadOrRedirectButton &&
+          buttonText &&
           redirectToWhat &&
           redirectToWhat.toLowerCase() === "another link" &&
           anotherLink && (
@@ -94,7 +95,8 @@ const DefaultEndingPreview: React.FC<PreviewProps> = ({
               {buttonText}
             </Link>
           )}
-        {buttonText &&
+        {reloadOrRedirectButton &&
+          buttonText &&
           redirectToWhat &&
           redirectToWhat.toLowerCase() !== "another link" && (
             <button className="flex justify-center mt-2  bg-blue-700 p-2 rounded-md min-w-[100px] main_text_bold">

@@ -20,6 +20,7 @@ export const GenericTextErrorTranslations = {
       "Description is too long, it should be under 300 characters.",
     descriptionRequired: "Description is required.",
     invalidImage: "Invalid image file.",
+    InvalidImageFormat: "invalid image format",
     regexAnswerFormat:
       "The answer format must match the provided regular expression.",
     hasPlaceHolder: "Placeholder is required.",
@@ -48,6 +49,7 @@ export const GenericTextErrorTranslations = {
       "Die Beschreibung ist zu lang, sie sollte unter 300 Zeichen liegen.",
     descriptionRequired: "Beschreibung ist erforderlich.",
     invalidImage: "Ungültige Bilddatei.",
+    InvalidImageFormat: "Ungültiges Bildformat",
     regexAnswerFormat:
       "Das Antwortformat muss dem bereitgestellten regulären Ausdruck entsprechen.",
     hasPlaceHolder: "Platzhalter ist erforderlich.",

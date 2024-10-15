@@ -1,34 +1,56 @@
-import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../lang/LanguageProvider";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import Welcome from "../question/welcome/weclome";
 import GenericTextQuestion from "../question/genericText/GenericTextQuestion";
 import Endings from "../question/endings/Endings";
-const SurveyBuilder = () => {
-  const NavigatTo = useNavigate();
+import { useEffect, useState } from "react";
+import { useGetSurvey } from "../../hooks/survey";
+import { useParams } from "react-router-dom";
+import { updateWelcomePart } from "../../store/slices/welcomePartSlice";
 
+const SurveyBuilder = () => {
+  const { workspaceId, surveyId } = useParams();
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
     useLanguage();
+  const dispatch = useDispatch();
   const currentSurvey = useSelector(
     (state: RootState) => state.currentSurvey.currentSurvey
   );
+  const currentWelcomePart = useSelector(
+    (state: RootState) => state.welcomePart
+  );
+  const welcomePartState = useSelector((state: RootState) => state.welcomePart);
 
-  // useEffect(() => {
-  //   if (!currentSurvey) {
-  //     NavigatTo("/");
-  //   }
-  // }, [currentSurvey]);
+  const [openWelcomePage, setOpenWelcomePage] = useState(false);
+  const [openTextPage, setOpenTextPage] = useState(false);
+  const [openEndingsPage, setOpenEndingsPage] = useState(false);
 
+  const { survey, isError, isLoading, errorState } = useGetSurvey(
+    Number(workspaceId),
+    Number(surveyId),
+    getCurrentLanguageTranslations,
+    getCurrentLanguage()
+  );
+  useEffect(() => {
+    if (
+      survey?.welcomePart &&
+      survey.welcomePart.length > 0 &&
+      !currentWelcomePart.id
+    ) {
+      dispatch(updateWelcomePart(survey.welcomePart[0]));
+      console.log("currentWelcomePart", survey.welcomePart[0]);
+    }
+  }, [survey]);
   return (
     <div className="survey_builder">
       <aside>
         <div className="flex flex-col items-center gap-5 mb-5 relative w-full">
-          <Link
-            to={`/survey/${currentSurvey?.id}/build/new`}
-            className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
+          <div
+            className="flex items-center justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl "
+            onClick={() => setOpenWelcomePage(true)}
           >
-            <div>
+            <div className="survey_builder_icon_welcome_style">
               <img
                 src="/assets/icons/welcome.svg"
                 alt="welcome"
@@ -36,18 +58,28 @@ const SurveyBuilder = () => {
               />
             </div>
             <p>{t("welcomePage")}</p>
-          </Link>
-          <div className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl">
+          </div>
+
+          {/* Open Generic Text Page */}
+          <div
+            className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
+            onClick={() => setOpenTextPage(true)}
+          >
             <div>
               <img
                 src="/assets/icons/text.svg"
-                alt="welcome"
+                alt="text"
                 className="w-[30px]"
               />
             </div>
-            <p>{t("text")}</p>
+            <p>{t("genericText")}</p>
           </div>
-          <div className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl">
+
+          {/* Open Endings Page */}
+          <div
+            className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
+            onClick={() => setOpenEndingsPage(true)}
+          >
             <div>
               <img
                 src="/assets/icons/bye.svg"
@@ -63,14 +95,37 @@ const SurveyBuilder = () => {
       <section>
         <div className="flex flex-col justify-center items-end gap-5 mb-5 relative w-full">
           <div className="w-full">
-            <div className="welcome_page_style">
-              <img
-                src="/assets/icons/plus.svg"
-                alt="plus"
-                className="w-[20px]"
-              />
-              <p>{t("welcomePage")}</p>
-            </div>
+            {welcomePartState.id ? (
+              <div
+                className="flex justify-start py-1 px-3 gap-2 rounded-lg w-full cursor-pointer"
+                onClick={() => setOpenWelcomePage(true)}
+              >
+                <div className="survey_builder_icon_welcome_style">
+                  <img
+                    src="/assets/icons/welcome.svg"
+                    alt="welcome"
+                    className="w-[30px]"
+                  />
+                </div>
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: welcomePartState.label ?? "",
+                  }}
+                ></p>
+              </div>
+            ) : (
+              <div
+                className="welcome_page_style "
+                onClick={() => setOpenWelcomePage(true)}
+              >
+                <img
+                  src="/assets/icons/plus.svg"
+                  alt="plus"
+                  className="w-[20px]"
+                />
+                <p>{t("welcomePage")}</p>
+              </div>
+            )}
           </div>
           <div className="flex flex-col w-full gap-3">
             <div>questions</div>
@@ -78,7 +133,10 @@ const SurveyBuilder = () => {
             <div>questions</div>
           </div>
           <div className="w-full">
-            <div className="welcome_page_style">
+            <div
+              className="welcome_page_style"
+              onClick={() => setOpenEndingsPage(true)}
+            >
               <img
                 src="/assets/icons/plus.svg"
                 alt="plus"
@@ -89,24 +147,25 @@ const SurveyBuilder = () => {
           </div>
         </div>
       </section>
+
       <Endings
-        isOpen={true}
+        isOpen={openEndingsPage}
         onClose={() => {
-          console.log("Closing welcome page");
+          setOpenEndingsPage(false);
         }}
       />
-      {/* <GenericTextQuestion
-        isOpen={true}
+      <GenericTextQuestion
+        isOpen={openTextPage}
         onClose={() => {
-          console.log("Closing welcome page");
+          setOpenTextPage(false);
         }}
-      /> */}
-      {/* <Welcome
-        isOpen={true}
+      />
+      <Welcome
+        isOpen={openWelcomePage}
         onClose={() => {
-          console.log("Closing welcome page");
+          setOpenWelcomePage(false);
         }}
-      /> */}
+      />
     </div>
   );
 };

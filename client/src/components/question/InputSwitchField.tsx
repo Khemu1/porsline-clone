@@ -62,7 +62,7 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
               type="text"
               value={value}
               onChange={onChange}
-              className={`w-full bg-[#2a2a2a] text-white p-2 rounded-sm mt-2 ${
+              className={`w-full bg-[#2a2a2a] main_text p-2 rounded-md mt-2 ${
                 errorMessage ? "input_error_border" : "input_border"
               }`}
               placeholder={placeholder}

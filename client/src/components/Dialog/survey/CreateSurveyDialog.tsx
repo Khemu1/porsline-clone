@@ -55,6 +55,7 @@ const CreateSurveyDialog: React.FC<CreateSurveyDialogProps> = ({
 
   useEffect(() => {
     if (isSuccess) {
+      setSurveyTitle("");
       onClose();
     }
   }, [isSuccess]);

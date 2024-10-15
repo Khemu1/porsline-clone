@@ -2,6 +2,7 @@ import { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import {
   SurveyModel,
   UpdateSurveyTitleResponse,
+  WelcomePartModel,
   WorkSpaceModel,
 } from "../types";
 import {
@@ -12,6 +13,10 @@ import { setSurveys } from "../store/slices/surveySlice";
 import { setWorkspaces } from "../store/slices/workspaceSlice";
 import { setCurrentWorkspace } from "../store/slices/currentWorkspaceSlice";
 import { TranslationKeys } from "./genericText";
+import { clearDefaultEndingFields } from "../store/slices/defaultEnding";
+import { clearSharedFormFields } from "../store/slices/sharedFormSlice";
+import { clearRedirectEndingFields } from "../store/slices/redirectEnding";
+import { updateWelcomePart } from "../store/slices/welcomePartSlice";
 
 export const mapSurveyErrorsTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, errors]) => {
@@ -235,16 +240,13 @@ export const toggleSurveyActiveF = async (
   dispatch: Dispatch
 ) => {
   try {
-    console.log("toggleSurveyActiveF", surveyId);
-
     const surveyToToggle = surveys.find((survey) => survey.id === surveyId);
-    console.log("surveyToToggle", surveyToToggle);
 
     const updatedSurvey: SurveyModel = {
       ...surveyToToggle!,
       isActive: !surveyToToggle!.isActive,
     };
-    console.log("updatedSurvey", updatedSurvey);
+    console.log("updatedSurvey status", updatedSurvey.isActive);
     const updatedSurveys = surveys.map((survey) =>
       survey.id === surveyId ? updatedSurvey : survey
     );
@@ -468,3 +470,32 @@ export function formatTime(seconds: number) {
 
   return `${formattedMinutes}:${formattedSeconds}`;
 }
+
+export function clearEndingsFieldsForSwitch(dispatch: Dispatch) {
+  dispatch(clearDefaultEndingFields());
+  dispatch(clearSharedFormFields());
+  dispatch(clearRedirectEndingFields());
+}
+
+export const addWelcomePartF = async (
+  newWelcomePart: WelcomePartModel,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(updateWelcomePart(newWelcomePart));
+  } catch (error) {
+    console.error("Error adding survey:", error);
+  }
+};
+
+export const transformDataIntoFormData = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: Record<string, any>,
+  form: FormData
+) => {
+  for (const [key, value] of Object.entries(data)) {
+    if (value !== undefined) {
+      form.append(key, String(value));
+    }
+  }
+};

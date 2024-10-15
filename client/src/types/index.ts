@@ -30,6 +30,10 @@ export interface SurveyModel {
   url: string;
   createdAt: Date;
   updatedAt: Date;
+
+  // for now it's an array
+  welcomePart: WelcomePartModel[];
+  genericTexts: GenericTextModel[];
 }
 
 export interface SignInResponseProps {
@@ -114,4 +118,72 @@ export interface FileUploaderProps {
   setFile: (file: File | null) => void;
   title: string;
   initialImage?: string;
+}
+
+export interface WelcomePartModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  description?: string;
+  imageUrl?: string;
+  buttonText?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface EndPartModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  description?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface welcomePartOptions {
+  isLabelEnabled: boolean;
+  isDescriptionEnabled: boolean;
+  isImageUploadEnabled: boolean;
+}
+
+export interface GenericTextModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  description?: string;
+  answerFormat: "text" | "regex";
+  imageUrl?: string;
+  required?: boolean;
+  hideQuestionNumber?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  generalTexts?: GeneralTextModel[];
+  generalRegexes?: GeneralRegexModel[];
+}
+
+export interface GeneralTextModel {
+  id: number;
+  questionId: number;
+  min: number;
+  max: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface GeneralRegexModel {
+  id: number;
+  questionId: number;
+  regex: string;
+  regexErrorMessage: string;
+  regexPlaceHolder?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface NewWelcomePart {
+  surveyId: number;
+  label?: string;
+  imageUrl?: string;
+  description?: string;
+  buttonText?: string;
 }

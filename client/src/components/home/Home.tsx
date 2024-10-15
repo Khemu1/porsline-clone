@@ -64,7 +64,6 @@ const Home = () => {
   useEffect(() => {
     if (Array.isArray(data) && data.length > 0) {
       dispatch(setWorkspaces(data));
-      dispatch(setCurrentWorkspace(data[0]));
     }
   }, [data, dispatch]);
 
@@ -145,7 +144,6 @@ const Home = () => {
                     currentLang: getCurrentLanguage(),
                   });
                   setMenuOpen(false);
-                  
                 }}
               >
                 {t("delete")}{" "}

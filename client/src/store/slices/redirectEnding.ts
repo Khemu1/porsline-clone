@@ -20,9 +20,14 @@ const redirectEndingSlice = createSlice({
     setUrlLabel: (state, action: PayloadAction<string | null>) => {
       state.urlLabel = action.payload;
     },
+    clearRedirectEndingFields: (state) => {
+      state.redirectTo = null;
+      state.urlLabel = null;
+    },
   },
 });
 
-export const { setRedirectTo, setUrlLabel } = redirectEndingSlice.actions;  
+export const { setRedirectTo, setUrlLabel, clearRedirectEndingFields } =
+  redirectEndingSlice.actions;  
 
 export default redirectEndingSlice.reducer; 

@@ -23,10 +23,10 @@ import { checkGroupMembership } from "../middlewares/groupMiddleware";
 const surveyRouter = Router();
 
 surveyRouter.get(
-  "/:surveyId",
+  "/:workspaceId/:surveyId",
   authUser,
-  checkSurveyExists,
-  checkGroupMembership,
+  // checkSurveyExists,
+  // checkGroupMembership,
   getSurvey
 );
 

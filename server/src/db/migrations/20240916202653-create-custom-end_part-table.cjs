@@ -4,7 +4,7 @@ const DataTypes = require("sequelize");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    await queryInterface.createTable("end_part", {
+    await queryInterface.createTable("custom_end", {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -20,12 +20,18 @@ module.exports = {
         onDelete: "CASCADE",
         allowNull: false,
       },
-      label: {
+      redirectUrl: {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      description: {
+      label: {
         type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      defultEnding: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       createdAt: {
         type: DataTypes.DATE,

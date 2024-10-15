@@ -1,4 +1,8 @@
+import GeneralRegex from "../db/models/GeneralRegex";
+import GeneralText from "../db/models/GeneralText";
+import GenericText from "../db/models/GenericText";
 import Survey from "../db/models/Survey";
+import WelcomePart from "../db/models/WelcomePart";
 import { CustomError } from "../errors/customError";
 import {
   SurveyModel,
@@ -19,37 +23,40 @@ export const addSurveyService = async (
       isActive,
       url: Date.now().toString(),
     });
-    const { workspace, createdAt, ...worksapceData } = survey.get();
-    return worksapceData;
+    return survey.get();
   } catch (error) {
     throw error;
   }
 };
 
 export const getSurveyService = async (
-  workspaceId: number
-): Promise<SurveyModel[]> => {
+  surveyId: number
+): Promise<SurveyModel> => {
   try {
-    if (isNaN(workspaceId)) {
-      throw new CustomError("Invalid workspace or user ID", 400, true);
-    }
-    const surveys = await Survey.findAll({
-      where: {
-        workspace: workspaceId,
-      },
-      order: [
-        ["createdAt", "ASC"],
-        ["updatedAt", "DESC"],
+    console.log("ma", surveyId);
+    const surveys = await Survey.findByPk(surveyId, {
+      include: [
+        {
+          model: WelcomePart,
+          as: "welcomePart",
+        },
+        {
+          model: GenericText,
+          as: "genericTexts",
+          include: [
+            { model: GeneralRegex, as: "generalRegexes" },
+            {
+              model: GeneralText,
+              as: "generalTexts",
+            },
+          ],
+        },
       ],
-      attributes: {
-        exclude: ["maker", "updatedAt"],
-      },
     });
-    return surveys.map((survey) => {
-      const plainSurvey = survey.get();
-      return plainSurvey as SurveyModel;
-    });
+    return surveys!.get({ plain: true });
   } catch (error) {
+    console.log(error);
+
     throw error;
   }
 };

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { NewSurvey, SurveyModel } from "../types/types";
+import { SurveyModel } from "../types/types";
 import {
   addSurveyService,
   deleteSurveyService,
@@ -31,13 +31,15 @@ export const addSurvey = async (
 };
 
 export const getSurvey = async (
-  req: Request<{ surveyId: string }, {}, {}>,
+  req: Request<{ surveyId: string; workspaceId: string }, {}, {}>,
   res: Response<{}, { userId: string }>,
   next: NextFunction
 ) => {
   try {
+    console.log(req.params);
     const { surveyId } = req.params;
     const surveyData = await getSurveyService(+surveyId);
+    console.log(surveyData);
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);

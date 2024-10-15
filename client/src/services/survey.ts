@@ -1,8 +1,5 @@
 import { translations } from "../components/lang/translations";
-import {
-  SurveyModel,
-  UpdateSurveyTitleResponse,
-} from "../types";
+import { SurveyModel, UpdateSurveyTitleResponse } from "../types";
 import { CustomError } from "../utils/CustomError";
 
 export const updateSurveyTitle = async (
@@ -280,7 +277,6 @@ export const createNewSurvey = async (
   }
 };
 
-
 export const getSurvey = async (
   workspaceId: number,
   surveyId: number,
@@ -288,13 +284,12 @@ export const getSurvey = async (
   currentLang: "en" | "de"
 ): Promise<SurveyModel> => {
   try {
-    const response = await fetch(`/api/survey/get-survey`, {
+    const response = await fetch(`/api/survey/${workspaceId}/${surveyId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
         "Accept-Language": currentLang,
       },
-      body: JSON.stringify({ workspaceId, surveyId }),
     });
 
     if (!response.ok) {
@@ -325,5 +320,3 @@ export const getSurvey = async (
     throw error;
   }
 };
-
-

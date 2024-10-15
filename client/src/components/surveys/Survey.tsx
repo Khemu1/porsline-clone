@@ -7,13 +7,13 @@ import DuplicateSurveyDialog from "../Dialog/survey/DuplicateSurveyDialog";
 import { useChangeSurveyStatus, useDeleteSurvey } from "../../hooks/survey";
 import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 
 const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
     useLanguage();
-
+  const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [isMoveDialogOpen, setMoveDialogOpen] = useState(false);
@@ -22,12 +22,13 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const surveyCardMenuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
   const { handleUpdateSurveyStatus } = useChangeSurveyStatus();
+
   const currentWorkspace = useSelector(
     (state: RootState) => state.currentWorkspace.currentWorkspace
   );
   const toggleSurveyStatus = async () => {
     try {
-      setCurrentSurvey(survey);
+      dispatch(setCurrentSurvey(survey));
       await handleUpdateSurveyStatus({
         surveyId: survey.id,
         workspaceId: survey.workspace,
@@ -90,6 +91,10 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    setCurrentSurvey(survey);
+  }, [toggleSurveyStatus]);
 
   return (
     <>
@@ -167,15 +172,16 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
                 </span>
                 <span
                   className="survey_card_buttons text-red-600"
-                  onClick={() =>
+                  onClick={() => {
+                    console.log(survey.workspace);
                     handleDeleteSurvey({
                       surveyId: survey.id,
                       workspaceId: survey.workspace,
                       getCurrentLanguageTranslations:
                         getCurrentLanguageTranslations,
                       currentLang: getCurrentLanguage(),
-                    })
-                  }
+                    });
+                  }}
                 >
                   {t("delete")}
                 </span>

@@ -1,5 +1,6 @@
-import { object, string, ZodError, instanceof as instanceof_ } from "zod";
+import { object, string, ZodError } from "zod";
 import { translations } from "../components/lang/translations";
+import { welcomePartOptions } from "../types";
 
 type Translations = typeof translations;
 
@@ -27,16 +28,12 @@ export const validateWithSchema = (
   };
 };
 
-export const welcomeFormSchema = (
-  isLabelEnabled: boolean,
-  isDescriptionEnabled: boolean,
-  isImageUploadEnabled: boolean
-) => {
+export const welcomeFormSchema = (options: welcomePartOptions) => {
   return object({
     label: string()
       .max(100, { message: "labelIsTooLong" })
       .optional()
-      .refine((val) => !isLabelEnabled || (val && val.length > 0), {
+      .refine((val) => !options.isLabelEnabled || (val && val.length > 0), {
         message: "labelRequired",
       }),
 
@@ -45,15 +42,30 @@ export const welcomeFormSchema = (
     description: string()
       .max(300, { message: "descriptionTooLong" })
       .optional()
-      .refine((val) => !isDescriptionEnabled || (val && val.length > 0), {
-        message: "descriptionRequired",
-      }),
+      .refine(
+        (val) => !options.isDescriptionEnabled || (val && val.length > 0),
+        {
+          message: "descriptionRequired",
+        }
+      ),
 
-    imageFile: instanceof_(File)
-      .nullable()
+    imageUrl: string()
       .optional()
-      .refine((val) => !isImageUploadEnabled || val, {
-        message: "invalidImage",
-      }),
+      .refine(
+        (val) => {
+          if (!options.isImageUploadEnabled) {
+            return true;
+          }
+          return (
+            val &&
+            val.match(
+              /^data:image\/(jpeg|png|gif|bmp|webp);base64,[A-Za-z0-9+/=]+$/
+            )
+          );
+        },
+        {
+          message: "InvalidImageFormat",
+        }
+      ),
   });
 };

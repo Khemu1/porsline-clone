@@ -26,6 +26,7 @@ import {
   toggleSurveyActiveF,
   updateSurveyTitleF,
 } from "../utils";
+import { stat } from "fs";
 
 export const useUpdateSurvey = () => {
   const dispatch = useDispatch();
@@ -262,15 +263,12 @@ export const useMoveSurvey = () => {
 export const useChangeSurveyStatus = () => {
   const dispatch = useDispatch();
   const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
-
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
+  const { workspaces, currentSurvey, currentWorkspace } = useSelector(
+    (state: RootState) => ({
+      workspaces: state.workspace.workspaces,
+      currentSurvey: state.currentSurvey.currentSurvey,
+      currentWorkspace: state.currentWorkspace.currentWorkspace,
+    })
   );
 
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
@@ -301,13 +299,17 @@ export const useChangeSurveyStatus = () => {
       );
     },
     onSuccess: async () => {
-      await toggleSurveyActiveF(
-        currentSurvey!.id,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
-      );
+      if (currentSurvey && currentWorkspace) {
+        await toggleSurveyActiveF(
+          currentSurvey.id,
+          workspaces,
+          surveys,
+          currentWorkspace,
+          dispatch
+        );
+      } else {
+        console.log("currentSurvey or currentWorkspace is null");
+      }
     },
     onError: (err: CustomError | unknown) => {
       const message =

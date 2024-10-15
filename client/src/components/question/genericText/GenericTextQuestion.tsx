@@ -36,7 +36,15 @@ import {
 } from "../../../store/slices/genericTextSlice";
 import { handleMinMaxChange, returnFileAndUrl } from "../../../utils";
 
-const GenericTextQuestion = ({ isOpen, onClose }) => {
+interface GenericTextQuestionProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
@@ -132,7 +140,7 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
       const formData = {
         label,
         ...(isDescriptionEnabled && { description }),
-        ...(isImageUploadEnabled && { file }),
+        ...(isImageUploadEnabled && { previewImageUrl }),
         ...(isCustomPattern && { regex, regexErrorMessage }),
         ...(regexPlaceHolder.trim().length !== 0 && { regexPlaceHolder }),
         ...(isText && { minLength, maxLength }),
@@ -176,21 +184,21 @@ const GenericTextQuestion = ({ isOpen, onClose }) => {
       />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="bg-[#1e1e1e] rounded-md w-full h-full flex flex-col">
-          <div className="flex items-center gap-5 border-b border-b-gray-500 pb-2 px-2">
-            <button type="button" onClick={onClose}>
-              <img
-                src="/assets/icons/close.svg"
-                alt="Close"
-                className="w-[20px] h-[20px]"
-              />
-            </button>
-            <span className="text-lg main_text_bold">{t("welcomePage")}</span>
-          </div>
           <div className="flex h-full overflow-y-auto">
             <form
               className="flex flex-col space-y-4 w-full h-full overflow-y-scroll md:w-1/4 border-r border-r-gray-600 pb-4 pt-2 px-3"
               onSubmit={handleSave}
             >
+              <div className="flex gap-5 items-center text-lg main_text_bold border-b border-b-[#85808025] py-4">
+                <button type="button" onClick={onClose}>
+                  <img
+                    src="/assets/icons/close.svg"
+                    alt="Close"
+                    className="w-[30px] h-[30px]"
+                  />
+                </button>
+                <span>{t("genericText")}</span>
+              </div>
               <div className="flex flex-col flex-grow gap-5 px-4">
                 <InputSwitchField
                   label={t("Label")}

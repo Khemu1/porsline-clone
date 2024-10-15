@@ -4,7 +4,7 @@ const DataTypes = require("sequelize");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    await queryInterface.createTable("general_text", {
+    await queryInterface.createTable("generic_text", {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -24,35 +24,25 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: false,
       },
-      min: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-        allowNull: false,
-        validate: {
-          min: 0,
-          isGreaterThanMax(value) {
-            if (this.max !== null && value >= this.max) {
-              throw new Error("min must be less than max");
-            }
-          },
-        },
-      },
-      max: {
-        type: DataTypes.INTEGER,
-        defaultValue: 1000,
-        allowNull: false,
-        validate: {
-          min: 0,
-          isGreaterThanMin(value) {
-            if (value <= this.min) {
-              throw new Error("Max must be greater than Min");
-            }
-          },
-          max: 1000,
-        },
-      },
       description: {
         type: DataTypes.TEXT,
+      },
+      answerFormat: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      imageUrl: {
+        type: DataTypes.TEXT,
+      },
+      required: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
+      hideQuestionNumber: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
       },
       createdAt: {
         type: DataTypes.DATE,
@@ -68,6 +58,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("general_text");
+    await queryInterface.dropTable("generic_text");
   },
 };
