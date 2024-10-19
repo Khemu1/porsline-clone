@@ -1,7 +1,6 @@
 import InputSwitchField from "../InputSwitchField";
 import { useLanguage } from "../../lang/LanguageProvider";
 import SwitchContainer from "../SwitchContainer";
-import { setAnotherLink } from "../../../store/slices/defaultEnding";
 import {} from "@headlessui/react";
 import { RootState } from "../../../store/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +9,7 @@ import {
   setDefaultEnding,
   setLabel,
 } from "../../../store/slices/sharedFormSlice";
+import { setRedirectUrl } from "../../../store/slices/redirectEnding";
 
 const RedirectEnding: React.FC<{
   validationErrors: Record<string, string | undefined> | null;
@@ -41,10 +41,11 @@ const RedirectEnding: React.FC<{
       <EnterRedirectLink
         label={"Respondents are directed to the following URL"}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          dispatch(setAnotherLink(e.target.value))
+          dispatch(setRedirectUrl(e.target.value))
         }
         bold={true}
         border={true}
+        errorMessage={validationErrors?.redirectUrl}
       />
 
       <InputSwitchField

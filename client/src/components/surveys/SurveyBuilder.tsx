@@ -7,47 +7,55 @@ import Endings from "../question/endings/Endings";
 import { useEffect, useState } from "react";
 import { useGetSurvey } from "../../hooks/survey";
 import { useParams } from "react-router-dom";
+import Questions from "./Questions";
+import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
+import { setGenericTexts } from "../../store/slices/questionsSlice";
+import {
+  setCustomEndings,
+  setDefaultEndings,
+} from "../../store/slices/endingsSlice";
+import EndingsContainer from "./EndingsContainer";
 import { updateWelcomePart } from "../../store/slices/welcomePartSlice";
+import WelcomePart from "./WelcomePart";
 
 const SurveyBuilder = () => {
   const { workspaceId, surveyId } = useParams();
   const { t, getCurrentLanguageTranslations, getCurrentLanguage } =
     useLanguage();
   const dispatch = useDispatch();
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
-  const currentWelcomePart = useSelector(
-    (state: RootState) => state.welcomePart
-  );
-  const welcomePartState = useSelector((state: RootState) => state.welcomePart);
 
+  const welcomePartState = useSelector((state: RootState) => state.welcomePart);
+  const endingsState = useSelector((state: RootState) => state.endings);
   const [openWelcomePage, setOpenWelcomePage] = useState(false);
   const [openTextPage, setOpenTextPage] = useState(false);
   const [openEndingsPage, setOpenEndingsPage] = useState(false);
 
-  const { survey, isError, isLoading, errorState } = useGetSurvey(
+  const { survey } = useGetSurvey(
     Number(workspaceId),
     Number(surveyId),
     getCurrentLanguageTranslations,
     getCurrentLanguage()
   );
   useEffect(() => {
-    if (
-      survey?.welcomePart &&
-      survey.welcomePart.length > 0 &&
-      !currentWelcomePart.id
-    ) {
+    if (survey && survey.welcomePart && survey.questions) {
       dispatch(updateWelcomePart(survey.welcomePart[0]));
-      console.log("currentWelcomePart", survey.welcomePart[0]);
+      dispatch(setCurrentSurvey(survey));
+      dispatch(setGenericTexts(survey.questions ?? []));
+      dispatch(setDefaultEndings(survey.defaultEndings ?? []));
+      dispatch(setCustomEndings(survey.customEndings ?? []));
     }
   }, [survey]);
   return (
     <div className="survey_builder">
       <aside>
         <div className="flex flex-col items-center gap-5 mb-5 relative w-full">
-          <div
-            className="flex items-center justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl "
+          <button
+            disabled={welcomePartState.id !== null}
+            className={`flex justify-start items-center ${
+              welcomePartState.id !== null
+                ? "bg-[#0e0f0f81] cursor-not-allowed"
+                : "bg-[#0e0f0f]"
+            }  py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all `}
             onClick={() => setOpenWelcomePage(true)}
           >
             <div className="survey_builder_icon_welcome_style">
@@ -58,11 +66,11 @@ const SurveyBuilder = () => {
               />
             </div>
             <p>{t("welcomePage")}</p>
-          </div>
+          </button>
 
           {/* Open Generic Text Page */}
           <div
-            className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
+            className="flex justify-start items-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
             onClick={() => setOpenTextPage(true)}
           >
             <div>
@@ -77,7 +85,7 @@ const SurveyBuilder = () => {
 
           {/* Open Endings Page */}
           <div
-            className="flex justify-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
+            className="flex justify-start items-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
             onClick={() => setOpenEndingsPage(true)}
           >
             <div>
@@ -92,59 +100,29 @@ const SurveyBuilder = () => {
         </div>
       </aside>
 
-      <section>
-        <div className="flex flex-col justify-center items-end gap-5 mb-5 relative w-full">
-          <div className="w-full">
-            {welcomePartState.id ? (
+      <section className="">
+        <div className="flex flex-col gap-28 mb-5 relative w-full">
+          <WelcomePart setOpenWelcomePage={setOpenWelcomePage} />
+          <Questions setOpenTextPage={setOpenTextPage} />
+
+          {endingsState.customEndings || endingsState.defaultEndings ? (
+            <EndingsContainer setOpenEndingsPage={setOpenEndingsPage} />
+          ) : (
+            <div className="w-full">
               <div
-                className="flex justify-start py-1 px-3 gap-2 rounded-lg w-full cursor-pointer"
-                onClick={() => setOpenWelcomePage(true)}
-              >
-                <div className="survey_builder_icon_welcome_style">
-                  <img
-                    src="/assets/icons/welcome.svg"
-                    alt="welcome"
-                    className="w-[30px]"
-                  />
-                </div>
-                <p
-                  dangerouslySetInnerHTML={{
-                    __html: welcomePartState.label ?? "",
-                  }}
-                ></p>
-              </div>
-            ) : (
-              <div
-                className="welcome_page_style "
-                onClick={() => setOpenWelcomePage(true)}
+                className="welcome_page_style"
+                  onClick={() => setOpenEndingsPage(true)}
+                  
               >
                 <img
                   src="/assets/icons/plus.svg"
                   alt="plus"
                   className="w-[20px]"
                 />
-                <p>{t("welcomePage")}</p>
+                <p>{t("endings")}</p>
               </div>
-            )}
-          </div>
-          <div className="flex flex-col w-full gap-3">
-            <div>questions</div>
-            <div>questions</div>
-            <div>questions</div>
-          </div>
-          <div className="w-full">
-            <div
-              className="welcome_page_style"
-              onClick={() => setOpenEndingsPage(true)}
-            >
-              <img
-                src="/assets/icons/plus.svg"
-                alt="plus"
-                className="w-[20px]"
-              />
-              <p>{t("endings")}</p>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

@@ -1,5 +1,13 @@
-import { object, string, ZodError, number, boolean, ZodIssueCode } from "zod";
-import { translations } from "../components/lang/translations";
+import {
+  object,
+  string,
+  ZodError,
+  number,
+  boolean,
+  ZodIssueCode,
+} from "zod";
+import { translations } from "../../locals/translations";
+import { NewQuestionOptions } from "../../types/types";
 
 type Translations = typeof translations;
 
@@ -23,20 +31,11 @@ export const validateWithSchema = (
   }
 
   return {
-    message: translations[language]?.unknownError || "Unexpected error",
+    message: translations[language]?.unexpectedError || "Unexpected error",
   };
 };
 
-export const genericTextSchema = (
-  isFormatText: boolean,
-  isFormatRegex: boolean,
-  hasPlaceHolder: boolean,
-  hasRegexErrorMessage: boolean,
-  hideQuestionNumber: boolean,
-  isDescriptionEnabled: boolean,
-  isImageUploadEnabled: boolean,
-  isRequired: boolean
-) => {
+export const genericTextSchema = (options: NewQuestionOptions) => {
   return object({
     label: string()
       .min(1, { message: "labelRequired" })
@@ -45,18 +44,19 @@ export const genericTextSchema = (
     description: string()
       .max(300, { message: "descriptionTooLong" })
       .optional()
-      .refine((val) => !isDescriptionEnabled || (val && val.length > 0), {
-        message: "descriptionRequired",
-      }),
+      .refine(
+        (val) => !options.isDescriptionEnabled || (val && val.length > 0),
+        {
+          message: "descriptionRequired",
+        }
+      ),
 
     imageUrl: string()
       .optional()
       .refine(
         (val) => {
-          if (!isImageUploadEnabled) {
+          if (!options.isImageUploadEnabled) {
             return true;
-          } else {
-            console.log(val);
           }
           return (
             val &&
@@ -72,31 +72,37 @@ export const genericTextSchema = (
 
     minLength: number()
       .optional()
-      .refine((val) => !isFormatText || (val !== undefined && val >= 0), {
-        message: "minRequired",
-      }),
+      .refine(
+        (val) => !options.isFormatText || (val !== undefined && val >= 0),
+        {
+          message: "minRequired",
+        }
+      ),
 
     maxLength: number()
       .optional()
-      .refine((val) => !isFormatText || (val !== undefined && val > 0), {
-        message: "maxRequired",
-      }),
+      .refine(
+        (val) => !options.isFormatText || (val !== undefined && val > 0),
+        {
+          message: "maxRequired",
+        }
+      ),
 
     isRequired: boolean()
       .optional()
-      .refine((val) => !isRequired || val, {
+      .refine((val) => !options.isRequired || val, {
         message: "isRequired",
       }),
 
     regex: string()
       .optional()
-      .refine((val) => !isFormatRegex || (val && val.length > 0), {
+      .refine((val) => !options.isFormatRegex || (val && val.length > 0), {
         message: "regexAnswerFormat",
       }),
 
     regexPlaceHolder: string()
       .optional()
-      .refine((val) => !hasPlaceHolder || (val && val.length >= 0), {
+      .refine((val) => !options.hasPlaceHolder || (val && val.length >= 0), {
         message: "hasPlaceHolder",
       }),
 
@@ -104,7 +110,9 @@ export const genericTextSchema = (
       .optional()
       .refine(
         (val) =>
-          !isFormatRegex || !hasRegexErrorMessage || (val && val.length > 0),
+          !options.isFormatRegex ||
+          !options.hasRegexErrorMessage ||
+          (val && val.length > 0),
         {
           message: "regexErrorMessageRequired",
         }
@@ -112,7 +120,7 @@ export const genericTextSchema = (
 
     hideQuestionNumber: boolean()
       .optional()
-      .refine((val) => !hideQuestionNumber || val, {
+      .refine((val) => !options.hideQuestionNumber || val, {
         message: "hideQuestionNumber",
       }),
   }).superRefine((val, ctx) => {

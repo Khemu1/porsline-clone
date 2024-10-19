@@ -1,3 +1,5 @@
+import CustomEnding from "../db/models/CustomEnding";
+import DefaultEnding from "../db/models/DefaultEnding";
 import GeneralRegex from "../db/models/GeneralRegex";
 import GeneralText from "../db/models/GeneralText";
 import GenericText from "../db/models/GenericText";
@@ -42,21 +44,26 @@ export const getSurveyService = async (
         },
         {
           model: GenericText,
-          as: "genericTexts",
+          as: "questions",
           include: [
-            { model: GeneralRegex, as: "generalRegexes" },
+            { model: GeneralRegex, as: "generalRegex" },
             {
               model: GeneralText,
-              as: "generalTexts",
+              as: "generalText",
             },
           ],
         },
+        {
+          model: DefaultEnding,
+          as: "defaultEndings",
+        },
+        { model: CustomEnding, as: "customEndings" },
       ],
+      order: [["questions", "createdAt", "ASC"]], // order should be out of the include block
     });
     return surveys!.get({ plain: true });
   } catch (error) {
     console.log(error);
-
     throw error;
   }
 };

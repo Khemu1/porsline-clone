@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel } from "@headlessui/react";
 import DefaultEnding from "./DefaultEnding";
 import { useLanguage } from "../../lang/LanguageProvider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { setIsSubmitting } from "../../../store/slices/sharedFormSlice";
@@ -13,7 +13,12 @@ import {
   customEndingSchema,
   defaultEndingSchema,
 } from "../../../utils/endings";
-import { clearEndingsFieldsForSwitch } from "../../../utils";
+import {
+  clearEndingsFieldsForSwitch,
+  transformDataIntoFormData,
+} from "../../../utils";
+import { useParams } from "react-router-dom";
+import { useAddEnding } from "../../../hooks/ending";
 
 interface EndingsProps {
   isOpen: boolean;
@@ -22,12 +27,16 @@ interface EndingsProps {
 
 const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
-  const { t, getCurrentLanguage } = useLanguage();
+  const { t, getCurrentLanguage, getCurrentLanguageTranslations } =
+    useLanguage();
   const [active, setActive] = useState<"default" | "custom">("default");
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
     string | undefined
   > | null>(null);
+
+  const { workspaceId, surveyId } = useParams();
+  const { handleAddEnding, isSuccess } = useAddEnding();
 
   const {
     isLabelEnabled,
@@ -44,6 +53,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
     autoReload,
     reloadTimeInSeconds,
     redirectToWhat,
+    redirectUrl,
   } = useSelector((state: RootState) => ({
     isLabelEnabled: state.welcomePage.isLabelEnabled,
     label: state.sharedForm.label,
@@ -59,9 +69,10 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
     reloadTimeInSeconds: state.defaultEnding.reloadTimeInSeconds,
     anotherLink: state.defaultEnding.anotherLink,
     redirectToWhat: state.defaultEnding.redirectToWhat,
+    redirectUrl: state.redirectEnding.redirectUrl,
   }));
 
-  const handleSave = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       setValidationErrors(null);
       e.preventDefault();
@@ -70,7 +81,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
         const defaultEndingData = {
           label,
           ...(isDescriptionEnabled && { description }),
-          ...(isImageUploadEnabled && { imageFile: previewImageUrl }),
+          ...(isImageUploadEnabled && { imageUrl: previewImageUrl }),
           ...(shareSurvey && { shareSurvey }),
           ...(buttonText.trim().length !== 0 && { buttonText }),
           ...(ReloadOrDirectButton &&
@@ -96,16 +107,56 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
           autoReload
         );
 
-        console.log(schema.parse(defaultEndingData));
+        const options = {
+          isDescriptionEnabled,
+          isImageUploadEnabled,
+          shareSurvey,
+          defaultEnding,
+          ReloadOrDirectButton,
+          autoReload,
+        };
+
+        const data = schema.parse(defaultEndingData);
+
+        const formData = new FormData();
+
+        transformDataIntoFormData({ ...data, type: active }, formData);
+        transformDataIntoFormData(
+          { workspaceId: +workspaceId!, surveyId: +surveyId! },
+          formData
+        );
+        transformDataIntoFormData(options, formData);
+
+        console.log(formData);
+        await handleAddEnding({
+          ending: formData,
+          getCurrentLanguageTranslations,
+          currentLang: getCurrentLanguage(),
+        });
       }
       if (active === "custom") {
         const customEndingData = {
-          anotherLink,
+          redirectUrl,
           ...(label.trim().length !== 0 && { label }),
           ...(defaultEnding && { defaultEnding }),
         };
         const schema = customEndingSchema(defaultEnding);
-        console.log(schema.parse(customEndingData));
+        const data = schema.parse(customEndingData);
+
+        const options = { defaultEnding };
+        const formData = new FormData();
+
+        transformDataIntoFormData({ ...data, type: active }, formData);
+        transformDataIntoFormData(
+          { workspaceId: +workspaceId!, surveyId: +surveyId! },
+          formData
+        );
+        transformDataIntoFormData(options, formData);
+        await handleAddEnding({
+          ending: formData,
+          getCurrentLanguageTranslations,
+          currentLang: getCurrentLanguage(),
+        });
       }
     } catch (error) {
       setValidationErrors(validateWithSchema(error, getCurrentLanguage()));
@@ -114,6 +165,13 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose();
+    }
+  }, [isSuccess]);
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div

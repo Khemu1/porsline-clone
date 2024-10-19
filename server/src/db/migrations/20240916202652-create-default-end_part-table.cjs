@@ -44,14 +44,20 @@ module.exports = {
       },
       buttonText: {
         type: DataTypes.TEXT,
-        allowNull: false,
+        allowNull: true,
       },
       redirectToWhat: {
         type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      type: {
+        type: DataTypes.ENUM,
+        values: ["default", "custom"],
         allowNull: false,
       },
-      anotherLinkText: {
+      anotherLink: {
         type: DataTypes.TEXT,
+        allowNull: true,
       },
       autoReload: {
         type: DataTypes.BOOLEAN,
@@ -67,6 +73,11 @@ module.exports = {
         defaultValue: DataTypes.NOW,
         allowNull: false,
       },
+      defultEnding: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false,
+      },
       updatedAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
@@ -76,6 +87,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("end_part");
+    await queryInterface.dropTable("default_end");
   },
 };

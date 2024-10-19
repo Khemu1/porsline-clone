@@ -1,18 +1,18 @@
 import { translations } from "../components/lang/translations";
 import { CustomError } from "../utils/CustomError";
 
-export const addWelcomePart = async (
-  welcomePart: FormData,
+export const addQuestion = async (
+  question: FormData,
   lang: () => (typeof translations)["en"],
   currentLang: "en" | "de"
 ) => {
   try {
-    const response = await fetch(`/api/welcomepart/add`, {
+    const response = await fetch(`/api/question/add`, {
       method: "POST",
       headers: {
         "Accept-Language": currentLang,
       },
-      body: welcomePart,
+      body: question,
     });
 
     if (!response.ok) {
@@ -44,14 +44,14 @@ export const addWelcomePart = async (
   }
 };
 
-export const deleteWelcomePart = async (
-  welcomePartId: number,
+export const deleteQuestion = async (
+  questionId: number,
   worksapceAndSurvey: FormData,
   lang: () => (typeof translations)["en"],
   currentLang: "en" | "de"
 ) => {
   try {
-    const response = await fetch(`/api/welcomepart/delete/${welcomePartId}`, {
+    const response = await fetch(`/api/question/delete/${questionId}`, {
       method: "DELETE",
       headers: {
         "Accept-Language": currentLang,
@@ -88,23 +88,20 @@ export const deleteWelcomePart = async (
   }
 };
 
-export const duplicateWelcomePart = async (
-  welcomePartId: number,
+export const duplicateQuestion = async (
+  questionId: number,
   worksapceAndSurvey: FormData,
   lang: () => (typeof translations)["en"],
   currentLang: "en" | "de"
 ) => {
   try {
-    const response = await fetch(
-      `/api/welcomepart/duplicate/${welcomePartId}`,
-      {
-        method: "POST",
-        headers: {
-          "Accept-Language": currentLang,
-        },
-        body: worksapceAndSurvey,
-      }
-    );
+    const response = await fetch(`/api/question/duplicate/${questionId}`, {
+      method: "POST",
+      headers: {
+        "Accept-Language": currentLang,
+      },
+      body: worksapceAndSurvey,
+    });
 
     if (!response.ok) {
       const errorData: CustomError = await response.json();

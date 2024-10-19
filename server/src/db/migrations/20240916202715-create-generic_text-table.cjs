@@ -33,6 +33,7 @@ module.exports = {
       },
       imageUrl: {
         type: DataTypes.TEXT,
+        allowNull: true,
       },
       required: {
         type: DataTypes.BOOLEAN,

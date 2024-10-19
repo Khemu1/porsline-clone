@@ -9,21 +9,20 @@ import WelcomePart from "./WelcomePart";
 import GenericText from "./GenericText";
 import GeneralText from "./GeneralText";
 import GeneralRegex from "./GeneralRegex";
+import DefaultEnding from "./DefaultEnding";
+import CustomEnding from "./CustomEnding";
 
 interface UserModelCreationAttributes
-  extends Optional<
-    UserModel,
-    "id" | "createdAt" | "updatedAt" | "workspaces" | "UserGroups"
-  > {}
+  extends Optional<UserModel, "id" | "createdAt" | "updatedAt"> {}
 
 class User
   extends Model<UserModel, UserModelCreationAttributes>
   implements UserModel
 {
-  declare id: number; // Type declaration
+  declare id: number;
   declare username: string;
   declare password: string;
-  declare groupId: number; // Group created by this user
+  declare groupId: number;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -64,21 +63,36 @@ class User
     });
     Survey.hasMany(WelcomePart, { foreignKey: "surveyId", as: "welcomePart" });
 
-    GenericText.hasMany(GeneralText, {
-      foreignKey: "questionId",
-      as: "generalTexts",
-    });
-
-    GeneralText.belongsTo(GenericText, { foreignKey: "questionId" });
-
-    GenericText.hasMany(GeneralRegex, {
-      foreignKey: "questionId",
-      as: "generalRegexes",
-    });
-    GeneralRegex.belongsTo(GenericText, { foreignKey: "questionId" });
-
-    Survey.hasMany(GenericText, { foreignKey: "surveyId", as: "genericTexts" });
     GenericText.belongsTo(Survey, { foreignKey: "surveyId" });
+    Survey.hasMany(GenericText, { foreignKey: "surveyId", as: "questions" });
+
+    Survey.hasMany(DefaultEnding, {
+      foreignKey: "surveyId",
+      as: "defaultEndings",
+    });
+    DefaultEnding.belongsTo(Survey, { foreignKey: "surveyId" });
+    Survey.hasMany(CustomEnding, {
+      foreignKey: "surveyId",
+      as: "customEndings",
+    });
+    CustomEnding.belongsTo(Survey, { foreignKey: "surveyId" });
+
+    GenericText.hasOne(GeneralText, {
+      foreignKey: "questionId",
+      as: "generalText",
+    });
+
+    GeneralText.belongsTo(GenericText, {
+      foreignKey: "questionId",
+    });
+
+    GenericText.hasOne(GeneralRegex, {
+      foreignKey: "questionId",
+      as: "generalRegex",
+    });
+    GeneralRegex.belongsTo(GenericText, {
+      foreignKey: "questionId",
+    });
   }
 }
 

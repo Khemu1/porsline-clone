@@ -1,5 +1,8 @@
 import { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import {
+  CustomEndingModel,
+  DefaultEndingModel,
+  GenericTextModel,
   SurveyModel,
   UpdateSurveyTitleResponse,
   WelcomePartModel,
@@ -16,7 +19,18 @@ import { TranslationKeys } from "./genericText";
 import { clearDefaultEndingFields } from "../store/slices/defaultEnding";
 import { clearSharedFormFields } from "../store/slices/sharedFormSlice";
 import { clearRedirectEndingFields } from "../store/slices/redirectEnding";
-import { updateWelcomePart } from "../store/slices/welcomePartSlice";
+import { resetWelcomePart, updateWelcomePart } from "../store/slices/welcomePartSlice";
+import {
+  addGenericText,
+  removeGenericText,
+} from "../store/slices/questionsSlice";
+import {
+  addCustomEnding,
+  addDefaultEnding,
+  deleteCustomEnding,
+  deleteDefaultEnding,
+  setDefaultEnding,
+} from "../store/slices/endingsSlice";
 
 export const mapSurveyErrorsTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, errors]) => {
@@ -331,6 +345,65 @@ export const addNewWorkspaceF = async (
   }
 };
 
+export const addNewQuestionF = async (
+  newQuestion: GenericTextModel,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(addGenericText(newQuestion));
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const removeQuestionF = async (
+  questionId: number,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(removeGenericText(+questionId));
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const addNewEndingF = async (
+  ending: CustomEndingModel | DefaultEndingModel,
+  type: "custom" | "default",
+  dispatch: Dispatch<UnknownAction>,
+  defaultEnding?: boolean
+) => {
+  try {
+    console.log(defaultEnding);
+    if (type === "custom") {
+      dispatch(addCustomEnding(ending as CustomEndingModel));
+    } else {
+      dispatch(addDefaultEnding(ending as DefaultEndingModel));
+    }
+    if (defaultEnding) {
+      dispatch(setDefaultEnding({ id: ending.id, type }));
+    }
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const deleteEndingF = async (
+  endingId: number,
+  type: "custom" | "default",
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    if (type === "custom") {
+      dispatch(deleteCustomEnding(endingId));
+    } else {
+      dispatch(deleteDefaultEnding(endingId));
+    }
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
 export const retrunSearchData = (
   allWorkspaces: WorkSpaceModel[],
   searchTerm: string
@@ -488,6 +561,16 @@ export const addWelcomePartF = async (
   }
 };
 
+export const deleteWelcomePartF = async (
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(resetWelcomePart());
+  } catch (error) {
+    console.error("Error adding survey:", error);
+  }
+};
+
 export const transformDataIntoFormData = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Record<string, any>,
@@ -498,4 +581,15 @@ export const transformDataIntoFormData = (
       form.append(key, String(value));
     }
   }
+};
+
+export const sortEndings = (
+  defaultEndings: DefaultEndingModel[],
+  customEndings: CustomEndingModel[]
+) => {
+  const allEndings = [...defaultEndings, ...customEndings];
+  const sortedEndings = allEndings.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+  return sortedEndings;
 };

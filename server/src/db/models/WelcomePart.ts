@@ -3,10 +3,7 @@ import sequelize from "../../config/database";
 import { WelcomePartModel } from "../../types/types";
 
 interface WelcomePartModelCreationAttributes
-  extends Optional<
-    WelcomePartModel,
-    "createdAt" | "updatedAt" | "id" | "buttonText" | "description" | "imageUrl"|"label"
-  > {}
+  extends Optional<WelcomePartModel, "createdAt" | "updatedAt" | "id"> {}
 
 class WelcomePart
   extends Model<WelcomePartModel, WelcomePartModelCreationAttributes>

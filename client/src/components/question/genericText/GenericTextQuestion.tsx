@@ -6,7 +6,7 @@ import {
   ListboxOption,
   ListboxButton,
 } from "@headlessui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "../../lang/LanguageProvider";
 import InputSwitchField from "../InputSwitchField";
 import ImageUploadField from "../ImageUploadField";
@@ -34,7 +34,13 @@ import {
   setRegexErrorMessage,
   setRegexPlaceHolder,
 } from "../../../store/slices/genericTextSlice";
-import { handleMinMaxChange, returnFileAndUrl } from "../../../utils";
+import {
+  handleMinMaxChange,
+  returnFileAndUrl,
+  transformDataIntoFormData,
+} from "../../../utils";
+import { useParams } from "react-router-dom";
+import { useAddQuestion } from "../../../hooks/genericQuestion";
 
 interface GenericTextQuestionProps {
   isOpen: boolean;
@@ -52,12 +58,15 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
   > | null>(null);
   const [selected, setSelected] = useState("Text");
 
+  const questions = useSelector((state: RootState) => state.genericTexts);
+
   const options = [
     { id: 1, name: "Text" },
     { id: 2, name: "Custom Pattern" },
   ];
 
-  const { t, getCurrentLanguage } = useLanguage();
+  const { t, getCurrentLanguage, getCurrentLanguageTranslations } =
+    useLanguage();
   const {
     label,
     description,
@@ -89,9 +98,13 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
     answerFormat: state.genericText.answerFormat,
   }));
 
+  const { workspaceId, surveyId } = useParams();
+
   const [file, setFile] = useState<File | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { handleAddQuestion, isSuccess } = useAddQuestion();
 
   const handleFileChange = async (file: File | null) => {
     const { file: _file, url } = await returnFileAndUrl(file);
@@ -126,6 +139,15 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
       const isCustomPattern = selected.toLowerCase() === "custom pattern";
       const isText = selected.toLowerCase() === "text";
 
+      const options = {
+        isText,
+        isCustomPattern,
+        hasRegexPlaceHolder: regexPlaceHolder.trim().length !== 0,
+        hideQuestionNumber,
+        isDescriptionEnabled,
+        isImageUploadEnabled,
+        isRequired,
+      };
       const schema = genericTextSchema(
         isText,
         isCustomPattern,
@@ -138,9 +160,10 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
       );
 
       const formData = {
+        type: isText ? "text" : "regex",
         label,
         ...(isDescriptionEnabled && { description }),
-        ...(isImageUploadEnabled && { previewImageUrl }),
+        ...(isImageUploadEnabled && { imageUrl: previewImageUrl }),
         ...(isCustomPattern && { regex, regexErrorMessage }),
         ...(regexPlaceHolder.trim().length !== 0 && { regexPlaceHolder }),
         ...(isText && { minLength, maxLength }),
@@ -149,7 +172,23 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
       };
 
       const data = schema.parse(formData);
-      console.log(data);
+
+      const prepFormData = new FormData();
+
+      transformDataIntoFormData(
+        { ...data, type: isText ? "text" : "regex" },
+        prepFormData
+      );
+      transformDataIntoFormData(
+        { workspaceId: +workspaceId!, surveyId: +surveyId! },
+        prepFormData
+      );
+      transformDataIntoFormData(options, prepFormData);
+      handleAddQuestion({
+        question: prepFormData,
+        getCurrentLanguageTranslations,
+        currentLang: getCurrentLanguage(),
+      });
     } catch (error) {
       setValidationErrors(validateWithSchema(error, getCurrentLanguage()));
       console.log("Error saving survey:", validationErrors);
@@ -166,12 +205,17 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
       Number(maxLength),
       t
     );
-    console.log(updatedMin, updatedMax, validationErrors);
-
     dispatch(setMinLength(updatedMin));
     dispatch(setMaxLength(updatedMax));
     setValidationErrors(validationErrors);
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose();
+    }
+  }, [isSuccess]);
+
   return (
     <Dialog
       open={isOpen}
@@ -411,6 +455,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
               min={+minLength}
               answerFormat={answerFormat}
               hideQuestionNumber={hideQuestionNumber}
+              index={questions.length + 1}
             />
           </div>
         </DialogPanel>

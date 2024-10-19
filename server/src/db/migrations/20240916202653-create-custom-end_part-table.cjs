@@ -24,6 +24,11 @@ module.exports = {
         type: DataTypes.TEXT,
         allowNull: false,
       },
+      type: {
+        type: DataTypes.ENUM,
+        values: ["default", "custom"],
+        allowNull: false,
+      },
       label: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -47,6 +52,6 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("end_part");
+    await queryInterface.dropTable("custom_end");
   },
 };

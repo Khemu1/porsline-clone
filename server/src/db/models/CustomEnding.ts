@@ -1,44 +1,37 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
 
-import { GenericTextModel } from "../../types/types";
+import { CustomEndingModel } from "../../types/types";
 
-interface GenericTextModelCreationAttributes
+interface CustomEndingCreationAttributes
   extends Optional<
-    GenericTextModel,
-    | "createdAt"
-    | "updatedAt"
-    | "id"
-    | "imageUrl"
-    | "required"
-    | "hideQuestionNumber"
+    CustomEndingModel,
+    "createdAt" | "updatedAt" | "id" | "label"
   > {}
-
-class GenericText
-  extends Model<GenericTextModel, GenericTextModelCreationAttributes>
-  implements GenericTextModel
+class CustomEnding
+  extends Model<CustomEndingModel, CustomEndingCreationAttributes>
+  implements CustomEndingModel
 {
   declare id: number;
   declare surveyId: number;
-  declare label: string;
+  declare redirectUrl: string;
+  declare type: "default" | "custom";
+  declare label?: string;
   declare description?: string;
-  declare answerFormat: "text" | "regex";
-  declare imageUrl?: string;
-  declare required?: boolean;
-  declare hideQuestionNumber?: boolean;
+  declare shareSurvey?: boolean;
+  declare defaultEnding?: boolean;
   declare createdAt?: Date;
   declare updatedAt?: Date;
 
   static associate() {}
 }
 
-GenericText.init(
+CustomEnding.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
+      primaryKey: true,
     },
     surveyId: {
       type: DataTypes.INTEGER,
@@ -49,27 +42,28 @@ GenericText.init(
       onDelete: "CASCADE",
       allowNull: false,
     },
-    label: {
+    type: {
+      type: DataTypes.ENUM,
+      values: ["default", "custom"],
+      allowNull: false,
+    },
+    redirectUrl: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    description: {
+    label: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    answerFormat: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    imageUrl: {
+    description: {
       type: DataTypes.TEXT,
     },
-    required: {
+    shareSurvey: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
     },
-    hideQuestionNumber: {
+    defaultEnding: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
       allowNull: false,
@@ -87,9 +81,9 @@ GenericText.init(
   },
   {
     sequelize,
-    tableName: "generic_text",
+    tableName: "custom_end",
     timestamps: true,
   }
 );
 
-export default GenericText;
+export default CustomEnding;

@@ -6,7 +6,11 @@ import {
   checkGroupMembership,
   validateNewWelcomePart,
 } from "../middlewares/welcomePartMiddleware";
-import { addWelcomePart } from "../controllers/welcomePartController";
+import {
+  addWelcomePart,
+  deleteWelcomePart,
+  duplicateWelcomePart,
+} from "../controllers/welcomePartController";
 
 const welcomePartRouter = Router();
 // body -> workspaceId, surveyId
@@ -29,5 +33,24 @@ welcomePartRouter.post(
   validateNewWelcomePart,
   addWelcomePart
 );
+
+welcomePartRouter.delete(
+  `/delete/:welcomeId`,
+  authUser,
+  checkWorkspaceExists,
+  checkGroupMembership,
+  checkSurveyExists,
+  checkWorkspaceExists,
+  deleteWelcomePart
+);
+
+// welcomePartRouter.post(
+//   "/duplicate",
+//   authUser,
+//   checkWorkspaceExists,
+//   checkGroupMembership,
+//   checkSurveyExists,
+//   checkWorkspaceExists,
+// );
 
 export default welcomePartRouter;

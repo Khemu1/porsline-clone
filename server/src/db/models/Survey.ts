@@ -5,7 +5,7 @@ import { SurveyModel } from "../../types/types";
 interface SurveyModelCreationAttributes
   extends Optional<
     SurveyModel,
-    "isActive" | "id" | "createdAt" | "updatedAt"
+    "isActive" | "id" | "createdAt" | "updatedAt" 
   > {}
 
 class Survey

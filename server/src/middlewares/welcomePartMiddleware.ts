@@ -17,7 +17,8 @@ import {
   makeImage,
   processWelcomePartData,
   processWelcomePartOptions,
-} from "../utils/validations";
+} from "../utils";
+import WelcomePart from "../db/models/WelcomePart";
 
 export const checkGroupMembership = async (
   req: Request<
@@ -186,6 +187,52 @@ export const validateNewWelcomePart = async (
         )
       );
     }
+    next(error);
+  }
+};
+
+export const checkQuestionExists = async (
+  req: Request<
+    { welcomeId: string },
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      welcomeData: NewWelcomePart;
+      options: welcomePartOptions;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      welcomePartData: NewWelcomePart;
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+      welcomePart: WelcomePart;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const { welcomeId } = req.params;
+    const welcomePart = await WelcomePart.findOne({
+      where: { id: welcomeId },
+    });
+
+    if (!welcomePart) {
+      return next(
+        new CustomError(
+          "Welcome part not found",
+          404,
+          true,
+          "welcomePartNotFound"
+        )
+      );
+    }
+    res.locals.welcomePart = welcomePart;
+    next();
+  } catch (error) {
     next(error);
   }
 };

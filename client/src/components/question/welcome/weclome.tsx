@@ -62,7 +62,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
     previewImageUrl: state.sharedForm.previewImageUrl,
   }));
 
-  const { handleAddWelcomePart } = useAddWelcomePart();
+  const { handleAddWelcomePart, isSuccess } = useAddWelcomePart();
 
   const [file, setFile] = useState<File | null>(null);
 
@@ -98,7 +98,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
       transformDataIntoFormData(options, formData);
 
       await handleAddWelcomePart({
-        welcomePart:formData,
+        welcomePart: formData,
         getCurrentLanguageTranslations,
         currentLang: getCurrentLanguage(),
       });
@@ -150,6 +150,13 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
     dispatch(setImageFile({ fileType: _file?.type, fileSize: _file?.size }));
     dispatch(setPreviewImageUrl(url));
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose();
+    }
+  }, [isSuccess]);
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div

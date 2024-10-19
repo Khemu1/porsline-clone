@@ -2,7 +2,7 @@ import { object, string, number, boolean, ZodIssueCode } from "zod";
 
 export const customEndingSchema = (defaultEnding: boolean,) => {
   return object({
-    url: string().url(),
+    redirectUrl: string().url(),
     label: string().max(100).optional(),
     defaultEnding: boolean()
       .optional()
@@ -40,7 +40,7 @@ export const defaultEndingSchema = (
         message: "descriptionRequired",
       }),
 
-    imageFile: string()
+    imageUrl: string()
       .optional()
       .refine(
         (val) =>

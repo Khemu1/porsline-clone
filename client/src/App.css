@@ -174,10 +174,19 @@ input:hover {
 
 .survey_builder_icon_welcome_style {
   display: flex;
-  height: 2rem;
-  min-width: 2rem;
   justify-content: center;
   align-items: center;
   transform: rotate(180deg);
   background-color: rgba(102, 104, 105, 0.083);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.survey_builder_icon {
+  display: flex;
+  justify-content: center;
+  padding: 5px;
+  align-items: center;
+  background-color: rgba(102, 104, 105, 0.083);
+  border-radius: 5px;
 }

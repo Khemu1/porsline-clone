@@ -18,6 +18,7 @@ interface PreviewProps {
   regexErrorMessage?: string;
   isRequired?: boolean;
   hideQuestionNumber?: boolean;
+  index: number;
 }
 
 const Preview: React.FC<PreviewProps> = ({
@@ -32,6 +33,7 @@ const Preview: React.FC<PreviewProps> = ({
   regexErrorMessage,
   regexPlaceHolder,
   answerFormat,
+  index,
 }) => {
   const [res, setRes] = useState<"pc" | "mobile">("pc");
 
@@ -87,7 +89,7 @@ const Preview: React.FC<PreviewProps> = ({
 
         <div className="mt-2 flex">
           {isRequired && <IsRequred />}
-          {hideQuestionNumber && <HideQuestionNumber index={5} />}
+          {!hideQuestionNumber && <HideQuestionNumber index={index} />}
           {label && <LabelPreivew label={label} />}
         </div>
 

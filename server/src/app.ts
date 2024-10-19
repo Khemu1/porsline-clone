@@ -11,6 +11,8 @@ import workspaceRouter from "./routes/workspaceRouter";
 import surveyRouter from "./routes/surveyRouter";
 import welcomePartRouter from "./routes/welcomePartRouter";
 import multer from "multer";
+import genericTextRouter from "./routes/genericTextRouter";
+import endingsRouter from "./routes/endingsRouter";
 const app = express();
 const upload = multer();
 
@@ -23,6 +25,8 @@ app.use("/group", groupRouter);
 app.use("/workspace", workspaceRouter);
 app.use("/survey", surveyRouter);
 app.use("/welcomepart/", welcomePartRouter);
+app.use("/question", genericTextRouter);
+app.use("/ending", endingsRouter);
 
 // Handle unmatched routes
 app.use("*", (req, res, next) => {

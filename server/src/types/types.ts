@@ -13,7 +13,7 @@ export interface UserModel {
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
-  groupId: number;
+  groupId?: number;
   workspaces?: WorkSpaceModel[];
   UserGroups?: UserGroupModel[];
 }
@@ -42,6 +42,10 @@ export interface SurveyModel {
   workspace: number;
   createdAt?: Date;
   updatedAt?: Date;
+  welcomePart?: WelcomePartModel;
+  questions?: GenericTextModel[];
+  defaultEndings?: DefaultEndingModel[];
+  customEndings?: CustomEndingModel[];
 }
 export interface UpdateSurveyModel {
   id: number;
@@ -160,8 +164,8 @@ export interface GenericTextModel {
   hideQuestionNumber?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  generalTexts?: GeneralTextModel[];
-  generalRegexes?: GeneralRegexModel[];
+  generalText?: GeneralTextModel;
+  generalRegex?: GeneralRegexModel;
 }
 
 export interface GeneralTextModel {
@@ -181,4 +185,97 @@ export interface GeneralRegexModel {
   regexPlaceHolder?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface NewQuestion {
+  surveyId: number;
+  type: "text" | "regex";
+  label: string;
+  description?: string;
+  imageUrl?: string;
+  minLength?: number;
+  maxLength?: number;
+  isRequired?: boolean;
+  regex?: string;
+  regexPlaceHolder?: string;
+  regexErrorMessage?: string;
+  hideQuestionNumber?: boolean;
+}
+
+export interface NewQuestionOptions {
+  isFormatText: boolean;
+  isFormatRegex: boolean;
+  hasPlaceHolder: boolean;
+  hasRegexErrorMessage: boolean;
+  hideQuestionNumber: boolean;
+  isDescriptionEnabled: boolean;
+  isImageUploadEnabled: boolean;
+  isRequired: boolean;
+}
+
+export interface DefaultEndingModel {
+  id: number;
+  surveyId: number;
+  label: string;
+  type: "default" | "custom";
+  description?: string;
+  imageUrl?: string;
+  shareSurvey?: boolean;
+  defaultEnding?: boolean;
+  reloadOrRedirect?: boolean;
+  buttonText?: string;
+  redirectToWhat?: string;
+  anotherLink?: string;
+  autoReload?: boolean;
+  reloadTimeInSeconds?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface CustomEndingModel {
+  id: number;
+  surveyId: number;
+  type: "default" | "custom";
+  redirectUrl: string;
+  label?: string;
+  description?: string;
+  shareSurvey?: boolean;
+  defaultEnding?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface NewCustomEnding {
+  surveyId: number;
+  redirectUrl: string;
+  type: "default" | "custom";
+  label?: string;
+  description?: string;
+  shareSurvey?: boolean;
+  defaultEnding?: boolean;
+}
+
+export interface NewDefaultEnding {
+  surveyId: number;
+  label: string;
+  description?: string;
+  type: "default" | "custom";
+  shareSurvey?: boolean;
+  imageUrl?: string;
+  defaultEnding?: boolean;
+  reloadOrRedirect?: boolean;
+  buttonText?: string;
+  redirectToWhat?: string;
+  anotherLink?: string;
+  autoReload?: boolean;
+  reloadTimeInSeconds?: number;
+}
+
+export interface DefaultEndingOptions {
+  isDescriptionEnabled: boolean;
+  isImageUploadEnabled: boolean;
+  shareSurvey: boolean;
+  defaultEnding: boolean;
+  reloadOrRedirectButton: boolean;
+  autoReload: boolean;
 }
