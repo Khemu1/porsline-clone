@@ -6,6 +6,7 @@ import { surveyTranslations } from "../../locals/survey";
 import { surveyBuilderTranslations } from "../../locals/surveyBuilder";
 import { surveyErrorsTranslations } from "../../locals/surveyErrors";
 import { workspaceTranslations } from "../../locals/workspace";
+import { workspaceErrorsTranslations } from "../../locals/worskspaceErrors";
 
 export const translations = {
   en: {
@@ -17,6 +18,7 @@ export const translations = {
     ...GenericTextErrorTranslations.en,
     ...GenericTextTranslations.en,
     ...defaultEnding.en,
+    ...workspaceErrorsTranslations.en,
   },
   de: {
     ...surveyTranslations.de,
@@ -27,5 +29,6 @@ export const translations = {
     ...GenericTextErrorTranslations.de,
     ...GenericTextTranslations.de,
     ...defaultEnding.de,
+    ...workspaceErrorsTranslations.de,
   },
 };

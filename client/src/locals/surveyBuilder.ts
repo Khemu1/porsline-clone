@@ -16,6 +16,7 @@ export const surveyBuilderTranslations = {
     invalidImage: "Invalid image file",
     mainfieldsEmpty: "Please Enable label or description or image",
     genericText: "Generic Text",
+    redirectToURL: "Redirect to URL",
   },
   de: {
     welcomePage: "Willkommensseite",
@@ -34,5 +35,6 @@ export const surveyBuilderTranslations = {
     invalidImage: "Ungültiges Bild",
     mainfieldsEmpty: "Bitte aktiviere das Label oder Beschreibung oder Bild",
     genericText: "Generischer Text",
+    redirectToURL: "Umleiten zu URL",
   },
 };

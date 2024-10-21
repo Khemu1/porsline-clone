@@ -8,8 +8,9 @@ import {
   addQuestion,
   deleteQuestion,
   duplicateQuestion,
+  editQuestion,
 } from "../services/genericQuestion";
-import { addNewQuestionF, removeQuestionF } from "../utils";
+import { addNewQuestionF, editQuestionF, removeQuestionF } from "../utils";
 
 export const useAddQuestion = () => {
   const dispatch = useDispatch();
@@ -191,6 +192,70 @@ export const useDuplicateQuestion = () => {
 
   return {
     handleDuplicateQuestion,
+    isError,
+    isSuccess,
+    errorState,
+    isPending,
+  };
+};
+
+export const useEditQuestion = () => {
+  const dispatch = useDispatch();
+
+  const [errorState, setErrorState] = useState<Record<
+    string,
+    string | undefined
+  > | null>(null);
+
+  const mutation = useMutation<
+    {
+      question: GenericTextModel;
+    },
+    CustomError | unknown,
+    {
+      questionId: number;
+      questionData: FormData;
+      getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
+    }
+  >({
+    mutationFn: async ({
+      questionId,
+      questionData,
+      getCurrentLanguageTranslations,
+      currentLang,
+    }) => {
+      const response = await editQuestion(
+        questionId,
+        questionData,
+        getCurrentLanguageTranslations,
+        currentLang
+      );
+      return response;
+    },
+    onSuccess: async (data: { question: GenericTextModel }) => {
+      await editQuestionF(data.question, dispatch);
+      console.log("edited", data.question);
+    },
+    onError: (err: CustomError | unknown) => {
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error creating new survey:", err);
+    },
+  });
+
+  const {
+    mutateAsync: handleEditQuestion,
+    isError,
+    isSuccess,
+    isPending,
+  } = mutation;
+
+  return {
+    handleEditQuestion,
     isError,
     isSuccess,
     errorState,

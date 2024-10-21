@@ -69,3 +69,55 @@ export const welcomeFormSchema = (options: welcomePartOptions) => {
       ),
   });
 };
+
+export const editWelcomeFormSchema = (options: welcomePartOptions) => {
+  return object({
+    label: string()
+      .max(100, { message: "labelIsTooLong" })
+      .optional()
+      .nullable()
+      .refine((val) => !options.isLabelEnabled || (val && val.length > 0), {
+        message: "labelRequired",
+      }),
+
+    buttonText: string()
+      .max(50, { message: "buttonTextTooLong" })
+      .optional()
+      .nullable(),
+    description: string()
+      .max(300, { message: "descriptionTooLong" })
+      .optional()
+      .nullable()
+      .refine(
+        (val) => !options.isDescriptionEnabled || (val && val.length > 0),
+        {
+          message: "descriptionRequired",
+        }
+      ),
+
+    imageUrl: string()
+      .optional()
+      .nullable()
+      .refine(
+        (val) => {
+          if (
+            !options.isImageUploadEnabled ||
+            val === null ||
+            val === undefined
+          ) {
+            return true;
+          }
+
+          const isValidBase64 = val.match(
+            /^data:image\/(jpeg|png|gif|bmp|webp);base64,[A-Za-z0-9+/=]+$/
+          );
+          const isValidExternalImage = val.includes("\\uploads\\");
+
+          return isValidBase64 || isValidExternalImage;
+        },
+        {
+          message: "InvalidImageFormat",
+        }
+      ),
+  });
+};

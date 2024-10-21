@@ -84,6 +84,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
         ...(isLabelEnabled && { label }),
         ...(isDescriptionEnabled && { description }),
         ...(isImageUploadEnabled && { imageUrl: previewImageUrl }),
+        ...(buttonText && { buttonText }),
       };
 
       const data = schema.parse(welcomeData);
@@ -96,7 +97,6 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
         formData
       );
       transformDataIntoFormData(options, formData);
-
       await handleAddWelcomePart({
         welcomePart: formData,
         getCurrentLanguageTranslations,

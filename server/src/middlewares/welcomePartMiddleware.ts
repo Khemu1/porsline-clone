@@ -9,12 +9,14 @@ import {
   welcomePartOptions,
 } from "../types/types";
 import {
+  editWelcomeFormSchema,
   validateWithSchema,
   welcomeFormSchema,
 } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
 import {
   makeImage,
+  processEditWelcomePartData,
   processWelcomePartData,
   processWelcomePartOptions,
 } from "../utils";
@@ -171,6 +173,66 @@ export const validateNewWelcomePart = async (
       res.locals.welcomePartData = { ...data, imageUrl };
     }
     console.log("validated");
+    next();
+  } catch (error) {
+    const { headers } = req;
+    const currentLang = headers["accept-language"] as "en" | "de";
+    if (error instanceof ZodError) {
+      next(
+        new CustomError(
+          "validation Error",
+          400,
+          true,
+          "`validationError`",
+          "",
+          validateWithSchema(error, currentLang)
+        )
+      );
+    }
+    next(error);
+  }
+};
+
+export const validateEditWelcomePart = async (
+  req: Request<
+    {},
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      welcomeData: NewWelcomePart;
+      options: welcomePartOptions;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      welcomePartData: NewWelcomePart;
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const data = processEditWelcomePartData(req.body);
+    console.log(data);
+    const options = processWelcomePartOptions(req.body);
+
+    const schema = editWelcomeFormSchema(options);
+    schema.parse(data);
+    res.locals.welcomePartData = { ...data };
+    if (
+      data.imageUrl !== null &&
+      data.imageUrl !== undefined &&
+      typeof data.imageUrl === "string" &&
+      !data.imageUrl.includes("\\uploads\\")
+    ) {
+      console.log("Valid imageUrl:", data.imageUrl);
+      const imageUrl = makeImage(data.imageUrl);
+      res.locals.welcomePartData = { ...data, imageUrl };
+    }
     next();
   } catch (error) {
     const { headers } = req;

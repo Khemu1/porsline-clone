@@ -17,10 +17,13 @@ import {
   processCustomEndingData,
   processDefaultEndingData,
   processDefaultEndingOptions,
+  processEditCustomEndingData,
+  processEditDefaultEndingData,
 } from "../utils";
 import {
   customEndingSchema,
   defaultEndingSchema,
+  editDefaultEndingSchema,
 } from "../utils/validations/endings";
 import DefaultEnding from "../db/models/DefaultEnding";
 import CustomEnding from "../db/models/CustomEnding";
@@ -287,5 +290,84 @@ export const checkEndingExists = async (
         "internalServerError"
       )
     );
+  }
+};
+
+export const validateEditEnding = async (
+  req: Request<
+    { endingId: string; type: "default" | "custom" },
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      type: "default" | "custom";
+      defaultEnding: boolean;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      newEnding: NewDefaultEnding | NewCustomEnding;
+      editEnding: DefaultEndingModel | CustomEndingModel;
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const { defaultEnding, type } = req.body;
+    const customEndingData = processEditCustomEndingData(req.body);
+    const defaultEndingData = processEditDefaultEndingData(req.body);
+    const defaultEndingOptions = processDefaultEndingOptions(req.body);
+    console.log(defaultEndingData);
+
+    const defaultSchema = editDefaultEndingSchema(defaultEndingOptions);
+    const customSchema = customEndingSchema(defaultEnding);
+
+    if (type === "custom") {
+      console.log(customEndingData);
+      customSchema.parse(customEndingData);
+      res.locals.editEnding = customEndingData as CustomEndingModel;
+    } else {
+      console.log(defaultEndingData)
+      defaultSchema.parse(defaultEndingData);
+
+      if (
+        defaultEndingData.imageUrl !== null &&
+        defaultEndingData.imageUrl !== undefined &&
+        typeof defaultEndingData.imageUrl === "string" &&
+        !defaultEndingData.imageUrl.includes("\\uploads\\")
+      ) {
+        const imageUrl = makeImage(defaultEndingData.imageUrl);
+        res.locals.editEnding = {
+          ...defaultEndingData,
+          imageUrl,
+        } as DefaultEndingModel;
+      } else {
+        res.locals.editEnding = defaultEndingData as DefaultEndingModel;
+      }
+    }
+
+    next();
+  } catch (error) {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
+
+    if (error instanceof ZodError) {
+      const validationErrors = validateWithSchema(error, currentLang);
+      next(
+        new CustomError(
+          "Validation Error",
+          400,
+          true,
+          "validationError",
+          "",
+          validationErrors
+        )
+      );
+    } else {
+      next(new CustomError("Unknown Error", 500, true, "unknownError", ""));
+    }
   }
 };

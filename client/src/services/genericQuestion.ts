@@ -131,3 +131,47 @@ export const duplicateQuestion = async (
     throw error;
   }
 };
+
+export const editQuestion = async (
+  questionId: number,
+  question: FormData,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+) => {
+  try {
+    const response = await fetch(`/api/question/edit/${questionId}`, {
+      method: "PUT",
+      headers: {
+        "Accept-Language": currentLang,
+      },
+      body: question,
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "getSurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

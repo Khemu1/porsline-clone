@@ -35,6 +35,7 @@ import {
   setRegexPlaceHolder,
 } from "../../../store/slices/genericTextSlice";
 import {
+  clearSlices,
   handleMinMaxChange,
   returnFileAndUrl,
   transformDataIntoFormData,
@@ -213,6 +214,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
   useEffect(() => {
     if (isSuccess) {
       onClose();
+      clearSlices(dispatch)
     }
   }, [isSuccess]);
 
@@ -234,7 +236,13 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
               onSubmit={handleSave}
             >
               <div className="flex gap-5 items-center text-lg main_text_bold border-b border-b-[#85808025] py-4">
-                <button type="button" onClick={onClose}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
+                >
                   <img
                     src="/assets/icons/close.svg"
                     alt="Close"
@@ -414,14 +422,14 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 <button
                   disabled={
                     isSubmitting ||
-                    (label.length === 0 &&
+                    (label?.length === 0 &&
                       !isImageUploadEnabled &&
                       !isDescriptionEnabled)
                   }
                   type="submit"
                   className={`${
                     isSubmitting ||
-                    (label.length === 0 &&
+                    (label?.length === 0 &&
                       !isImageUploadEnabled &&
                       !isDescriptionEnabled)
                       ? "bg-[#0000001e]"
@@ -432,7 +440,10 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
                   Cancel

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CustomEndingModel } from "../../types";
 
 interface RedirectEndings {
   redirectUrl: string | null;
@@ -20,14 +21,29 @@ const redirectEndingSlice = createSlice({
     setUrlLabel: (state, action: PayloadAction<string | null>) => {
       state.urlLabel = action.payload;
     },
-    clearRedirectEndingFields: (state) => {
-      state.redirectUrl = null;
-      state.urlLabel = null;
+    resetRedirectEndingSliceFields: () => {
+      return {
+        ...initialState,
+      };
+    },
+    modifyRedirectEndingSliceFields: (
+      state,
+      action: PayloadAction<Partial<CustomEndingModel>>
+    ) => {
+      return {
+        ...state,
+        redirectUrl: action.payload.redirectUrl || initialState.redirectUrl,
+        urlLabel: action.payload.redirectUrl || initialState.urlLabel,
+      };
     },
   },
 });
 
-export const { setRedirectUrl, setUrlLabel, clearRedirectEndingFields } =
-  redirectEndingSlice.actions;  
+export const {
+  setRedirectUrl,
+  setUrlLabel,
+  resetRedirectEndingSliceFields,
+  modifyRedirectEndingSliceFields,
+} = redirectEndingSlice.actions;
 
-export default redirectEndingSlice.reducer; 
+export default redirectEndingSlice.reducer;

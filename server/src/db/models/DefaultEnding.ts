@@ -69,6 +69,11 @@ DefaultEnding.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    reloadOrRedirect: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      allowNull: false,
+    },
     anotherLink: {
       type: DataTypes.TEXT,
     },

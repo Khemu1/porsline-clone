@@ -28,6 +28,13 @@ const genericTextSlice = createSlice({
   },
 });
 
+export const findGenericTextIndex = (
+  state: GenericTextModel[],
+  id: number
+): number => {
+  return state.findIndex((question) => question.id === id) + 1;
+};
+
 export const {
   addGenericText,
   updateGenericText,

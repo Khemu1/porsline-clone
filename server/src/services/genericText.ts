@@ -6,7 +6,6 @@ import { copyFileWithNewName } from "../utils";
 
 export const addGenericTestService = async (newQuestion: NewQuestion) => {
   try {
-    console.log("in controller");
     const { type } = newQuestion;
     const generic = {
       surveyId: newQuestion.surveyId,
@@ -89,7 +88,6 @@ export const deleteGenricTextService = async (questionId: number) => {
 export const duplicateGenericTextService = async (
   question: GenericTextModel
 ) => {
-  console.log("in service", question);
   try {
     const { generalText, generalRegex, id, imageUrl, ...otherProps } = question;
 
@@ -128,6 +126,95 @@ export const duplicateGenericTextService = async (
     }
 
     return newGenericText;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const editGenericTextService = async (
+  newQuestion: NewQuestion,
+  genericTextId: number
+) => {
+  try {
+    const {
+      type,
+      minLength,
+      maxLength,
+      regex,
+      regexErrorMessage,
+      regexPlaceHolder,
+    } = newQuestion;
+
+    // Prepare the generic object for the GenericText model
+    const generic = {
+      surveyId: newQuestion.surveyId,
+      label: newQuestion.label,
+      description: newQuestion.description || undefined, // Ensure description is null if not provided
+      answerFormat: type,
+      imageUrl: newQuestion.imageUrl || undefined, // Ensure imageUrl is null if not provided
+      required: newQuestion.isRequired,
+      hideQuestionNumber: newQuestion.hideQuestionNumber,
+    };
+
+    // Update the generic text entry
+    await GenericText.update(generic, {
+      where: { id: genericTextId },
+    });
+
+    // Clear previous regex data associated with the question
+    await GeneralRegex.destroy({
+      where: { questionId: genericTextId },
+    });
+
+    // Conditional updates based on type
+    if (
+      type === "text" &&
+      (minLength !== undefined || maxLength !== undefined)
+    ) {
+      const generalText = {
+        questionId: genericTextId,
+        min: minLength!,
+        max: maxLength!,
+      };
+      await GeneralText.create({ ...generalText });
+    } else if (type === "regex" && regex) {
+      const generalRegex = {
+        questionId: genericTextId,
+        regex,
+        regexErrorMessage: regexErrorMessage!,
+        regexPlaceHolder: regexPlaceHolder || undefined,
+      };
+      await GeneralRegex.create({ ...generalRegex });
+
+      // Clear previous general text if regex is being updated
+      await GeneralText.destroy({
+        where: { questionId: genericTextId },
+      });
+    }
+
+    // Fetch the updated question along with its related models
+    const question = await GenericText.findByPk(genericTextId, {
+      include: [
+        {
+          model: GeneralText,
+          as: "generalText",
+        },
+        {
+          model: GeneralRegex,
+          as: "generalRegex",
+        },
+      ],
+    });
+
+    const plainGenericText = question!.get({ plain: true });
+
+    const fullQuestion = {
+      ...plainGenericText,
+      generalText: plainGenericText.generalText || undefined, // Keep generalText if it exists
+      generalRegex: plainGenericText.generalRegex || undefined, // Keep generalRegex if it exists
+    };
+
+    return fullQuestion;
   } catch (error) {
     throw error;
   }

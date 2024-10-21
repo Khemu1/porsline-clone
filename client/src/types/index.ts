@@ -107,6 +107,7 @@ export interface InputSwitchFieldProps {
 }
 
 export interface FileUploaderProps {
+  filePath?: string;
   file: File | null | undefined;
   setFile: (file: File | null) => void;
   title: string;
@@ -192,8 +193,11 @@ export interface DefaultEndingModel {
   defaultEnding?: boolean;
   reloadOrRedirect?: boolean;
   buttonText?: string;
-  redirectToWhat?: string;
-  anotherLinkText?: string;
+  redirectToWhat?:
+    | "Results Link"
+    | "Another Link"
+    | "Survey Link (Reaload the Survey)";
+  anotherLink?: string;
   autoReload?: boolean;
   reloadTimeInSeconds?: number;
   createdAt: Date;

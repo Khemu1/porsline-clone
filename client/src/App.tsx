@@ -20,7 +20,10 @@ function App() {
         {/* Private Routes */}
         <Route element={<PrivateLayout />}>
           <Route path="/" element={<Home />} />
-          <Route path="/survey/:workspaceId/:surveyId/build" element={<SurveyBuilder />} />
+          <Route
+            path="/survey/:workspaceId/:surveyId/*"
+            element={<SurveyBuilder />}
+          />
         </Route>
 
         {/* Catch-All Route */}

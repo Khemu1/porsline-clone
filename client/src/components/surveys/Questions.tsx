@@ -2,16 +2,17 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLanguage } from "../lang/LanguageProvider";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   useDeleteQuestion,
   useDuplicateQuestion,
 } from "../../hooks/genericQuestion";
 import { transformDataIntoFormData } from "../../utils";
+import EditGenericTextQuestion from "../Dialog/survey/edit/question/EditGenericTextQuestion";
+import { GenericTextModel } from "../../types";
+import { findGenericTextIndex } from "../../store/slices/questionsSlice";
 
-const Questions: React.FC<{
-  setOpenTextPage: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ setOpenTextPage }) => {
+const Questions: React.FC = () => {
   const currentQuestions = useSelector(
     (state: RootState) => state.genericTexts
   );
@@ -23,9 +24,15 @@ const Questions: React.FC<{
   const { handleDuplicateQuestion } = useDuplicateQuestion();
 
   const [menuOpen, setMenuOpen] = useState<Record<number, boolean>>({});
-
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
+
+  const location = useLocation();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentQuestion, setCurrentQuestion] =
+    useState<GenericTextModel | null>(null);
+
+  const navigate = useNavigate();
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (
@@ -81,74 +88,118 @@ const Questions: React.FC<{
     }
   };
 
+  const onClose = () => {
+    console.log("onClose");
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.delete("type");
+    searchParams.delete("id");
+
+    console.log(searchParams.toString());
+    navigate({
+      pathname: location.pathname,
+      search: searchParams.toString(),
+    });
+
+    setIsDialogOpen(false);
+    setCurrentQuestion(null);
+  };
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const type = searchParams.get("type");
+    const id = searchParams.get("id");
+
+    if (type === "question" && id) {
+      const questionToEdit = currentQuestions.find((q) => q.id === Number(id));
+      if (questionToEdit) {
+        setCurrentQuestion(questionToEdit);
+        setIsDialogOpen(true);
+      }
+    }
+  }, [location, currentQuestions]);
+
   return (
-    <div className="flex flex-col gap-2 w-full justify-between items-center">
-      {currentQuestions?.map((question, index) => (
-        <div
-          key={question.id + Date.now() * Math.round(Math.random() * 100)}
-          className="relative flex w-full items-center transition-all hover:bg-[#303033] hover:text-white rounded-lg py-1 px-3"
-          onClick={() => setOpenTextPage(true)}
-        >
-          <div className="flex justify-start items-center gap-2 w-full cursor-pointer">
-            <div className="flex survey_builder_icon">
-              <div className="">
-                <img
-                  src="/assets/icons/text.svg"
-                  alt="question"
-                  className="w-[30px]"
-                />
-              </div>
-              {!question?.hideQuestionNumber && <span>{index + 1}</span>}
-            </div>
-            <p
-              className="text-white font-semibold"
-              dangerouslySetInnerHTML={{
-                __html: question?.label ?? "",
-              }}
-            />
-          </div>
-          <button
-            className="flex justify-center items-center border w-[50px] h-[30px] border-[#85808025] rounded-lg"
-            onClick={(e: React.MouseEvent) => {
-              e.stopPropagation();
-              toggleMenu(question.id);
-            }}
-            ref={toggleButtonRef}
+    <>
+      <div className="flex flex-col gap-2 w-full justify-between items-center">
+        {currentQuestions?.map((question, index) => (
+          <div
+            onClick={() =>
+              navigate(
+                `/survey/${workspaceId}/${surveyId}/edit?type=question&id=${question.id}`
+              )
+            }
+            key={question.id + Date.now() * Math.round(Math.random() * 100)}
+            className="relative flex w-full items-center transition-all hover:bg-[#303033] hover:text-white rounded-lg py-1 px-3"
           >
-            <img
-              src="/assets/icons/dots.svg"
-              alt="menu"
-              className="w-[50px] h-[30px]"
-            />
-          </button>
-          {menuOpen[question.id] && (
-            <div
-              ref={menuRef}
-              className="flex flex-col text-left right-0 text-sm absolute top-10 bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
-            >
-              <span
-                className="survey_card_buttons"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  handleDuplicate(question.id);
+            <div className="flex justify-start items-center gap-2 w-full cursor-pointer">
+              <div className="flex survey_builder_icon">
+                <div className="">
+                  <img
+                    src="/assets/icons/text.svg"
+                    alt="question"
+                    className="w-[30px]"
+                  />
+                </div>
+                {!question?.hideQuestionNumber && <span>{index + 1}</span>}
+              </div>
+              <p
+                className="text-white font-semibold"
+                dangerouslySetInnerHTML={{
+                  __html: question?.label ?? "",
                 }}
-              >
-                {t("duplicate")}
-              </span>
-              <span
-                className="survey_card_buttons text-red-600"
-                onClick={(e: React.MouseEvent) => {
-                  e.stopPropagation();
-                  handleDelete(question.id);
-                }}
-              >
-                {t("delete")}
-              </span>
+              />
             </div>
-          )}
-        </div>
-      ))}
-    </div>
+            <button
+              className="flex justify-center items-center border w-[50px] h-[30px] border-[#85808025] rounded-lg"
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                toggleMenu(question.id);
+              }}
+              ref={toggleButtonRef}
+            >
+              <img
+                src="/assets/icons/dots.svg"
+                alt="menu"
+                className="w-[50px] h-[30px]"
+              />
+            </button>
+            {menuOpen[question.id] && (
+              <div
+                ref={menuRef}
+                className="flex flex-col text-left right-0 text-sm absolute top-10 bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
+              >
+                <span
+                  className="survey_card_buttons"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    handleDuplicate(question.id);
+                  }}
+                >
+                  {t("duplicate")}
+                </span>
+                <span
+                  className="survey_card_buttons text-red-600"
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    handleDelete(question.id);
+                  }}
+                >
+                  {t("delete")}
+                </span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      {isDialogOpen && currentQuestion && (
+        <EditGenericTextQuestion
+          index={findGenericTextIndex(currentQuestions, currentQuestion.id)}
+          question={currentQuestion}
+          isOpen={isDialogOpen}
+          onClose={onClose}
+        />
+      )}
+    </>
   );
 };
 

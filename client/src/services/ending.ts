@@ -131,3 +131,47 @@ export const duplicateEnding = async (
     throw error;
   }
 };
+
+export const editEnding = async (
+  endingId: number,
+  ending: FormData,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+) => {
+  try {
+    const response = await fetch(`/api/ending/edit/${endingId}`, {
+      method: "PUT",
+      headers: {
+        "Accept-Language": currentLang,
+      },
+      body: ending,
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "getSurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

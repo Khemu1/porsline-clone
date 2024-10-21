@@ -1,5 +1,6 @@
 // sharedFormSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DefaultEndingModel, GenericTextModel, WelcomePartModel } from "../../types";
 
 interface SharedFormState {
   label: string;
@@ -70,17 +71,28 @@ const sharedFormSlice = createSlice({
     setDefaultEnding: (state, action: PayloadAction<boolean>) => {
       state.defaultEnding = action.payload;
     },
-    clearSharedFormFields: (state) => {
-      state.label = "";
-      state.description = "";
-      state.isSubmitting = false;
-      state.fileImage = null;
-      state.isRequired = false;
-      state.hideQuestionNumber = false;
-      state.isImageUploadEnabled = false;
-      state.isDescriptionEnabled = false;
-      state.previewImageUrl = undefined;
-      state.defaultEnding = false;
+    resetSharedFormSliceFields: () => {
+      return {
+        ...initialState,
+      };
+    },
+    modifySharedFormSliceFields: (
+      state,
+      action: PayloadAction<Partial<WelcomePartModel|GenericTextModel|DefaultEndingModel>>
+    ) => {
+      return {
+        ...state,
+        isImageUploadEnabled: action.payload.imageUrl
+          ? true
+          : initialState.isImageUploadEnabled,
+        isDescriptionEnabled: action.payload.description
+          ? true
+          : initialState.isDescriptionEnabled,
+        label: action.payload.label || initialState.label,
+        description: action.payload.description || initialState.description,
+        previewImageUrl:
+          action.payload.imageUrl || initialState.previewImageUrl,
+      };
     },
   },
 });
@@ -94,7 +106,8 @@ export const {
   setIsDescriptionEnabled,
   setPreviewImageUrl,
   setDefaultEnding,
-  clearSharedFormFields,
+  resetSharedFormSliceFields,
+  modifySharedFormSliceFields,
 } = sharedFormSlice.actions;
 
 export default sharedFormSlice.reducer;

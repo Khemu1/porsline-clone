@@ -13,9 +13,22 @@ import welcomePartRouter from "./routes/welcomePartRouter";
 import multer from "multer";
 import genericTextRouter from "./routes/genericTextRouter";
 import endingsRouter from "./routes/endingsRouter";
+import cors from "cors";
+import path from "path";
+import dotenv from "dotenv";
 const app = express();
 const upload = multer();
 
+dotenv.config();
+const __dirname = path.resolve();
+
+const corsOptions = {
+  origin: process.env.VITE_ADDRESS,
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use(cookieParser());
 app.use(express.json());
 app.use(morgan("dev"));

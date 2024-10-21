@@ -5,12 +5,14 @@ import {
   checkGroupMembership,
   checkSurveyExists,
   checkWorkspaceExists,
+  validateEditQuestion,
   validateNewQuestion,
 } from "../middlewares/genericTextMiddleware";
 import {
   addGenericQuestion,
   deleteGenericQuestion,
   duplicateGenericText,
+  editGenericText,
   getGenericQuestion,
 } from "../controllers/genericTextController";
 
@@ -53,6 +55,16 @@ genericTextRouter.post(
   checkSurveyExists,
   checkGenericTextExists,
   duplicateGenericText
+);
+
+genericTextRouter.put(
+  "/edit/:questionId",
+  authUser,
+  checkWorkspaceExists,
+  checkGroupMembership,
+  checkSurveyExists,
+  validateEditQuestion,
+  editGenericText,
 );
 
 export default genericTextRouter;

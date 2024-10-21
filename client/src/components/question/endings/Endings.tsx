@@ -13,10 +13,7 @@ import {
   customEndingSchema,
   defaultEndingSchema,
 } from "../../../utils/endings";
-import {
-  clearEndingsFieldsForSwitch,
-  transformDataIntoFormData,
-} from "../../../utils";
+import { clearSlices, transformDataIntoFormData } from "../../../utils";
 import { useParams } from "react-router-dom";
 import { useAddEnding } from "../../../hooks/ending";
 
@@ -47,7 +44,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
     previewImageUrl,
     shareSurvey,
     defaultEnding,
-    ReloadOrDirectButton,
+    reloadOrRedirect,
     buttonText,
     anotherLink,
     autoReload,
@@ -63,7 +60,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
     previewImageUrl: state.sharedForm.previewImageUrl,
     shareSurvey: state.defaultEnding.shareSurvey,
     defaultEnding: state.sharedForm.defaultEnding,
-    ReloadOrDirectButton: state.defaultEnding.ReloadOrDirectButton,
+    reloadOrRedirect: state.defaultEnding.reloadOrRedirect,
     buttonText: state.defaultEnding.buttonText,
     autoReload: state.defaultEnding.autoReload,
     reloadTimeInSeconds: state.defaultEnding.reloadTimeInSeconds,
@@ -84,15 +81,15 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
           ...(isImageUploadEnabled && { imageUrl: previewImageUrl }),
           ...(shareSurvey && { shareSurvey }),
           ...(buttonText.trim().length !== 0 && { buttonText }),
-          ...(ReloadOrDirectButton &&
+          ...(reloadOrRedirect &&
             redirectToWhat.toLowerCase() === "Another Link".toLowerCase() &&
             anotherLink?.trim().length !== 0 && {
               anotherLink,
             }),
           ...(autoReload && reloadTimeInSeconds && { reloadTimeInSeconds }),
-          ...(ReloadOrDirectButton && { ReloadOrDirectButton }),
+          ...(reloadOrRedirect && { reloadOrRedirect }),
           ...(autoReload && { autoReload }),
-          ...(ReloadOrDirectButton &&
+          ...(reloadOrRedirect &&
             redirectToWhat?.trim().length !== 0 && {
               redirectToWhat,
             }),
@@ -103,7 +100,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
           isImageUploadEnabled,
           shareSurvey,
           defaultEnding,
-          ReloadOrDirectButton,
+          reloadOrRedirect,
           autoReload
         );
 
@@ -112,7 +109,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
           isImageUploadEnabled,
           shareSurvey,
           defaultEnding,
-          ReloadOrDirectButton,
+          reloadOrRedirect,
           autoReload,
         };
 
@@ -170,6 +167,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
     if (isSuccess) {
       onClose();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
   return (
@@ -206,7 +204,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                     }`}
                     onClick={() => {
                       setActive("default");
-                      clearEndingsFieldsForSwitch(dispatch);
+                      clearSlices(dispatch);
                     }}
                   >
                     End Page
@@ -218,7 +216,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                     }`}
                     onClick={() => {
                       setActive("custom");
-                      clearEndingsFieldsForSwitch(dispatch);
+                      clearSlices(dispatch);
                     }}
                   >
                     Redirect to URL
@@ -259,8 +257,8 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                 imageUrl={isImageUploadEnabled ? previewImageUrl : undefined}
                 label={isLabelEnabled ? label : undefined}
                 description={isDescriptionEnabled ? description : undefined}
-                buttonText={ReloadOrDirectButton ? buttonText : undefined}
-                reloadOrRedirectButton={ReloadOrDirectButton}
+                buttonText={reloadOrRedirect ? buttonText : undefined}
+                reloadOrRedirectButton={reloadOrRedirect}
                 autoReload={autoReload}
                 reloadTimeInSeconds={reloadTimeInSeconds}
                 shareSurvey={shareSurvey}

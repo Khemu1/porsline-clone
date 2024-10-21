@@ -4,6 +4,7 @@ import WorkSpace from "../db/models/WorkSpace";
 import Survey from "../db/models/Survey";
 import UserGroup from "../db/models/UserGroup";
 import {
+  editQuestion,
   GenericTextModel,
   NewQuestion,
   NewQuestionOptions,
@@ -13,10 +14,14 @@ import { validateWithSchema } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
 import {
   makeImage,
+  processEditQuestionData,
   processNewQuestionOptions,
   processQuestionData,
 } from "../utils";
-import { genericTextSchema } from "../utils/validations/genericText";
+import {
+  editGenericTextSchema,
+  genericTextSchema,
+} from "../utils/validations/genericText";
 import GenericText from "../db/models/GenericText";
 import GeneralRegex from "../db/models/GeneralRegex";
 import GeneralText from "../db/models/GeneralText";
@@ -192,10 +197,63 @@ export const validateNewQuestion = async (
   }
 };
 
-/**
- * you will be given an id
- * check for that question , add it to the response locals
- */
+export const validateEditQuestion = async (
+  req: Request<
+    { questionId: string },
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      newQuestion: NewQuestion;
+      options: NewQuestionOptions;
+      currentEndingType: "default" | "custom";
+    }
+  >,
+  res: Response<
+    {},
+    {
+      newQuestion: editQuestion;
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const data = processEditQuestionData(req.body);
+    const options = processNewQuestionOptions(req.body);
+    const schema = editGenericTextSchema(options);
+    schema.parse(data);
+    res.locals.newQuestion = { ...data };
+    if (
+      data.imageUrl !== null &&
+      data.imageUrl !== undefined &&
+      typeof data.imageUrl === "string" &&
+      !data.imageUrl.includes("\\uploads\\")
+    ) {
+      const imageUrl = makeImage(data.imageUrl);
+      res.locals.newQuestion = { ...data, imageUrl };
+    }
+    next();
+  } catch (error) {
+    const { headers } = req;
+    const currentLang = headers["accept-language"] as "en" | "de";
+    if (error instanceof ZodError) {
+      next(
+        new CustomError(
+          "validation Error",
+          400,
+          true,
+          "`validationError`",
+          "",
+          validateWithSchema(error, currentLang)
+        )
+      );
+    }
+    next(error);
+  }
+};
 
 export const checkGenericTextExists = async (
   req: Request<

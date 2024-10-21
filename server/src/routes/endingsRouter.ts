@@ -3,12 +3,14 @@ import {
   addEnding,
   deleteEnding,
   duplicateEnding,
+  editEnding,
 } from "../controllers/endingController";
 import {
   checkEndingExists,
   checkGroupMembership,
   checkSurveyExists,
   checkWorkspaceExists,
+  validateEditEnding,
   validateNewEnding,
 } from "../middlewares/endingMiddleware";
 import { authUser } from "../middlewares/authMiddleware";
@@ -31,7 +33,6 @@ endingsRouter.delete(
   checkWorkspaceExists,
   checkGroupMembership,
   checkSurveyExists,
-  checkEndingExists,
   deleteEnding
 );
 
@@ -43,6 +44,16 @@ endingsRouter.post(
   checkSurveyExists,
   checkEndingExists,
   duplicateEnding
+);
+
+endingsRouter.put(
+  "/edit/:endingId",
+  authUser,
+  checkWorkspaceExists,
+  checkGroupMembership,
+  checkSurveyExists,
+  validateEditEnding,
+  editEnding
 );
 
 export default endingsRouter;

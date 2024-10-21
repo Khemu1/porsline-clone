@@ -19,7 +19,7 @@ export const addWelcomePartService = async (data: NewWelcomePart) => {
     const welcomePart = await WelcomePart.create({
       ...data,
     });
-    return welcomePart.get() as WelcomePartModel;
+    return welcomePart.get({ plain: true }) as WelcomePartModel;
   } catch (error) {
     throw error;
   }
@@ -52,6 +52,27 @@ export const duplicateWelcomePartService = async (
     }
     await WelcomePart.create(duped);
     return duped;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const editWelcomePartService = async (
+  welcomePart: NewWelcomePart,
+  welcomepartId: number
+) => {
+  try {
+    await WelcomePart.update(
+      {
+        ...welcomePart,
+      },
+      {
+        where: {
+          id: welcomepartId,
+        },
+      }
+    );
+    return await WelcomePart.findByPk(welcomepartId);
   } catch (error) {
     throw error;
   }

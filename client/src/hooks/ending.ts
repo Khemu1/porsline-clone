@@ -4,8 +4,13 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CustomError } from "../utils/CustomError";
 import { translations } from "../components/lang/translations";
-import { addNewEndingF, deleteEndingF } from "../utils";
-import { addEnding, deleteEnding, duplicateEnding } from "../services/ending";
+import { addNewEndingF, deleteEndingF, editEndingF } from "../utils";
+import {
+  addEnding,
+  deleteEnding,
+  duplicateEnding,
+  editEnding,
+} from "../services/ending";
 
 export const useAddEnding = () => {
   const dispatch = useDispatch();
@@ -208,6 +213,82 @@ export const useDuplicateEnding = () => {
 
   return {
     handleDuplicateEnding,
+    isError,
+    isSuccess,
+    errorState,
+    isPending,
+  };
+};
+
+export const useEditEnding = () => {
+  const dispatch = useDispatch();
+
+  const [errorState, setErrorState] = useState<Record<
+    string,
+    string | undefined
+  > | null>(null);
+
+  const mutation = useMutation<
+    {
+      ending: DefaultEndingModel | CustomEndingModel;
+      prevType: "custom" | "default";
+      prevId: number;
+    },
+    CustomError | unknown,
+    {
+      endingId: number;
+      endingData: FormData;
+      getCurrentLanguageTranslations: () => (typeof translations)["en"];
+      currentLang: "en" | "de";
+    }
+  >({
+    mutationFn: async ({
+      endingId,
+      endingData,
+      getCurrentLanguageTranslations,
+      currentLang,
+    }) => {
+      const response = await editEnding(
+        endingId,
+        endingData,
+        getCurrentLanguageTranslations,
+        currentLang
+      );
+      return response;
+    },
+    onSuccess: async (data: {
+      ending: CustomEndingModel | DefaultEndingModel;
+      prevType: "custom" | "default";
+      prevId: number;
+    }) => {
+      await editEndingF(
+        data.ending,
+        data.prevType,
+        data.prevId,
+        dispatch,
+        data.ending.defaultEnding
+      );
+      console.log("edited");
+    },
+    onError: (err: CustomError | unknown) => {
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+      setErrorState(message);
+      console.error("Error creating new survey:", err);
+    },
+  });
+
+  const {
+    mutateAsync: handleEditEnding,
+    isError,
+    isSuccess,
+    isPending,
+  } = mutation;
+
+  return {
+    handleEditEnding,
     isError,
     isSuccess,
     errorState,

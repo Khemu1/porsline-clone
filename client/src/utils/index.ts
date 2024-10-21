@@ -16,13 +16,14 @@ import { setSurveys } from "../store/slices/surveySlice";
 import { setWorkspaces } from "../store/slices/workspaceSlice";
 import { setCurrentWorkspace } from "../store/slices/currentWorkspaceSlice";
 import { TranslationKeys } from "./genericText";
-import { clearDefaultEndingFields } from "../store/slices/defaultEnding";
-import { clearSharedFormFields } from "../store/slices/sharedFormSlice";
-import { clearRedirectEndingFields } from "../store/slices/redirectEnding";
-import { resetWelcomePart, updateWelcomePart } from "../store/slices/welcomePartSlice";
+import {
+  resetWelcomePart,
+  updateWelcomePart,
+} from "../store/slices/welcomePartSlice";
 import {
   addGenericText,
   removeGenericText,
+  updateGenericText,
 } from "../store/slices/questionsSlice";
 import {
   addCustomEnding,
@@ -30,7 +31,14 @@ import {
   deleteCustomEnding,
   deleteDefaultEnding,
   setDefaultEnding,
+  updateCustomEnding,
+  updateDefaultEnding,
 } from "../store/slices/endingsSlice";
+import { resetDefaultEndingSliceFields } from "../store/slices/defaultEnding";
+import { resetWelcomePartSliceFields } from "../store/slices/welcomePageSlice";
+import { resetRedirectEndingSliceFields } from "../store/slices/redirectEnding";
+import { resetGenericTextSliceFields } from "../store/slices/genericTextSlice";
+import { resetSharedFormSliceFields } from "../store/slices/sharedFormSlice";
 
 export const mapSurveyErrorsTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, errors]) => {
@@ -356,6 +364,17 @@ export const addNewQuestionF = async (
   }
 };
 
+export const editQuestionF = async (
+  newQuestion: GenericTextModel,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(updateGenericText(newQuestion));
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
 export const removeQuestionF = async (
   questionId: number,
   dispatch: Dispatch<UnknownAction>
@@ -374,7 +393,6 @@ export const addNewEndingF = async (
   defaultEnding?: boolean
 ) => {
   try {
-    console.log(defaultEnding);
     if (type === "custom") {
       dispatch(addCustomEnding(ending as CustomEndingModel));
     } else {
@@ -382,6 +400,39 @@ export const addNewEndingF = async (
     }
     if (defaultEnding) {
       dispatch(setDefaultEnding({ id: ending.id, type }));
+    }
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+  }
+};
+
+export const editEndingF = async (
+  ending: CustomEndingModel | DefaultEndingModel,
+  prevType: "custom" | "default",
+  prevId: number,
+  dispatch: Dispatch<UnknownAction>,
+  defaultEnding?: boolean
+) => {
+  try {
+    console.log("in edit ", ending.type, prevType, prevId);
+    const currentEndingType = ending.type;
+    if (prevType !== currentEndingType) {
+      if (prevType === "custom") {
+        dispatch(deleteCustomEnding(prevId));
+        dispatch(addDefaultEnding(ending as DefaultEndingModel));
+      } else {
+        dispatch(deleteDefaultEnding(prevId));
+        dispatch(addCustomEnding(ending as CustomEndingModel));
+      }
+    } else {
+      if (currentEndingType === "custom") {
+        dispatch(updateCustomEnding(ending as CustomEndingModel));
+      } else {
+        dispatch(updateDefaultEnding(ending as DefaultEndingModel));
+      }
+    }
+    if (defaultEnding) {
+      dispatch(setDefaultEnding({ id: ending.id, type: currentEndingType }));
     }
   } catch (error) {
     console.error("Error deleting survey:", error);
@@ -544,10 +595,12 @@ export function formatTime(seconds: number) {
   return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-export function clearEndingsFieldsForSwitch(dispatch: Dispatch) {
-  dispatch(clearDefaultEndingFields());
-  dispatch(clearSharedFormFields());
-  dispatch(clearRedirectEndingFields());
+export function clearSlices(dispatch: Dispatch) {
+  dispatch(resetSharedFormSliceFields());
+  dispatch(resetWelcomePartSliceFields());
+  dispatch(resetDefaultEndingSliceFields());
+  dispatch(resetRedirectEndingSliceFields());
+  dispatch(resetGenericTextSliceFields());
 }
 
 export const addWelcomePartF = async (
@@ -561,9 +614,7 @@ export const addWelcomePartF = async (
   }
 };
 
-export const deleteWelcomePartF = async (
-  dispatch: Dispatch<UnknownAction>
-) => {
+export const deleteWelcomePartF = async (dispatch: Dispatch<UnknownAction>) => {
   try {
     dispatch(resetWelcomePart());
   } catch (error) {
@@ -592,4 +643,15 @@ export const sortEndings = (
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   return sortedEndings;
+};
+
+export const servePath = (path: string | undefined) => {
+  if (path) {
+    const relativePath = path.replace(
+      "H:\\porsline\\server\\",
+      `${import.meta.env.VITE_PROXY_URL}\\`
+    );
+    return relativePath;
+  }
+  return undefined;
 };

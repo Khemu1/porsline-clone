@@ -5,11 +5,13 @@ import {
   checkWorkspaceExists,
   checkGroupMembership,
   validateNewWelcomePart,
+  validateEditWelcomePart,
 } from "../middlewares/welcomePartMiddleware";
 import {
   addWelcomePart,
   deleteWelcomePart,
   duplicateWelcomePart,
+  editWelcomePart,
 } from "../controllers/welcomePartController";
 
 const welcomePartRouter = Router();
@@ -44,13 +46,14 @@ welcomePartRouter.delete(
   deleteWelcomePart
 );
 
-// welcomePartRouter.post(
-//   "/duplicate",
-//   authUser,
-//   checkWorkspaceExists,
-//   checkGroupMembership,
-//   checkSurveyExists,
-//   checkWorkspaceExists,
-// );
+welcomePartRouter.post(
+  "/edit/:welcomeId",
+  authUser,
+  checkWorkspaceExists,
+  checkGroupMembership,
+  checkSurveyExists,
+  validateEditWelcomePart,
+  editWelcomePart,
+);
 
 export default welcomePartRouter;

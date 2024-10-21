@@ -21,7 +21,7 @@ import {
   setAutoReload,
   setButtonText,
   setRedirectToWhat,
-  setReloadOrDirectButton,
+  setReloadOrRedirect,
   setReloadTimeInSeconds,
   setShareSurvey,
 } from "../../../store/slices/defaultEnding";
@@ -56,7 +56,7 @@ const DefaultEnding: React.FC<{
     isDescriptionEnabled,
     shareSurvey,
     defaultEnding,
-    ReloadOrDirectButton,
+    reloadOrRedirect,
     buttonText,
     autoReload,
     reloadTimeInSeconds,
@@ -70,7 +70,7 @@ const DefaultEnding: React.FC<{
     isDescriptionEnabled: state.sharedForm.isDescriptionEnabled,
     shareSurvey: state.defaultEnding.shareSurvey,
     defaultEnding: state.sharedForm.defaultEnding,
-    ReloadOrDirectButton: state.defaultEnding.ReloadOrDirectButton,
+    reloadOrRedirect: state.defaultEnding.reloadOrRedirect,
     buttonText: state.defaultEnding.buttonText,
     autoReload: state.defaultEnding.autoReload,
     reloadTimeInSeconds: state.defaultEnding.reloadTimeInSeconds,
@@ -86,7 +86,7 @@ const DefaultEnding: React.FC<{
         | "description"
         | "imageUpload"
         | "defaultEnding"
-        | "ReloadOrDirectButton"
+        | "reloadOrRedirect"
         | "autoReload"
     ) =>
     (enabled: boolean) => {
@@ -98,8 +98,8 @@ const DefaultEnding: React.FC<{
         dispatch(setIsImageUploadEnabled(enabled));
       } else if (field === "defaultEnding") {
         dispatch(setDefaultEnding(enabled));
-      } else if (field === "ReloadOrDirectButton") {
-        dispatch(setReloadOrDirectButton(enabled));
+      } else if (field === "reloadOrRedirect") {
+        dispatch(setReloadOrRedirect(enabled));
         setSelected(options[0].name);
       } else if (field === "autoReload") {
         dispatch(setAutoReload(enabled));
@@ -165,11 +165,11 @@ const DefaultEnding: React.FC<{
       />
       <div className="flex flex-col gap-2  pb-8">
         <InputSwitchField
-          label={t("ReloadOrDirectButton")}
+          label={t("reloadOrRedirect")}
           value={buttonText}
           onChange={(e) => dispatch(setButtonText(e.target.value))}
-          switchChecked={ReloadOrDirectButton}
-          onSwitchChange={handleSwitchChange("ReloadOrDirectButton")}
+          switchChecked={reloadOrRedirect}
+          onSwitchChange={handleSwitchChange("reloadOrRedirect")}
           placeholder={t("buttonText")}
           required={false}
           hasSwitch={true}
@@ -177,12 +177,17 @@ const DefaultEnding: React.FC<{
           border={false}
           errorMessage={validationErrors?.buttonText}
         />
-        {ReloadOrDirectButton && (
+        {reloadOrRedirect && (
           <div className="flex flex-col justify-between gap-2 px-4  main_text  flex-wrap">
             <span className="main_text">Redirect To</span>
             <Listbox
               value={selected}
-              onChange={(value: "results" | "reload" | "anotherLink") => {
+              onChange={(
+                value:
+                  | "Results Link"
+                  | "Another Link"
+                  | "Survey Link (Reaload the Survey)"
+              ) => {
                 setSelected(value);
                 dispatch(setRedirectToWhat(value));
                 if (
@@ -228,7 +233,7 @@ const DefaultEnding: React.FC<{
           </div>
         )}
         {selected.toLowerCase() === "Another Link".toLowerCase() &&
-          ReloadOrDirectButton && (
+          reloadOrRedirect && (
             <EnterRedirectLink
               label={t("enterLink")}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>

@@ -9,6 +9,9 @@ export const workspaceErrorsTranslations = {
     workspaceTitleRequired: "workspace title is required.",
     workspaceTitleTooLong: "workspace title is too long.",
     titleExists: "A workspace with this title already exists.",
+    labelShouldBeDifferent: "Label should be different.",
+    buttonTextShouldBeDifferent: "Button text should be different.",
+    descriptionShouldBeDifferent: "Description should be different.",
   },
   de: {
     invalidWorkspaceId: "Ungültige Arbeitsbereichs-ID.",
@@ -20,5 +23,8 @@ export const workspaceErrorsTranslations = {
     workspaceTitleRequired: "Arbeitsbereichs ist erforderlich.",
     workspaceTitleTooLong: "Arbeitsbereichs ist zu lang.",
     titleExists: "Eine Arbeitsbereichs mit diesem Titel existiert bereits.",
+    labelShouldBeDifferent: "Label sollten sich unterscheiden.",
+    buttonTextShouldBeDifferent: "Button text sollten sich unterscheiden.",
+    descriptionShouldBeDifferent: "Description sollten sich unterscheiden.",
   },
 };

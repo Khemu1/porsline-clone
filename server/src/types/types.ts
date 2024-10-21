@@ -142,7 +142,7 @@ export interface WelcomePartModel {
 export interface NewWelcomePart {
   surveyId: number;
   label?: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   description?: string;
   buttonText?: string;
 }
@@ -200,6 +200,21 @@ export interface NewQuestion {
   regexPlaceHolder?: string;
   regexErrorMessage?: string;
   hideQuestionNumber?: boolean;
+}
+
+export interface editQuestion {
+  surveyId: number;
+  type: "text" | "regex";
+  label: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  minLength?: number | null;
+  maxLength?: number | null;
+  isRequired?: boolean | null;
+  regex?: string | null;
+  regexPlaceHolder?: string | null;
+  regexErrorMessage?: string | null;
+  hideQuestionNumber?: boolean | null;
 }
 
 export interface NewQuestionOptions {
@@ -271,11 +286,27 @@ export interface NewDefaultEnding {
   reloadTimeInSeconds?: number;
 }
 
+export interface EditDefaultEnding {
+  surveyId: number;
+  label: string;
+  description?: string | null;
+  type: "default" | "custom";
+  shareSurvey?: boolean;
+  imageUrl?: string | null;
+  defaultEnding?: boolean;
+  reloadOrRedirect?: boolean;
+  buttonText?: string | null;
+  redirectToWhat?: string | null;
+  anotherLink?: string | null;
+  autoReload?: boolean;
+  reloadTimeInSeconds?: number | null;
+}
+
 export interface DefaultEndingOptions {
   isDescriptionEnabled: boolean;
   isImageUploadEnabled: boolean;
   shareSurvey: boolean;
   defaultEnding: boolean;
-  reloadOrRedirectButton: boolean;
+  reloadOrRedirect: boolean;
   autoReload: boolean;
 }

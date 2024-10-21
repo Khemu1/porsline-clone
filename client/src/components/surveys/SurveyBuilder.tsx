@@ -103,7 +103,7 @@ const SurveyBuilder = () => {
       <section className="">
         <div className="flex flex-col gap-28 mb-5 relative w-full">
           <WelcomePart setOpenWelcomePage={setOpenWelcomePage} />
-          <Questions setOpenTextPage={setOpenTextPage} />
+          <Questions />
 
           {endingsState.customEndings || endingsState.defaultEndings ? (
             <EndingsContainer setOpenEndingsPage={setOpenEndingsPage} />
@@ -111,8 +111,7 @@ const SurveyBuilder = () => {
             <div className="w-full">
               <div
                 className="welcome_page_style"
-                  onClick={() => setOpenEndingsPage(true)}
-                  
+                onClick={() => setOpenEndingsPage(true)}
               >
                 <img
                   src="/assets/icons/plus.svg"

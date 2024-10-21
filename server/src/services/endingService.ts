@@ -6,6 +6,7 @@ import {
   NewDefaultEnding,
 } from "../types/types";
 import CustomEnding from "../db/models/CustomEnding";
+import e from "express";
 
 export const addEndingService = async (
   endingData: NewDefaultEnding | NewCustomEnding,
@@ -107,5 +108,60 @@ export const duplicateEndingService = async (
     }
   } catch (error) {
     throw error;
+  }
+};
+
+export const editEndingService = async (
+  ending: DefaultEndingModel | CustomEndingModel,
+  endingId: number,
+  currentEndingType: "default" | "custom"
+) => {
+  try {
+    if (ending.defaultEnding) {
+      await Promise.all([
+        CustomEnding.update(
+          { defaultEnding: false },
+          { where: { defaultEnding: true } }
+        ),
+        DefaultEnding.update(
+          { defaultEnding: false },
+          { where: { defaultEnding: true } }
+        ),
+      ]);
+    }
+
+    let endingType;
+    let updated = false;
+
+    if (currentEndingType !== ending.type) {
+      await Promise.all([
+        CustomEnding.destroy({ where: { id: endingId } }),
+        DefaultEnding.destroy({ where: { id: endingId } }),
+      ]);
+
+      if (ending.type === "custom") {
+        endingType = await CustomEnding.create(ending as CustomEndingModel);
+      } else {
+        endingType = await DefaultEnding.create(ending as DefaultEndingModel);
+      }
+    } else {
+      if (currentEndingType === "custom") {
+        await CustomEnding.update(ending as CustomEndingModel, {
+          where: { id: endingId },
+        });
+        endingType = await CustomEnding.findByPk(endingId);
+      } else {
+        await DefaultEnding.update(ending as DefaultEndingModel, {
+          where: { id: endingId },
+        });
+        endingType = await DefaultEnding.findByPk(endingId);
+      }
+      updated = true;
+    }
+
+    return updated ? endingType : endingType?.get({ plain: true });
+  } catch (error) {
+    console.error("Error editing ending:", error);
+    throw new Error("Failed to edit ending. Please try again.");
   }
 };

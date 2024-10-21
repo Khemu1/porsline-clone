@@ -51,6 +51,33 @@ const genericTextSlice = createSlice({
     setAnswerFormat: (state, action: PayloadAction<string>) => {
       state.answerFormat = action.payload;
     },
+    resetGenericTextSliceFields: () => {
+      return {
+        ...initialState,
+      };
+    },
+    modifyGenericTextSliceFields: (
+      state,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      action: PayloadAction<Partial<any>>
+    ) => {
+      return {
+        ...state,
+        isRequired: action.payload.required ?? initialState.isRequired,
+        hideQuestionNumber:
+          action.payload.hideQuestionNumber ?? initialState.hideQuestionNumber,
+        minLength: action.payload.generalText?.min ?? initialState.minLength,
+        maxLength: action.payload.generalText?.max ?? initialState.maxLength,
+        regex: action.payload.generalRegex?.regex || initialState.regex,
+        regexPlaceHolder:
+          action.payload.generalRegex?.regexPlaceHolder ||
+          initialState.regexPlaceHolder,
+        regexErrorMessage:
+          action.payload.generalRegex?.regexErrorMessage ||
+          initialState.regexErrorMessage,
+        answerFormat: action.payload.answerFormat || initialState.answerFormat,
+      };
+    },
   },
 });
 
@@ -63,6 +90,8 @@ export const {
   setRegexPlaceHolder,
   setRegexErrorMessage,
   setAnswerFormat,
+  resetGenericTextSliceFields,
+  modifyGenericTextSliceFields,
 } = genericTextSlice.actions;
 
 export default genericTextSlice.reducer;

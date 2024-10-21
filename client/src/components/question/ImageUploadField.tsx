@@ -13,6 +13,7 @@ interface ImageUploadFieldProps extends FileUploaderProps {
 const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   file,
   setFile,
+  filePath,
   title,
   label,
   switchChecked,
@@ -40,7 +41,7 @@ const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
 
       {switchChecked && (
         <div className="flex flex-col gap-3">
-          <FileUploader file={file} setFile={setFile} title={title} />
+          <FileUploader file={file} filePath={filePath} setFile={setFile} title={title} />
           {errorMessage && (
             <p className="text-[#ff484f] font-semibold bg-[#4f000a] mt-2 py-1 px-2 rounded-md">
               {errorMessage}

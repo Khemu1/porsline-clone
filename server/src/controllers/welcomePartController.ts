@@ -3,6 +3,7 @@ import {
   addWelcomePartService,
   deleteWelcomePartService,
   duplicateWelcomePartService,
+  editWelcomePartService,
   getWelcomePartService,
 } from "../services/welcomePart";
 import {
@@ -87,6 +88,39 @@ export const duplicateWelcomePart = async (
     const { welcomePart } = res.locals;
     const newWelcomePartData = await duplicateWelcomePartService(welcomePart);
     return res.status(201).json(newWelcomePartData);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editWelcomePart = async (
+  req: Request<
+    { welcomeId: string },
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      welcomeData: NewWelcomePart;
+      options: welcomePartOptions;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      workspaceId: string;
+      welcomePartData: NewWelcomePart;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const { welcomePartData } = res.locals;
+    const { welcomeId } = req.params;
+    const newWelcomePartData = await editWelcomePartService(
+      welcomePartData,
+      +welcomeId
+    );
+    return res.status(200).json(newWelcomePartData!);
   } catch (error) {
     next(error);
   }

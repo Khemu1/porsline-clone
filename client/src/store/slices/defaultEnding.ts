@@ -1,8 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DefaultEndingModel } from "../../types";
 
 interface DefaultEndings {
   shareSurvey: boolean;
-  ReloadOrDirectButton: boolean;
+  reloadOrRedirect: boolean;
   buttonText: string;
   redirectToWhat:
     | "Results Link"
@@ -15,7 +16,7 @@ interface DefaultEndings {
 
 const initialState: DefaultEndings = {
   shareSurvey: false,
-  ReloadOrDirectButton: false,
+  reloadOrRedirect: false,
   buttonText: "",
   autoReload: false,
   reloadTimeInSeconds: 10,
@@ -30,8 +31,8 @@ const defaultEndingSlice = createSlice({
     setShareSurvey: (state, action: PayloadAction<boolean>) => {
       state.shareSurvey = action.payload;
     },
-    setReloadOrDirectButton: (state, action: PayloadAction<boolean>) => {
-      state.ReloadOrDirectButton = action.payload;
+    setReloadOrRedirect: (state, action: PayloadAction<boolean>) => {
+      state.reloadOrRedirect = action.payload;
     },
     setButtonText: (state, action: PayloadAction<string>) => {
       state.buttonText = action.payload;
@@ -54,27 +55,50 @@ const defaultEndingSlice = createSlice({
     setAnotherLink: (state, action: PayloadAction<string>) => {
       state.anotherLink = action.payload;
     },
-    clearDefaultEndingFields: (state) => {
-      state.shareSurvey = false;
-      state.ReloadOrDirectButton = false;
-      state.buttonText = "";
-      state.autoReload = false;
-      state.reloadTimeInSeconds = 10;
-      state.redirectToWhat = "Survey Link (Reaload the Survey)";
-      state.anotherLink = null;
+    resetDefaultEndingSliceFields: () => {
+      return {
+        ...initialState,
+      };
+    },
+    modifyDefaultEndingSliceFields: (
+      state,
+      action: PayloadAction<Partial<DefaultEndingModel>>
+    ) => {
+      return {
+        ...state,
+        shareSurvey: action.payload.shareSurvey ?? initialState.shareSurvey,
+        buttonText: action.payload.buttonText ?? initialState.buttonText,
+        anotherLink: action.payload.anotherLink ?? initialState.anotherLink,
+        autoReload: action.payload.autoReload ?? initialState.autoReload,
+        reloadTimeInSeconds:
+          action.payload.reloadTimeInSeconds ??
+          initialState.reloadTimeInSeconds,
+        redirectToWhat:
+          action.payload.redirectToWhat &&
+          [
+            "Results Link",
+            "Another Link",
+            "Survey Link (Reaload the Survey)",
+          ].includes(action.payload.redirectToWhat)
+            ? action.payload.redirectToWhat
+            : initialState.redirectToWhat,
+        reloadOrRedirect:
+          action.payload.reloadOrRedirect ?? initialState.reloadOrRedirect,
+      };
     },
   },
 });
 
 export const {
   setShareSurvey,
-  setReloadOrDirectButton,
+  setReloadOrRedirect,
   setButtonText,
   setAutoReload,
   setReloadTimeInSeconds,
   setRedirectToWhat,
   setAnotherLink,
-  clearDefaultEndingFields,
+  resetDefaultEndingSliceFields,
+  modifyDefaultEndingSliceFields,
 } = defaultEndingSlice.actions;
 
 export default defaultEndingSlice.reducer;

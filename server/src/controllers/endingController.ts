@@ -1,9 +1,15 @@
 import { Request, Response, NextFunction } from "express";
-import { CustomEndingModel, DefaultEndingModel, NewCustomEnding, NewDefaultEnding } from "../types/types";
+import {
+  CustomEndingModel,
+  DefaultEndingModel,
+  NewCustomEnding,
+  NewDefaultEnding,
+} from "../types/types";
 import {
   addEndingService,
   deleteEndingService,
   duplicateEndingService,
+  editEndingService,
 } from "../services/endingService";
 import DefaultEnding from "../db/models/DefaultEnding";
 import CustomEnding from "../db/models/CustomEnding";
@@ -108,5 +114,47 @@ export const duplicateEnding = async (
 
     const newEnding = await duplicateEndingService(ending, type);
     return res.status(201).json({ ending: newEnding, type });
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editEnding = async (
+  req: Request<
+    { endingId: string; type: "default" | "custom" },
+    {},
+    {
+      workspaceId: string;
+      surveyId: string;
+      type: "default" | "custom";
+      defaultEnding: boolean;
+      currentEndingType: "default" | "custom";
+    }
+  >,
+  res: Response<
+    {},
+    {
+      editEnding: DefaultEndingModel | CustomEndingModel;
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const { editEnding } = res.locals;
+    const { endingId } = req.params;
+    const { currentEndingType } = req.body;
+    const ending = await editEndingService(
+      editEnding,
+      +endingId,
+      currentEndingType
+    );
+    return res
+      .status(200)
+      .json({ ending, prevType: currentEndingType, prevId: +endingId });
+  } catch (error) {
+    next(error);
+  }
 };
