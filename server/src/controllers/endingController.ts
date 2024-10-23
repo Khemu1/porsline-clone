@@ -4,6 +4,7 @@ import {
   DefaultEndingModel,
   NewCustomEnding,
   NewDefaultEnding,
+  UserGroupModel,
 } from "../types/types";
 import {
   addEndingService,
@@ -13,7 +14,8 @@ import {
 } from "../services/endingService";
 import DefaultEnding from "../db/models/DefaultEnding";
 import CustomEnding from "../db/models/CustomEnding";
-import exp from "constants";
+import { userSocketMap } from "../handlers/socketHandler";
+import { io } from "../server";
 
 export const addEnding = async (
   req: Request<
@@ -33,12 +35,13 @@ export const addEnding = async (
       workspaceId: string;
       userId: string;
       groupId: string;
+      groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   try {
-    const { newEnding } = res.locals;
+    const { newEnding, groupMembers } = res.locals;
     const { type } = req.body;
 
     const {
@@ -46,6 +49,18 @@ export const addEnding = async (
       default: defaultEnding,
       type: endingType,
     } = await addEndingService(newEnding, type);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("ENDING_ADDED", {
+          ending,
+          type: endingType,
+          defaultEnding,
+        });
+      }
+    });
+
     return res.status(201).json({ ending, type: endingType, defaultEnding });
   } catch (error) {
     next(error);
@@ -71,14 +86,28 @@ export const deleteEnding = async (
       userId: string;
       groupId: string;
       ending: DefaultEnding | CustomEnding;
+      groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   try {
     const { endingId } = req.params;
-    const { type } = req.body;
+    const { type, surveyId } = req.body;
+    const { groupMembers } = res.locals;
     await deleteEndingService(+endingId, type);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("ENDING_DELETED", {
+          surveyId,
+          endingId,
+          type,
+        });
+      }
+    });
+
     return res.status(200).json({ endingId, type });
   } catch (error) {
     next(error);
@@ -104,15 +133,27 @@ export const duplicateEnding = async (
       userId: string;
       groupId: string;
       ending: DefaultEndingModel | CustomEndingModel;
+      groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   try {
-    const { ending } = res.locals;
+    const { ending, groupMembers } = res.locals;
     const { type } = req.body;
 
     const newEnding = await duplicateEndingService(ending, type);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("ENDING_DUPLICATED", {
+          ending: newEnding,
+          type,
+        });
+      }
+    });
+
     return res.status(201).json({ ending: newEnding, type });
   } catch (error) {
     next(error);
@@ -138,12 +179,13 @@ export const editEnding = async (
       workspaceId: string;
       userId: string;
       groupId: string;
+      groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   try {
-    const { editEnding } = res.locals;
+    const { editEnding, groupMembers } = res.locals;
     const { endingId } = req.params;
     const { currentEndingType } = req.body;
     const ending = await editEndingService(
@@ -151,6 +193,16 @@ export const editEnding = async (
       +endingId,
       currentEndingType
     );
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("ENDING_EDITED", {
+          ending,
+          prevType: currentEndingType,
+          prevId: +endingId,
+        });
+      }
+    });
     return res
       .status(200)
       .json({ ending, prevType: currentEndingType, prevId: +endingId });

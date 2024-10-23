@@ -6,9 +6,11 @@ import {
   getWorkSpaces,
   updateWorkspaceTitle,
 } from "../controllers/workspaceController";
-import { checkDuplicateWorkspaceTitle, checkWorkspaceExists } from "../middlewares/workspaceMiddleware";
+import {
+  checkDuplicateWorkspaceTitle,
+  checkWorkspaceExists,
+} from "../middlewares/workspaceMiddleware";
 import { checkGroupMembership } from "../middlewares/groupMiddleware";
-import { updateWorkspaceTitleService } from "../services/workspaceService";
 
 const workspaceRouter = Router();
 

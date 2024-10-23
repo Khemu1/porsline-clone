@@ -1,5 +1,5 @@
 import { Response, Request, NextFunction } from "express";
-import { NewGroup } from "../types/types";
+import { NewGroup, UserGroupModel } from "../types/types";
 import { CustomError } from "../errors/customError";
 import User from "../db/models/User";
 import UserGroup from "../db/models/UserGroup";
@@ -48,7 +48,10 @@ export const checkGroupMembership = async (
       workspaceId: string;
     }
   >,
-  res: Response<{}, { groupId: string; userId: string }>,
+  res: Response<
+    {},
+    { groupId: string; userId: string; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
@@ -57,6 +60,12 @@ export const checkGroupMembership = async (
       where: {
         userId,
         groupId,
+      },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: {
+        groupId: groupId,
       },
     });
 
@@ -71,7 +80,9 @@ export const checkGroupMembership = async (
       );
     }
     res.locals.groupId = userGroupMembership.groupId.toString();
-    console.log("check for ownership done", "done");
+    res.locals.groupMembers = groupMembers.map((group) =>
+      group.get({ plain: true })
+    );
     next();
   } catch (error) {
     throw error;

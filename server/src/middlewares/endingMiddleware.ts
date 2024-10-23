@@ -9,6 +9,7 @@ import {
   NewCustomEnding,
   NewDefaultEnding,
   NewQuestion,
+  UserGroupModel,
 } from "../types/types";
 import { validateWithSchema } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
@@ -35,6 +36,7 @@ export const checkGroupMembership = async (
     {
       groupId: string;
       userId: string;
+      groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
@@ -44,6 +46,12 @@ export const checkGroupMembership = async (
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
+        groupId,
+      },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: {
         groupId,
       },
     });
@@ -59,7 +67,9 @@ export const checkGroupMembership = async (
       );
     }
     res.locals.groupId = userGroupMembership.groupId.toString();
-    console.log("check for ownership done", "done");
+    res.locals.groupMembers = groupMembers.map((group) =>
+      group.get({ plain: true })
+    );
     next();
   } catch (error) {
     throw error;
@@ -331,7 +341,7 @@ export const validateEditEnding = async (
       customSchema.parse(customEndingData);
       res.locals.editEnding = customEndingData as CustomEndingModel;
     } else {
-      console.log(defaultEndingData)
+      console.log(defaultEndingData);
       defaultSchema.parse(defaultEndingData);
 
       if (

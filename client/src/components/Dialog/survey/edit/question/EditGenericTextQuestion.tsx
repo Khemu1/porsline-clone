@@ -105,11 +105,8 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
     answerFormat: state.genericText.answerFormat,
   }));
 
-  const [selected, setSelected] = useState(
-    answerFormat === "regex" ? "Custom Pattern" : "Text"
-  );
+  const [selected, setSelected] = useState(answerFormat);
 
-  console.log(question);
 
   const { workspaceId, surveyId } = useParams();
 
@@ -244,6 +241,10 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
     }
   }, [question]);
 
+  useEffect(() => {
+    setSelected(answerFormat);
+  }, [answerFormat]);
+
   return (
     <Dialog
       open={isOpen}
@@ -277,6 +278,7 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 </button>
                 <span>{t("genericText")}</span>
               </div>
+
               <div className="flex flex-col flex-grow gap-5 px-4">
                 <InputSwitchField
                   label={t("Label")}

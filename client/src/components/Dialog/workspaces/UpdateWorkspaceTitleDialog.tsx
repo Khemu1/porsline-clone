@@ -36,12 +36,12 @@ const UpdateWorkspaceTitleDialog: React.FC<
 
     if (!workspaceId) {
       setIsSubmitting(false);
+      alert("missing workspace id");
       return;
     }
 
     try {
       newSurveySchema().parse({ title });
-      console.log("title", title);
       await handleUpdateWorkspaceTitle({
         title,
         workspaceId: workspaceId,
@@ -50,7 +50,7 @@ const UpdateWorkspaceTitleDialog: React.FC<
       });
     } catch (error) {
       setErros(validateWithSchema(error, getCurrentLanguage()));
-      console.error("Failed to update survey", error);
+      console.error("Failed to update workspace", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -59,16 +59,19 @@ const UpdateWorkspaceTitleDialog: React.FC<
   useEffect(() => {
     if (isSuccess) {
       onClose();
-      console.log(getCurrentLanguage());
+      setTitle("");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
   useEffect(() => {
-    if (currentWorkspaceState.currentWorkspace) {
+    if (isOpen && currentWorkspaceState.currentWorkspace) {
       setTitle(currentWorkspaceState.currentWorkspace.title);
     }
-  }, [currentWorkspaceState.currentWorkspace]);
+  }, [isOpen, currentWorkspaceState.currentWorkspace]);
+
+  if (!currentWorkspaceState) {
+    return <div>loading...</div>;
+  }
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
@@ -119,7 +122,6 @@ const UpdateWorkspaceTitleDialog: React.FC<
                   {t("cancel")}
                 </button>
                 <button
-                  disabled={isSubmitting}
                   className=" bg-[#2c2f31] transition-all  py-2 px-4 rounded"
                   type="submit"
                 >

@@ -1,10 +1,8 @@
-import { useDispatch } from "react-redux";
 import { WelcomePartModel } from "../types";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { CustomError } from "../utils/CustomError";
 import { translations } from "../components/lang/translations";
-import { addWelcomePartF, deleteWelcomePartF } from "../utils";
 import {
   addWelcomePart,
   deleteWelcomePart,
@@ -12,7 +10,6 @@ import {
 } from "../services/welcomePart";
 
 export const useAddWelcomePart = () => {
-  const dispatch = useDispatch();
 
   const [errorState, setErrorState] = useState<Record<
     string,
@@ -34,15 +31,11 @@ export const useAddWelcomePart = () => {
       currentLang,
     }) => {
       const response = await addWelcomePart(
-        welcomePart,
+          welcomePart,
         getCurrentLanguageTranslations,
         currentLang
       );
       return response;
-    },
-    onSuccess: async (newWelcomePart: WelcomePartModel) => {
-      await addWelcomePartF(newWelcomePart, dispatch);
-      console.log("Survey created successfully:", newWelcomePart);
     },
     onError: (err: CustomError | unknown) => {
       const message =
@@ -69,9 +62,7 @@ export const useAddWelcomePart = () => {
     isPending,
   };
 };
-
 export const useDeleteWelcomePart = () => {
-  const dispatch = useDispatch();
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -104,7 +95,7 @@ export const useDeleteWelcomePart = () => {
       return response;
     },
     onSuccess: async () => {
-      await deleteWelcomePartF(dispatch);
+      // await deleteWelcomePartF(dispatch);
       console.log("deleted");
     },
     onError: (err: CustomError | unknown) => {
@@ -134,7 +125,6 @@ export const useDeleteWelcomePart = () => {
 };
 
 export const useEditWelcomePart = () => {
-  const dispatch = useDispatch();
 
   const [errorState, setErrorState] = useState<Record<
     string,
@@ -166,7 +156,7 @@ export const useEditWelcomePart = () => {
       return response;
     },
     onSuccess: async (newWelcomePart: WelcomePartModel) => {
-      await addWelcomePartF(newWelcomePart, dispatch);
+      // await addWelcomePartF(newWelcomePart, dispatch);
       console.log("Survey created successfully:", newWelcomePart);
     },
     onError: (err: CustomError | unknown) => {

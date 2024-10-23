@@ -35,7 +35,6 @@ export const getSurveyService = async (
   surveyId: number
 ): Promise<SurveyModel> => {
   try {
-    console.log("ma", surveyId);
     const surveys = await Survey.findByPk(surveyId, {
       include: [
         {
@@ -146,7 +145,6 @@ export const moveSurveyService = async (
   targetWorkspaceId: number,
   surveyId: number
 ) => {
-  console.log("moveSurveyService", targetWorkspaceId, surveyId);
   try {
     await Survey.update(
       { workspace: targetWorkspaceId },
@@ -166,7 +164,6 @@ export const duplicateSurveyService = async (
   targetWorkspaceId: number,
   survey: SurveyModel
 ) => {
-  console.log("duplicateSurveyService", survey);
   try {
     const duplicatedSurvey = await Survey.create({
       ...survey,

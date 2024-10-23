@@ -13,20 +13,16 @@ export const useSignIn = () => {
   const [success, setSuccess] = useState<boolean>(false);
   const routeTo = useNavigate();
   const dispatch = useDispatch();
-  const handleSignIn = async (
-    data: SignInProps,
-  ) => {
+  const handleSignIn = async (data: SignInProps) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
       console.log("going in");
-      const { userId, username } = await signIn(data);
+      const user = await signIn(data);
       setSuccess(true);
-      if (success) {
-        localStorage.setItem("userData", JSON.stringify({ userId, username }));
-        dispatch(signInRed({ username, id: userId }));
-      }
+      localStorage.setItem("userData", JSON.stringify(user));
+      dispatch(signInRed({ ...user }));
     } catch (err: unknown) {
       console.error(err);
       if (err instanceof CustomError) {
@@ -72,9 +68,10 @@ export const useAuthUser = () => {
 
   const handleSignIn = useCallback(async () => {
     try {
-      const { userId, username } = await authUser();
-      localStorage.setItem("userData", JSON.stringify({ userId, username }));
-      dispatch(signInRed({ username, id: userId }));
+      const user = await authUser();
+      localStorage.setItem("userData", JSON.stringify(user));
+
+      dispatch(signInRed({ ...user }));
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
       localStorage.removeItem("userData");

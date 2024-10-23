@@ -38,7 +38,6 @@ const Preview: React.FC<PreviewProps> = ({
 }) => {
   const [res, setRes] = useState<"pc" | "mobile">("pc");
 
-  console.log("previewImageUrl", imageUrl);
   return (
     <div className="flex  flex-col w-full h-full gap-5 relative main_text overflow-hidden">
       {/* Buttons container */}

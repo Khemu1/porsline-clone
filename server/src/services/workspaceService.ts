@@ -3,12 +3,7 @@ import Survey from "../db/models/Survey";
 import UserGroup from "../db/models/UserGroup";
 import WorkSpace from "../db/models/WorkSpace";
 import { CustomError } from "../errors/customError";
-import {
-  UpdateWorkspaceDescriptionResponse,
-  UpdateWorkspaceOwnerResponse,
-  UpdateWorkspaceTitleResponse,
-  WorkSpaceModel,
-} from "../types/types";
+import { UpdateWorkspaceTitleResponse, WorkSpaceModel } from "../types/types";
 
 export const addWorkSpaceService = async (userId: number, title: string) => {
   try {
@@ -20,8 +15,9 @@ export const addWorkSpaceService = async (userId: number, title: string) => {
       title,
       maker: userId,
       groupId: group.groupId,
+      
     });
-    return workspace.get();
+    return workspace.get({ plain: true });
   } catch (error) {
     throw error;
   }

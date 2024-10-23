@@ -9,6 +9,7 @@ import {
   NewQuestion,
   NewQuestionOptions,
   NewWelcomePart,
+  UserGroupModel,
 } from "../types/types";
 import { validateWithSchema } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
@@ -37,7 +38,10 @@ export const checkGroupMembership = async (
       options: NewQuestionOptions;
     }
   >,
-  res: Response<{}, { groupId: string; userId: string }>,
+  res: Response<
+    {},
+    { groupId: string; userId: string; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
@@ -45,6 +49,11 @@ export const checkGroupMembership = async (
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
+        groupId,
+      },
+    });
+    const groupMembers = await UserGroup.findAll({
+      where: {
         groupId,
       },
     });
@@ -60,7 +69,9 @@ export const checkGroupMembership = async (
       );
     }
     res.locals.groupId = userGroupMembership.groupId.toString();
-    console.log("check for ownership done", "done");
+    res.locals.groupMembers = groupMembers.map((group) =>
+      group.get({ plain: true })
+    );
     next();
   } catch (error) {
     throw error;
@@ -176,7 +187,6 @@ export const validateNewQuestion = async (
       const imageUrl = makeImage(data.imageUrl);
       res.locals.newQuestion = { ...data, imageUrl };
     }
-    console.log("validated");
     next();
   } catch (error) {
     const { headers } = req;

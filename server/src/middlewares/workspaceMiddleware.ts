@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { NewWorkSpace } from "../types/types";
+import { NewWorkSpace, UserGroupModel } from "../types/types";
 import { ZodError } from "zod";
 import { CustomError } from "../errors/customError";
 import WorkSpace from "../db/models/WorkSpace";
 import { Op } from "sequelize";
 import { validateWithSchema } from "../utils/validations/survey";
 import { newWorkspaceSchema } from "../utils/validations/workspace";
+import UserGroup from "../db/models/UserGroup";
 
 export const validateNewWorkSpace = async (
   req: Request<{}, {}, NewWorkSpace>,
@@ -29,7 +30,15 @@ export const validateNewWorkSpace = async (
 
 export const checkWorkspaceExists = async (
   req: Request<{ workspaceId: string }, {}, { title: string }>,
-  res: Response<{}, { workspaceId: string; userId: string; groupId: string }>,
+  res: Response<
+    {},
+    {
+      workspaceId: string;
+      userId: string;
+      groupId: string;
+      groupMembers?: UserGroupModel[];
+    }
+  >,
   next: NextFunction
 ) => {
   const { workspaceId } = req.params;
@@ -43,10 +52,20 @@ export const checkWorkspaceExists = async (
     where: { id: +workspaceId },
   });
 
+  const groupMembers = await UserGroup.findAll({
+    where: {
+      groupId: workspace?.groupId,
+    },
+  });
+
   if (!workspace) {
     return next(new CustomError("Workspace not found", 404, true));
   }
   res.locals.groupId = workspace.groupId.toString();
+  res.locals.groupMembers = groupMembers.map((group) =>
+    group.get({ plain: true })
+  );
+
   next();
 };
 

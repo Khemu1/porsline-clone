@@ -31,7 +31,11 @@ const signIn = async (
       return res.status(401).json({ message: "Invalid credentials" }); // Handle invalid user case
     }
 
-    const jwtToken = generateToken({ id: user.id });
+    const jwtToken = generateToken({
+      id: user.id,
+      groups: user.groups,
+      userGroup: user.userGroup,
+    });
 
     // Set the cookie with a 90-day expiration
     res.cookie("jwt", jwtToken, {
@@ -41,7 +45,7 @@ const signIn = async (
       sameSite: "strict", // Prevent CSRF attacks
     });
 
-    return res.status(200).json({ user: user, jwtToken });
+    return res.status(200).json(user);
   } catch (error) {
     next(error);
   }

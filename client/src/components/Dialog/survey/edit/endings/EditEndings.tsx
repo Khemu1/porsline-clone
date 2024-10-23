@@ -77,9 +77,6 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
     redirectToWhat: state.defaultEnding.redirectToWhat,
     redirectUrl: state.redirectEnding.redirectUrl,
   }));
-
-  console.log(ending);
-
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();

@@ -3,12 +3,19 @@ import { CustomError } from "../errors/customError";
 import { verifyToken } from "../services/jwtService";
 import UserGroup from "../db/models/UserGroup";
 import WorkSpace from "../db/models/WorkSpace";
+import { UserGroupModel } from "../types/types";
+import { group } from "console";
 
-export const authUser = (
+export const authUser = async (
   req: Request,
   res: Response<
     {},
-    { userId: string; workspaceId: string; }
+    {
+      userId: string;
+      workspaceId: string;
+      groupMembers?: UserGroupModel[];
+      groupId: string;
+    }
   >,
   next: NextFunction
 ) => {
@@ -25,8 +32,24 @@ export const authUser = (
     }
 
     const tokenData = verifyToken(idToken);
-    if (!tokenData || !tokenData.id) {
+    if (
+      !tokenData ||
+      !tokenData.id ||
+      tokenData.groups === null ||
+      tokenData.groups === undefined
+    ) {
       throw new CustomError("Invalid Token", 401, true, "premissionDenied");
+    }
+    res.locals.groupMembers = undefined;
+    if (tokenData.userGroup) {
+      const groupMebers = await UserGroup.findAll({
+        where: {
+          groupId: tokenData.userGroup.id,
+        },
+      });
+      res.locals.groupMembers = groupMebers.map((groupMmeber) =>
+        groupMmeber.get({ plain: true })
+      );
     }
 
     res.locals.userId = tokenData.id.toString();

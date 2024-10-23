@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { SurveyModel } from "../types/types";
+import { SurveyModel, UserGroupModel } from "../types/types";
 import {
   addSurveyService,
   deleteSurveyService,
@@ -10,7 +10,8 @@ import {
   updateSurveyTitleService,
   updateSurveyUrlService,
 } from "../services/surveyService";
-import { json } from "sequelize";
+import { userSocketMap } from "../handlers/socketHandler";
+import { io } from "../server";
 
 export const addSurvey = async (
   req: Request<
@@ -18,12 +19,21 @@ export const addSurvey = async (
     {},
     { title: string; workspaceId: string }
   >,
-  res: Response<{}, { userId: string }>,
+  res: Response<{}, { userId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { title, workspaceId } = req.body;
+    const { groupMembers } = res.locals;
     const surveyData = await addSurveyService(+workspaceId, title);
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_ADDED", {
+          surveyData: { ...surveyData },
+        });
+      }
+    });
     res.status(201).json(surveyData);
   } catch (error) {
     next(error);
@@ -36,10 +46,8 @@ export const getSurvey = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.params);
     const { surveyId } = req.params;
     const surveyData = await getSurveyService(+surveyId);
-    console.log(surveyData);
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -48,13 +56,25 @@ export const getSurvey = async (
 
 export const updateSurveyTitle = async (
   req: Request<{ surveyId: string }, {}, { title: string }>,
-  res: Response<{}, { userId: string; workspaceId: string }>,
+  res: Response<
+    {},
+    { userId: string; workspaceId: string; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { title } = req.body;
+    const { groupMembers } = res.locals;
     const surveyData = await updateSurveyTitleService(+surveyId, title);
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_TITLE_UPDATED", {
+          surveyData: { ...surveyData },
+        });
+      }
+    });
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -63,13 +83,24 @@ export const updateSurveyTitle = async (
 
 export const updateSurvyStatus = async (
   req: Request<{ surveyId: string }, { isActive: boolean; title: string }>,
-  res: Response<{}, { workspaceId: string }>,
+  res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { isActive } = req.body;
+    const { groupMembers } = res.locals;
     const surveyData = await updateSurveyStatusService(+surveyId, isActive);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_STATUS_UPDATED", {
+          surveyData: { ...surveyData },
+        });
+      }
+    });
+
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -81,13 +112,22 @@ export const updateSurveyUrl = async (
     { surveyId: string },
     { url: string; isActive: boolean; title: string }
   >,
-  res: Response<{}, { workspaceId: string }>,
+  res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { url } = req.body;
+    const { groupMembers } = res.locals;
     const surveyData = await updateSurveyUrlService(+surveyId, url);
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_URL_UPDATED", {
+          surveyData: { ...surveyData },
+        });
+      }
+    });
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -96,12 +136,21 @@ export const updateSurveyUrl = async (
 
 export const deleteSurvey = async (
   req: Request<{ surveyId: string }, {}>,
-  res: Response<{}, { userId: string }>,
+  res: Response<{}, { userId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
+    const { groupMembers } = res.locals;
     await deleteSurveyService(+surveyId);
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_DELETED", {
+          surveyId: surveyId,
+        });
+      }
+    });
     return res.status(200).json("deleted");
   } catch (error) {
     next(error);
@@ -114,16 +163,28 @@ export const duplicateSurvey = async (
     {},
     { workspaceId: string; targetWorkspaceId: string }
   >,
-  res: Response<{}, { duplicateSurvey: SurveyModel }>,
+  res: Response<
+    {},
+    { duplicateSurvey: SurveyModel; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
     const { duplicateSurvey } = res.locals;
     const { targetWorkspaceId } = req.body;
+    const { groupMembers } = res.locals;
     const survey = await duplicateSurveyService(
       +targetWorkspaceId,
       duplicateSurvey
     );
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_DUPLICATED", {
+          surveyData: { ...survey },
+        });
+      }
+    });
 
     return res.status(201).json(survey);
   } catch (error) {
@@ -133,14 +194,25 @@ export const duplicateSurvey = async (
 
 export const moveSurvey = async (
   req: Request<{ surveyId: string }, {}, { targetWorkspaceId: string }>,
-  res: Response<{}>,
+  res: Response<{}, { groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
-    // console.log("controller", req.body);
     const { targetWorkspaceId } = req.body;
     const { surveyId } = req.params;
-    await moveSurveyService(+targetWorkspaceId, +surveyId);
+    const { groupMembers } = res.locals;
+
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("SURVEY_MOVED", {
+          surveyId: +surveyId,
+          targetWorkspaceId: +targetWorkspaceId,
+        });
+      }
+    });
+
     return res.status(200).json({ targetWorkspaceId });
   } catch (error) {
     next(error);

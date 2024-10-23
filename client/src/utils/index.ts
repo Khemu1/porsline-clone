@@ -13,8 +13,16 @@ import {
   setCurrentSurvey,
 } from "../store/slices/currentSurveySlice";
 import { setSurveys } from "../store/slices/surveySlice";
-import { setWorkspaces } from "../store/slices/workspaceSlice";
-import { setCurrentWorkspace } from "../store/slices/currentWorkspaceSlice";
+import {
+  addWorkspace,
+  deleteWorkspace,
+  setWorkspaces,
+  updateWorkspace,
+} from "../store/slices/workspaceSlice";
+import {
+  setCurrentWorkspace,
+  updateCurrentWorkspace,
+} from "../store/slices/currentWorkspaceSlice";
 import { TranslationKeys } from "./genericText";
 import {
   resetWelcomePart,
@@ -297,57 +305,41 @@ export const toggleSurveyActiveF = async (
 };
 
 export const updateWorkspaceTitleF = async (
-  title: string,
-  workspaces: WorkSpaceModel[],
-  currentWorkspace: WorkSpaceModel,
+  workspaceId: number,
+  workspaceData: WorkSpaceModel,
   dispatch: Dispatch
 ) => {
   try {
-    const updatedCurrentWorkspace: WorkSpaceModel = {
-      ...currentWorkspace,
-      title: title,
-    };
-
-    const updatedWorkspaces = workspaces.map((workspace) =>
-      workspace.id === updatedCurrentWorkspace.id
-        ? updatedCurrentWorkspace
-        : workspace
-    );
-
-    dispatch(setCurrentWorkspace(updatedCurrentWorkspace));
-    dispatch(setWorkspaces(updatedWorkspaces));
+    dispatch(updateCurrentWorkspace(workspaceData));
+    dispatch(updateWorkspace({ workspaceData, id: +workspaceId }));
   } catch (error) {
     console.error("Error updating survey title:", error);
   }
 };
 
 export const deleteWorkspaceF = async (
+  workspaceId: number,
+  currentWorkspaceId: number,
   workspaces: WorkSpaceModel[],
-  currentWorkSpace: WorkSpaceModel,
-  dispatch: Dispatch<UnknownAction>
+  dispatch: Dispatch
 ) => {
   try {
-    const updatedWorkspaces = workspaces.filter(
-      (workspace) => workspace.id !== currentWorkSpace.id
-    );
-
-    dispatch(setWorkspaces(updatedWorkspaces));
-    dispatch(setCurrentWorkspace(updatedWorkspaces[0]));
-    dispatch(setSurveys(updatedWorkspaces[0].surveys || []));
+    dispatch(deleteWorkspace(+workspaceId));
+    if (+currentWorkspaceId === +workspaceId) {
+      dispatch(setCurrentWorkspace(workspaces[0]));
+      dispatch(setSurveys(workspaces[0].surveys || []));
+    }
   } catch (error) {
-    console.error("Error deleting survey:", error);
+    console.error("Error deleting workspace:", error);
   }
 };
 
 export const addNewWorkspaceF = async (
-  newWorkspace: WorkSpaceModel,
-  workspaces: WorkSpaceModel[],
+  workspace: WorkSpaceModel,
   dispatch: Dispatch<UnknownAction>
 ) => {
   try {
-    const modifiedWorkspaces = { ...newWorkspace, surveys: [] };
-    const updatedWorkspaces = [...workspaces, modifiedWorkspaces];
-    dispatch(setWorkspaces(updatedWorkspaces));
+    dispatch(addWorkspace(workspace));
   } catch (error) {
     console.error("Error deleting survey:", error);
   }
@@ -410,11 +402,9 @@ export const editEndingF = async (
   ending: CustomEndingModel | DefaultEndingModel,
   prevType: "custom" | "default",
   prevId: number,
-  dispatch: Dispatch<UnknownAction>,
-  defaultEnding?: boolean
+  dispatch: Dispatch<UnknownAction>
 ) => {
   try {
-    console.log("in edit ", ending.type, prevType, prevId);
     const currentEndingType = ending.type;
     if (prevType !== currentEndingType) {
       if (prevType === "custom") {
@@ -431,7 +421,7 @@ export const editEndingF = async (
         dispatch(updateDefaultEnding(ending as DefaultEndingModel));
       }
     }
-    if (defaultEnding) {
+    if (ending.defaultEnding) {
       dispatch(setDefaultEnding({ id: ending.id, type: currentEndingType }));
     }
   } catch (error) {

@@ -42,7 +42,9 @@ const Surveys = () => {
 
         {surveys.map((survey) => (
           <Survey
-            key={survey.id}
+            key={
+              survey.id * Math.random() * Date.now() * Math.ceil(Math.random())
+            }
             selected={selectedSurvey?.id === survey.id}
             survey={survey}
             onSelect={handleSurveySelect}

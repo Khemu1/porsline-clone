@@ -51,7 +51,7 @@ export const validateNewSurvey = async (
 
 export const checkWorkspaceExistsForSurvey = async (
   req: Request<
-    { surveyId: string },
+    { surveyId: string; workspaceId: string },
     {},
     {
       workspaceId: string;
@@ -72,7 +72,7 @@ export const checkWorkspaceExistsForSurvey = async (
   next: NextFunction
 ) => {
   console.log(req.body);
-  const { workspaceId } = req.body;
+  const { workspaceId } = req.params;
   console.log(workspaceId ?? false);
   try {
     if (isNaN(+workspaceId)) {

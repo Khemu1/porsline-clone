@@ -99,6 +99,7 @@ export const duplicateGenericTextService = async (
     const duplicatedGenericText = {
       ...otherProps,
       imageUrl: newImageUrl,
+      createdAt: new Date(),
     };
 
     const newGenericText = (
@@ -110,6 +111,7 @@ export const duplicateGenericTextService = async (
       const duplicatedGeneralText = {
         ...duplicatedGeneralTextData,
         questionId: newGenericText.id,
+        createdAt: new Date(),
       };
       const dupedText = await GeneralText.create(duplicatedGeneralText);
       newGenericText.generalText = { ...dupedText.get({ plain: true }) };
@@ -120,6 +122,7 @@ export const duplicateGenericTextService = async (
       const duplicatedGeneralRegex = {
         ...duplicatedGeneralRegexData,
         questionId: newGenericText.id,
+        createdAt: new Date(),
       };
       const dupedRegex = await GeneralRegex.create(duplicatedGeneralRegex);
       newGenericText.generalRegex = { ...dupedRegex.get({ plain: true }) };
@@ -145,28 +148,24 @@ export const editGenericTextService = async (
       regexPlaceHolder,
     } = newQuestion;
 
-    // Prepare the generic object for the GenericText model
     const generic = {
       surveyId: newQuestion.surveyId,
       label: newQuestion.label,
-      description: newQuestion.description || undefined, // Ensure description is null if not provided
+      description: newQuestion.description || undefined,
       answerFormat: type,
-      imageUrl: newQuestion.imageUrl || undefined, // Ensure imageUrl is null if not provided
+      imageUrl: newQuestion.imageUrl || undefined,
       required: newQuestion.isRequired,
       hideQuestionNumber: newQuestion.hideQuestionNumber,
     };
 
-    // Update the generic text entry
     await GenericText.update(generic, {
       where: { id: genericTextId },
     });
 
-    // Clear previous regex data associated with the question
     await GeneralRegex.destroy({
       where: { questionId: genericTextId },
     });
 
-    // Conditional updates based on type
     if (
       type === "text" &&
       (minLength !== undefined || maxLength !== undefined)
@@ -186,13 +185,11 @@ export const editGenericTextService = async (
       };
       await GeneralRegex.create({ ...generalRegex });
 
-      // Clear previous general text if regex is being updated
       await GeneralText.destroy({
         where: { questionId: genericTextId },
       });
     }
 
-    // Fetch the updated question along with its related models
     const question = await GenericText.findByPk(genericTextId, {
       include: [
         {
@@ -210,10 +207,9 @@ export const editGenericTextService = async (
 
     const fullQuestion = {
       ...plainGenericText,
-      generalText: plainGenericText.generalText || undefined, // Keep generalText if it exists
-      generalRegex: plainGenericText.generalRegex || undefined, // Keep generalRegex if it exists
+      generalText: plainGenericText.generalText || undefined,
+      generalRegex: plainGenericText.generalRegex || undefined,
     };
-
     return fullQuestion;
   } catch (error) {
     throw error;

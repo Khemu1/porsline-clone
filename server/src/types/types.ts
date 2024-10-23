@@ -1,3 +1,5 @@
+import User from "../db/models/User";
+
 export interface GroupModel {
   id: number;
   maker: number;
@@ -80,12 +82,16 @@ export interface SafeUser {
   username: string;
   email: string;
   role: string;
+  groups?: UserGroupModel[];
+  userGroup?: GroupModel;
 }
 export interface ReturnedJWTPaylod {
   id: number;
   userType: string;
   iat: number;
   exp: number;
+  groups: UserGroupModel[];
+  userGroup: GroupModel;
 }
 export interface NewWorkSpace {
   title: string;

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { SurveyModel } from "../../types";
 
 interface SurveyState {
-  surveys: SurveyModel[] | [];
+  surveys: SurveyModel[];
 }
 
 const initialState: SurveyState = {
@@ -19,8 +19,22 @@ const surveySlice = createSlice({
     signOut: (state) => {
       state.surveys = []; // Reset surveys on sign out
     },
+    updateSurvey: (state, action: PayloadAction<SurveyModel>) => {
+      const index = state.surveys.findIndex(
+        (survey) => survey.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.surveys[index] = action.payload; // Update the survey
+      }
+    },
+    deleteSurvey: (state, action: PayloadAction<number>) => {
+      state.surveys = state.surveys.filter(
+        (survey) => survey.id !== action.payload
+      ); // Delete the survey by ID
+    },
   },
 });
 
-export const { setSurveys, signOut } = surveySlice.actions;
+export const { setSurveys, signOut, updateSurvey, deleteSurvey } =
+  surveySlice.actions;
 export default surveySlice.reducer;

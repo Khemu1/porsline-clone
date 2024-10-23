@@ -1,4 +1,3 @@
-import { useDispatch } from "react-redux";
 import { GenericTextModel } from "../types";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -10,11 +9,8 @@ import {
   duplicateQuestion,
   editQuestion,
 } from "../services/genericQuestion";
-import { addNewQuestionF, editQuestionF, removeQuestionF } from "../utils";
 
 export const useAddQuestion = () => {
-  const dispatch = useDispatch();
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -42,7 +38,6 @@ export const useAddQuestion = () => {
       return response;
     },
     onSuccess: async (newQuestion: GenericTextModel) => {
-      await addNewQuestionF(newQuestion, dispatch);
       console.log("newQuestion", newQuestion);
     },
     onError: (err: CustomError | unknown) => {
@@ -72,8 +67,6 @@ export const useAddQuestion = () => {
 };
 
 export const useDeleteQuestion = () => {
-  const dispatch = useDispatch();
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -106,7 +99,6 @@ export const useDeleteQuestion = () => {
       return response;
     },
     onSuccess: async (data: { questionId: number }) => {
-      await removeQuestionF(data.questionId, dispatch);
       console.log("deleted", data.questionId);
     },
     onError: (err: CustomError | unknown) => {
@@ -136,8 +128,6 @@ export const useDeleteQuestion = () => {
 };
 
 export const useDuplicateQuestion = () => {
-  const dispatch = useDispatch();
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -170,8 +160,7 @@ export const useDuplicateQuestion = () => {
       return response;
     },
     onSuccess: async (data: { question: GenericTextModel }) => {
-      await addNewQuestionF(data.question, dispatch);
-      console.log("added", data.question);
+      console.log("duplicated", data.question);
     },
     onError: (err: CustomError | unknown) => {
       const message =
@@ -200,8 +189,6 @@ export const useDuplicateQuestion = () => {
 };
 
 export const useEditQuestion = () => {
-  const dispatch = useDispatch();
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -234,7 +221,6 @@ export const useEditQuestion = () => {
       return response;
     },
     onSuccess: async (data: { question: GenericTextModel }) => {
-      await editQuestionF(data.question, dispatch);
       console.log("edited", data.question);
     },
     onError: (err: CustomError | unknown) => {

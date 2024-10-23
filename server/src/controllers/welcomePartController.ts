@@ -8,9 +8,12 @@ import {
 } from "../services/welcomePart";
 import {
   NewWelcomePart,
+  UserGroupModel,
   WelcomePartModel,
   welcomePartOptions,
 } from "../types/types";
+import { userSocketMap } from "../handlers/socketHandler";
+import { io } from "../server";
 
 export const getWelcomePart = async (
   req: Request<{ welcomeId: string }, {}, {}>,
@@ -37,13 +40,30 @@ export const addWelcomePart = async (
       options: welcomePartOptions;
     }
   >,
-  res: Response<{}, { welcomePartData: NewWelcomePart }>,
+  res: Response<
+    {},
+    {
+      welcomePartData: NewWelcomePart;
+      groupId: string;
+      userId: string;
+      groupMembers?: UserGroupModel[];
+    }
+  >,
   next: NextFunction
 ) => {
   try {
-    const { welcomePartData } = res.locals;
-    console.log(welcomePartData);
+    const { welcomePartData, groupMembers } = res.locals;
+
     const newWelcomePartData = await addWelcomePartService(welcomePartData);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("WELCOME_PART_ADDED", {
+          welcomePart: { ...newWelcomePartData },
+        });
+      }
+    });
     return res.status(200).json(newWelcomePartData);
   } catch (error) {
     next(error);
@@ -51,13 +71,28 @@ export const addWelcomePart = async (
 };
 
 export const deleteWelcomePart = async (
-  req: Request<{ welcomeId: string }, {}, {}>,
-  res: Response<{}, { userId: string }>,
+  req: Request<{ welcomeId: string }, {}, { surveyId: string }>,
+  res: Response<
+    {},
+    { userId: string; groupId: string; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
+    const { groupMembers } = res.locals;
+    const { surveyId } = req.body;
     const { welcomeId } = req.params;
     await deleteWelcomePartService(+welcomeId);
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("WELCOME_PART_DELETED", {
+          welcomePart: welcomeId,
+          surveyId: surveyId,
+        });
+      }
+    });
     return res.status(200).json(welcomeId);
   } catch (error) {
     next(error);
@@ -109,17 +144,30 @@ export const editWelcomePart = async (
     {
       workspaceId: string;
       welcomePartData: NewWelcomePart;
+      userId: string;
+      groupId: string;
+      groupMembers: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   try {
-    const { welcomePartData } = res.locals;
+    const { welcomePartData, groupMembers } = res.locals;
     const { welcomeId } = req.params;
     const newWelcomePartData = await editWelcomePartService(
       welcomePartData,
       +welcomeId
     );
+
+    groupMembers?.forEach((member) => {
+      const memberSocketId = userSocketMap[member.userId];
+      if (memberSocketId) {
+        io.to(memberSocketId).emit("WELCOME_PART_UPDATED", {
+          welcomePart: { ...newWelcomePartData!.get({ plain: true }) },
+        });
+      }
+    });
+
     return res.status(200).json(newWelcomePartData!);
   } catch (error) {
     next(error);

@@ -15,10 +15,7 @@ import {
 } from "../controllers/welcomePartController";
 
 const welcomePartRouter = Router();
-// body -> workspaceId, surveyId
-//find workspace --> survey
-// permission
-//return welcomePart
+
 welcomePartRouter.get(
   "/welcome/:id",
   authUser,
@@ -42,7 +39,6 @@ welcomePartRouter.delete(
   checkWorkspaceExists,
   checkGroupMembership,
   checkSurveyExists,
-  checkWorkspaceExists,
   deleteWelcomePart
 );
 

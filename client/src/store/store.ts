@@ -12,6 +12,7 @@ import redirectEndingSlice from "./slices/redirectEnding";
 import welcomePartSlice from "./slices/welcomePartSlice";
 import questionsSlice from "./slices/questionsSlice";
 import endingsSlice from "./slices/endingsSlice";
+import socketSlice from "./slices/socketSlice";
 
 const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ const store = configureStore({
     welcomePart: welcomePartSlice,
     genericTexts: questionsSlice,
     endings: endingsSlice,
+    socket: socketSlice,
   },
 });
 

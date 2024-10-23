@@ -25,8 +25,9 @@ const surveyRouter = Router();
 surveyRouter.get(
   "/:workspaceId/:surveyId",
   authUser,
-  // checkSurveyExists,
-  // checkGroupMembership,
+  checkWorkspaceExistsForSurvey,
+  checkGroupMembership,
+  checkSurveyExists,
   getSurvey
 );
 

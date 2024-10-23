@@ -19,9 +19,15 @@ const currentWorkspaceSlice = createSlice({
     clearCurrentWorkspace: (state) => {
       state.currentWorkspace = null;
     },
+    updateCurrentWorkspace: (state, action: PayloadAction<WorkSpaceModel>) => {
+      state.currentWorkspace = { ...state.currentWorkspace, ...action.payload };
+    },
   },
 });
 
-export const { setCurrentWorkspace, clearCurrentWorkspace } =
-  currentWorkspaceSlice.actions;
+export const {
+  setCurrentWorkspace,
+  clearCurrentWorkspace,
+  updateCurrentWorkspace,
+} = currentWorkspaceSlice.actions;
 export default currentWorkspaceSlice.reducer;

@@ -20,7 +20,7 @@ const initialState: GenericTextState = {
   regex: "",
   regexPlaceHolder: "",
   regexErrorMessage: "",
-  answerFormat: "text",
+  answerFormat: "Text",
 };
 
 const genericTextSlice = createSlice({
@@ -75,7 +75,8 @@ const genericTextSlice = createSlice({
         regexErrorMessage:
           action.payload.generalRegex?.regexErrorMessage ||
           initialState.regexErrorMessage,
-        answerFormat: action.payload.answerFormat || initialState.answerFormat,
+        answerFormat:
+          action.payload.answerFormat === "regex" ? "Custom Pattern" : "Text",
       };
     },
   },

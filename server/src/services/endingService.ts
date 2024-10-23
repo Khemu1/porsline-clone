@@ -6,13 +6,11 @@ import {
   NewDefaultEnding,
 } from "../types/types";
 import CustomEnding from "../db/models/CustomEnding";
-import e from "express";
 
 export const addEndingService = async (
   endingData: NewDefaultEnding | NewCustomEnding,
   type: "custom" | "default"
 ) => {
-  console.log("in service");
   try {
     if (endingData.defaultEnding) {
       await CustomEnding.update(
@@ -90,9 +88,12 @@ export const duplicateEndingService = async (
         surveyId: ending.surveyId,
         defaultEnding: false,
         type,
+        createdAt: new Date(),
       };
-      await CustomEnding.create(newCustomEnding as CustomEndingModel);
-      return newCustomEnding;
+      const duped = await CustomEnding.create(
+        newCustomEnding as CustomEndingModel
+      );
+      return duped.get({ plain: true });
     } else {
       const { id, ...newDefaultEndingData } = ending;
       const newDefaultEnding = {
@@ -100,11 +101,12 @@ export const duplicateEndingService = async (
         surveyId: ending.surveyId,
         defaultEnding: false,
         type,
+        createdAt: new Date(),
       };
       const duped = await DefaultEnding.create(
         newDefaultEnding as DefaultEndingModel
       );
-      return duped;
+      return duped.get({ plain: true });
     }
   } catch (error) {
     throw error;

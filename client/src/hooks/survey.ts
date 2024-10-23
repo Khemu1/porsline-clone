@@ -1,5 +1,4 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useDispatch, useSelector } from "react-redux";
 import {
   createNewSurvey,
   deleteSurveyFromWorkspace,
@@ -16,31 +15,10 @@ import {
   UpdateSurveyTitleResponse,
 } from "../types";
 import { CustomError } from "../utils/CustomError";
-import { RootState } from "../store/store";
 import { translations } from "../components/lang/translations";
-import {
-  addSurvey,
-  deleteSurvey,
-  duplicateSurveyF,
-  moveSurveyF,
-  toggleSurveyActiveF,
-  updateSurveyTitleF,
-} from "../utils";
-import { stat } from "fs";
+
 
 export const useUpdateSurvey = () => {
-  const dispatch = useDispatch();
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -63,16 +41,6 @@ export const useUpdateSurvey = () => {
         surveyId,
         getCurrentLanguageTranslations,
         currentLang
-      );
-    },
-    onSuccess: async (data: UpdateSurveyTitleResponse) => {
-      await updateSurveyTitleF(
-        data,
-        currentSurvey!.id,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
       );
     },
     onError: (err: CustomError | unknown) => {
@@ -106,15 +74,6 @@ export const useUpdateSurvey = () => {
 };
 
 export const useDuplicateSurvey = () => {
-  const dispatch = useDispatch();
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -149,16 +108,7 @@ export const useDuplicateSurvey = () => {
       );
       return response;
     },
-    onSuccess: async (data: SurveyModel) => {
-      await duplicateSurveyF(
-        data,
-        data.workspace,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
-      );
-    },
+
     onError: (err: CustomError | unknown) => {
       const message =
         err instanceof CustomError
@@ -181,19 +131,6 @@ export const useDuplicateSurvey = () => {
 };
 
 export const useMoveSurvey = () => {
-  const dispatch = useDispatch();
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
-
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -224,16 +161,7 @@ export const useMoveSurvey = () => {
         currentLang
       );
     },
-    onSuccess: async ({ targetWorkspaceId: number }) => {
-      await moveSurveyF(
-        currentSurvey!.id,
-        number,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
-      );
-    },
+
     onError: (err: CustomError | unknown) => {
       const message =
         err instanceof CustomError
@@ -261,16 +189,6 @@ export const useMoveSurvey = () => {
 };
 
 export const useChangeSurveyStatus = () => {
-  const dispatch = useDispatch();
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const { workspaces, currentSurvey, currentWorkspace } = useSelector(
-    (state: RootState) => ({
-      workspaces: state.workspace.workspaces,
-      currentSurvey: state.currentSurvey.currentSurvey,
-      currentWorkspace: state.currentWorkspace.currentWorkspace,
-    })
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -298,19 +216,7 @@ export const useChangeSurveyStatus = () => {
         currentLang
       );
     },
-    onSuccess: async () => {
-      if (currentSurvey && currentWorkspace) {
-        await toggleSurveyActiveF(
-          currentSurvey.id,
-          workspaces,
-          surveys,
-          currentWorkspace,
-          dispatch
-        );
-      } else {
-        console.log("currentSurvey or currentWorkspace is null");
-      }
-    },
+
     onError: (err: CustomError | unknown) => {
       const message =
         err instanceof CustomError
@@ -338,18 +244,6 @@ export const useChangeSurveyStatus = () => {
 };
 
 export const useDeleteSurvey = () => {
-  const dispatch = useDispatch();
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentSurvey = useSelector(
-    (state: RootState) => state.currentSurvey.currentSurvey
-  );
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -375,16 +269,6 @@ export const useDeleteSurvey = () => {
         surveyId,
         getCurrentLanguageTranslations,
         currentLang
-      );
-    },
-    onSuccess: async () => {
-      console.log("Survey deleted successfully");
-      await deleteSurvey(
-        currentSurvey!.id,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
       );
     },
     onError: (err: CustomError | unknown) => {
@@ -414,14 +298,6 @@ export const useDeleteSurvey = () => {
 };
 
 export const useCreateSurvey = () => {
-  const dispatch = useDispatch();
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -449,16 +325,6 @@ export const useCreateSurvey = () => {
         currentLang
       );
       return response;
-    },
-    onSuccess: async (newSurvey: SurveyModel) => {
-      await addSurvey(
-        newSurvey,
-        workspaces,
-        surveys,
-        currentWorkspace!,
-        dispatch
-      );
-      console.log("Survey created successfully:", newSurvey);
     },
     onError: (err: CustomError | unknown) => {
       const message =

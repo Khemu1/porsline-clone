@@ -6,6 +6,7 @@ import UserGroup from "../db/models/UserGroup";
 import {
   NewWelcomePart,
   NewWorkSpace,
+  UserGroupModel,
   welcomePartOptions,
 } from "../types/types";
 import {
@@ -33,7 +34,10 @@ export const checkGroupMembership = async (
       options: welcomePartOptions;
     }
   >,
-  res: Response<{}, { groupId: string; userId: string }>,
+  res: Response<
+    {},
+    { groupId: string; userId: string; groupMembers?: UserGroupModel[] }
+  >,
   next: NextFunction
 ) => {
   try {
@@ -41,6 +45,12 @@ export const checkGroupMembership = async (
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
+        groupId,
+      },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: {
         groupId,
       },
     });
@@ -56,7 +66,9 @@ export const checkGroupMembership = async (
       );
     }
     res.locals.groupId = userGroupMembership.groupId.toString();
-    console.log("check for ownership done", "done");
+    res.locals.groupMembers = groupMembers.map((group) =>
+      group.get({ plain: true })
+    );
     next();
   } catch (error) {
     throw error;
@@ -77,7 +89,6 @@ export const checkWorkspaceExists = async (
   res: Response<{}, { workspaceId: string; userId: string; groupId: string }>,
   next: NextFunction
 ) => {
-  console.log(req.body);
   const { workspaceId } = req.body;
   if (isNaN(+workspaceId) || +workspaceId < 1) {
     return next(
@@ -103,6 +114,7 @@ export const checkSurveyExists = async (
     {
       surveyId: string;
       workspaceId: string;
+      
     }
   >,
   res: Response<
@@ -165,14 +177,12 @@ export const validateNewWelcomePart = async (
     const options = processWelcomePartOptions(req.body);
 
     const schema = welcomeFormSchema(options);
-    console.log("prep cyka", data);
     schema.parse(data);
     res.locals.welcomePartData = { ...data };
     if (data.imageUrl) {
       const imageUrl = makeImage(data.imageUrl);
       res.locals.welcomePartData = { ...data, imageUrl };
     }
-    console.log("validated");
     next();
   } catch (error) {
     const { headers } = req;
@@ -217,7 +227,6 @@ export const validateEditWelcomePart = async (
 ) => {
   try {
     const data = processEditWelcomePartData(req.body);
-    console.log(data);
     const options = processWelcomePartOptions(req.body);
 
     const schema = editWelcomeFormSchema(options);
@@ -229,7 +238,6 @@ export const validateEditWelcomePart = async (
       typeof data.imageUrl === "string" &&
       !data.imageUrl.includes("\\uploads\\")
     ) {
-      console.log("Valid imageUrl:", data.imageUrl);
       const imageUrl = makeImage(data.imageUrl);
       res.locals.welcomePartData = { ...data, imageUrl };
     }

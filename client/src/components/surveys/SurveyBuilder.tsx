@@ -29,6 +29,9 @@ const SurveyBuilder = () => {
   const [openWelcomePage, setOpenWelcomePage] = useState(false);
   const [openTextPage, setOpenTextPage] = useState(false);
   const [openEndingsPage, setOpenEndingsPage] = useState(false);
+  const currentSurvey = useSelector(
+    (state: RootState) => state.currentSurvey.currentSurvey
+  );
 
   const { survey } = useGetSurvey(
     Number(workspaceId),
@@ -36,15 +39,50 @@ const SurveyBuilder = () => {
     getCurrentLanguageTranslations,
     getCurrentLanguage()
   );
+
+  // Load survey from local storage on component mount
   useEffect(() => {
-    if (survey && survey.welcomePart && survey.questions) {
-      dispatch(updateWelcomePart(survey.welcomePart[0]));
+    const savedSurvey = localStorage.getItem("currentSurvey");
+    if (savedSurvey) {
+      const parsedSurvey = JSON.parse(savedSurvey);
+      if (!currentSurvey) {
+        dispatch(setCurrentSurvey(parsedSurvey));
+        console.log("Loaded survey from local storage:", parsedSurvey);
+      }
+    }
+  }, [currentSurvey, dispatch]);
+
+  useEffect(() => {
+    if (survey) {
+      console.log("Survey fetched:", survey);
       dispatch(setCurrentSurvey(survey));
-      dispatch(setGenericTexts(survey.questions ?? []));
-      dispatch(setDefaultEndings(survey.defaultEndings ?? []));
-      dispatch(setCustomEndings(survey.customEndings ?? []));
+      localStorage.setItem("currentSurvey", JSON.stringify(survey)); // Save survey to local storage
+
+      if (survey.welcomePart) {
+        dispatch(updateWelcomePart(survey.welcomePart[0]));
+      }
+      if (survey.questions) {
+        dispatch(setGenericTexts(survey.questions ?? []));
+      }
+      if (survey.defaultEndings) {
+        dispatch(setDefaultEndings(survey.defaultEndings ?? []));
+      }
+      if (survey.customEndings) {
+        dispatch(setCustomEndings(survey.customEndings ?? []));
+      }
+    } else {
+      console.warn("Survey is null or undefined");
     }
   }, [survey]);
+
+  useEffect(() => {
+    if (currentSurvey) {
+      console.log("exists", currentSurvey);
+    } else {
+      console.log("no");
+    }
+  }, [currentSurvey]);
+
   return (
     <div className="survey_builder">
       <aside>
@@ -103,7 +141,9 @@ const SurveyBuilder = () => {
       <section className="">
         <div className="flex flex-col gap-28 mb-5 relative w-full">
           <WelcomePart setOpenWelcomePage={setOpenWelcomePage} />
-          <Questions />
+          <div className="flex flex-col gap-5">
+            <Questions />
+          </div>
 
           {endingsState.customEndings || endingsState.defaultEndings ? (
             <EndingsContainer setOpenEndingsPage={setOpenEndingsPage} />

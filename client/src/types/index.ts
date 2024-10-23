@@ -3,6 +3,7 @@ import { translations } from "../components/lang/translations";
 export interface AuthSliceProps {
   id: number | null;
   username: string | null;
+  groups: UserGroupModel[];
 }
 
 export interface SurveyModel {
@@ -28,10 +29,16 @@ export interface WorkSpaceModel {
   updatedAt: Date;
   surveys: SurveyModel[];
 }
-
-export interface SignInResponseProps {
+export interface UserGroupModel {
   userId: number;
+  groupId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+export interface SignInResponseProps {
+  id: number;
   username: string;
+  groups: UserGroupModel[];
 }
 export interface SignInProps {
   username: string;

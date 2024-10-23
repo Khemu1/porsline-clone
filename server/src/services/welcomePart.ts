@@ -1,5 +1,6 @@
 import GenericText from "../db/models/GenericText";
 import WelcomePart from "../db/models/WelcomePart";
+import { io } from "../server"; 
 import { NewWelcomePart, WelcomePartModel } from "../types/types";
 import { copyFileWithNewName } from "../utils";
 
@@ -8,6 +9,7 @@ export const getWelcomePartService = async (
 ): Promise<WelcomePartModel> => {
   try {
     const welcomePart = await WelcomePart.findByPk(welcomeId);
+
     return welcomePart!.get();
   } catch (error) {
     throw error;
@@ -17,7 +19,7 @@ export const getWelcomePartService = async (
 export const addWelcomePartService = async (data: NewWelcomePart) => {
   try {
     const welcomePart = await WelcomePart.create({
-      ...data,
+      ...(data as WelcomePartModel),
     });
     return welcomePart.get({ plain: true }) as WelcomePartModel;
   } catch (error) {
@@ -32,6 +34,7 @@ export const deleteWelcomePartService = async (workspaceId: number) => {
         id: workspaceId,
       },
     });
+
   } catch (error) {
     throw error;
   }
@@ -51,6 +54,7 @@ export const duplicateWelcomePartService = async (
       duped = eWelcomePart;
     }
     await WelcomePart.create(duped);
+
     return duped;
   } catch (error) {
     throw error;
@@ -64,7 +68,7 @@ export const editWelcomePartService = async (
   try {
     await WelcomePart.update(
       {
-        ...welcomePart,
+        ...(welcomePart as WelcomePartModel),
       },
       {
         where: {
@@ -72,7 +76,9 @@ export const editWelcomePartService = async (
         },
       }
     );
-    return await WelcomePart.findByPk(welcomepartId);
+
+    const updatedWelcomePart = await WelcomePart.findByPk(welcomepartId);
+    return updatedWelcomePart;
   } catch (error) {
     throw error;
   }

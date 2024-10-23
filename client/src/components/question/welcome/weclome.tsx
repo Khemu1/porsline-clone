@@ -26,14 +26,12 @@ import {
 import { returnFileAndUrl, transformDataIntoFormData } from "../../../utils";
 import { useAddWelcomePart } from "../../../hooks/welcomePart";
 import { useParams } from "react-router-dom";
-
 interface WelcomeProps {
   isOpen: boolean;
   onClose: () => void;
 }
-const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
+const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
   const { workspaceId, surveyId } = useParams();
-
   const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
     string,
@@ -50,6 +48,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
     isImageUploadEnabled,
     isDescriptionEnabled,
     previewImageUrl,
+    socketId,
   } = useSelector((state: RootState) => ({
     isButtonEnabled: state.welcomePage.isButtonEnabled,
     isLabelEnabled: state.welcomePage.isLabelEnabled,
@@ -60,6 +59,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
     isImageUploadEnabled: state.sharedForm.isImageUploadEnabled,
     isDescriptionEnabled: state.sharedForm.isDescriptionEnabled,
     previewImageUrl: state.sharedForm.previewImageUrl,
+    socketId: state.socket.socketId,
   }));
 
   const { handleAddWelcomePart, isSuccess } = useAddWelcomePart();
@@ -98,6 +98,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
       );
       transformDataIntoFormData(options, formData);
       await handleAddWelcomePart({
+        socketId,
         welcomePart: formData,
         getCurrentLanguageTranslations,
         currentLang: getCurrentLanguage(),
@@ -142,6 +143,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
     isImageUploadEnabled,
     isButtonEnabled,
   ]);
+  console.log(socketId);
 
   const handleFileChange = async (file: File | null) => {
     const { file: _file, url } = await returnFileAndUrl(file);
@@ -156,7 +158,6 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
       onClose();
     }
   }, [isSuccess]);
-
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div

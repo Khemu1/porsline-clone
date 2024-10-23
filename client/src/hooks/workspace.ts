@@ -7,15 +7,9 @@ import {
   updateWorkspaceTitle,
 } from "../services/workspace";
 import { CustomError } from "../utils/CustomError";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import { translations } from "../components/lang/translations";
-import {
-  addNewWorkspaceF,
-  deleteWorkspaceF,
-  updateWorkspaceTitleF,
-} from "../utils";
+
 import { useMutation } from "@tanstack/react-query";
+import { translations } from "../components/lang/translations";
 
 export const useGetWorkspaces = () => {
   const [data, setData] = useState<[] | WorkSpaceModel[]>([]);
@@ -50,14 +44,6 @@ export const useGetWorkspaces = () => {
 };
 
 export const useUpdateWorkspaceTitle = () => {
-  const dispatch = useDispatch();
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -90,14 +76,6 @@ export const useUpdateWorkspaceTitle = () => {
         currentLang
       );
     },
-    onSuccess: async (data: { title: string }) => {
-      await updateWorkspaceTitleF(
-        data.title,
-        workspaces,
-        currentWorkspace!,
-        dispatch
-      );
-    },
     onError: (err: CustomError | unknown) => {
       const message =
         err instanceof CustomError
@@ -106,9 +84,6 @@ export const useUpdateWorkspaceTitle = () => {
 
       setErrorState(message);
       console.error("Error updating survey title:", err);
-    },
-    onSettled: () => {
-      console.log("Mutation has either succeeded or failed");
     },
   });
 
@@ -129,15 +104,6 @@ export const useUpdateWorkspaceTitle = () => {
 };
 
 export const useDeleteWorkspace = () => {
-  const dispatch = useDispatch();
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
-
-  const currentWorkspace = useSelector(
-    (state: RootState) => state.currentWorkspace.currentWorkspace
-  );
-
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -161,10 +127,6 @@ export const useDeleteWorkspace = () => {
         getCurrentLanguageTranslations,
         currentLang
       );
-    },
-    onSuccess: async () => {
-      console.log("Survey deleted successfully");
-      await deleteWorkspaceF(workspaces, currentWorkspace!, dispatch);
     },
     onError: (err: CustomError | unknown) => {
       const message =
@@ -193,10 +155,6 @@ export const useDeleteWorkspace = () => {
 };
 
 export const useCreateWorkspace = () => {
-  const dispatch = useDispatch();
-  const workspaces = useSelector(
-    (state: RootState) => state.workspace.workspaces
-  );
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
@@ -221,9 +179,6 @@ export const useCreateWorkspace = () => {
         currentLang
       );
       return response;
-    },
-    onSuccess: async (newWorkspace: WorkSpaceModel) => {
-      await addNewWorkspaceF(newWorkspace, workspaces, dispatch);
     },
     onError: (err: CustomError | unknown) => {
       const message =

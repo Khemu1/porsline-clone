@@ -3,6 +3,8 @@ import User from "../db/models/User";
 import { SafeUser, signInParams, SignUpParams } from "../types/types";
 import { CustomError } from "../errors/customError";
 import { Op } from "sequelize";
+import UserGroup from "../db/models/UserGroup";
+import Group from "../db/models/Group";
 
 const addUser = async ({
   username,
@@ -44,6 +46,16 @@ const getUser = async ({
       where: {
         username: username,
       },
+      include: [
+        {
+          model: UserGroup,
+          as: "groups",
+        },
+        {
+          model: Group,
+          as: "userGroup",
+        },
+      ],
     });
     if (!existingUser || password !== existingUser.password) {
       throw new CustomError("Invalid credentials", 401, true);
@@ -54,6 +66,7 @@ const getUser = async ({
     console.log("failed to find user :", error);
     throw error;
   }
+
 };
 
 export { addUser, getUser };

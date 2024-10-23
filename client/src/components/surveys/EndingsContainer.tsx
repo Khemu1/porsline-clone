@@ -1,24 +1,33 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { sortEndings, transformDataIntoFormData } from "../../utils";
+import {
+  addNewEndingF,
+  deleteEndingF,
+  editEndingF,
+  sortEndings,
+  transformDataIntoFormData,
+} from "../../utils";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useLanguage } from "../lang/LanguageProvider";
 import { useDeleteEnding, useDuplicateEnding } from "../../hooks/ending";
-import { useNavigate, useParams, useLocation } from "react-router-dom"; // Added useLocation
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { CustomEndingModel, DefaultEndingModel } from "../../types";
 import EditEndings from "../Dialog/survey/edit/endings/EditEndings";
+import { useSocket } from "../socket/userSocket";
 
 const EndingsContainer: React.FC<{
   setOpenEndingsPage: React.Dispatch<React.SetStateAction<boolean>>;
 }> = ({ setOpenEndingsPage }) => {
   const endings = useSelector((state: RootState) => state.endings);
   const { workspaceId, surveyId } = useParams();
-  const location = useLocation(); // Use location from react-router-dom
+  const location = useLocation();
   const { t, getCurrentLanguage, getCurrentLanguageTranslations } =
     useLanguage();
   const { handleDeleteEnding } = useDeleteEnding();
   const { handleDuplicateEnding } = useDuplicateEnding();
-
+  const currentSurvey = useSelector(
+    (state: RootState) => state.currentSurvey.currentSurvey
+  );
   const [menuOpen, setMenuOpen] = useState<Record<number, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleButtonRef = useRef<HTMLButtonElement>(null);
@@ -52,44 +61,63 @@ const EndingsContainer: React.FC<{
     };
   }, [handleClickOutside]);
 
-  const toggleMenu = (id: number) => {
+  const toggleMenu = useCallback((id: number) => {
     setMenuOpen((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  }, []);
 
-  const handleDelete = (endingId: number, type: string) => {
-    try {
-      const formData = new FormData();
-      transformDataIntoFormData({ workspaceId, surveyId, type }, formData);
-      handleDeleteEnding({
-        endingId,
-        ending: formData,
-        getCurrentLanguageTranslations,
-        currentLang: getCurrentLanguage(),
-      });
-      toggleMenu(endingId);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const handleDelete = useCallback(
+    (endingId: number, type: string) => {
+      try {
+        const formData = new FormData();
+        transformDataIntoFormData({ workspaceId, surveyId, type }, formData);
+        handleDeleteEnding({
+          endingId,
+          ending: formData,
+          getCurrentLanguageTranslations,
+          currentLang: getCurrentLanguage(),
+        });
+        toggleMenu(endingId);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [
+      handleDeleteEnding,
+      workspaceId,
+      surveyId,
+      getCurrentLanguage,
+      getCurrentLanguageTranslations,
+      toggleMenu,
+    ]
+  );
 
-  const handleDuplicate = (endingId: number, type: string) => {
-    try {
-      const formData = new FormData();
-      transformDataIntoFormData({ workspaceId, surveyId, type }, formData);
-      handleDuplicateEnding({
-        endingId,
-        ending: formData,
-        getCurrentLanguageTranslations,
-        currentLang: getCurrentLanguage(),
-      });
-      toggleMenu(endingId);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const handleDuplicate = useCallback(
+    (endingId: number, type: string) => {
+      try {
+        const formData = new FormData();
+        transformDataIntoFormData({ workspaceId, surveyId, type }, formData);
+        handleDuplicateEnding({
+          endingId,
+          ending: formData,
+          getCurrentLanguageTranslations,
+          currentLang: getCurrentLanguage(),
+        });
+        toggleMenu(endingId);
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    [
+      handleDuplicateEnding,
+      workspaceId,
+      surveyId,
+      getCurrentLanguage,
+      getCurrentLanguageTranslations,
+      toggleMenu,
+    ]
+  );
 
-  const onClose = () => {
-    console.log("onClose");
+  const onClose = useCallback(() => {
     const searchParams = new URLSearchParams(location.search);
     searchParams.delete("type");
     searchParams.delete("id");
@@ -101,7 +129,7 @@ const EndingsContainer: React.FC<{
 
     setIsDialogOpen(false);
     setCurrentEnding(null);
-  };
+  }, [location.search, navigate]);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -116,6 +144,63 @@ const EndingsContainer: React.FC<{
       }
     }
   }, [location, allEndings]);
+  const socket = useSocket();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleNewEnding = async (data: {
+      newEnding: { surveyId: string | number };
+      ending: CustomEndingModel | DefaultEndingModel;
+      type: "custom" | "default";
+    }) => {
+      if (currentSurvey?.id !== +data.newEnding.surveyId) return;
+      await addNewEndingF(data.ending, data.type, dispatch);
+    };
+
+    const handleDeletedEnding = async (data: {
+      surveyId: number;
+      endingId: number;
+      type: "default" | "custom";
+    }) => {
+      if (currentSurvey?.id !== +data.surveyId) return;
+      await deleteEndingF(data.endingId, data.type, dispatch);
+    };
+
+    const handleEditedEnding = async (data: {
+      ending: CustomEndingModel | DefaultEndingModel;
+      prevType: "default" | "custom";
+      prevId: string | number;
+    }) => {
+      console.log(data);
+      if (currentSurvey?.id !== +data.ending.surveyId) return;
+      await editEndingF(data.ending, data.prevType, +data.prevId, dispatch);
+    };
+
+    const handleDuplicatedEnding = async (data: {
+      ending: CustomEndingModel | DefaultEndingModel;
+      type: "custom" | "default";
+    }) => {
+      console.log(data);
+      if (currentSurvey?.id !== +data.ending.surveyId) return;
+      await addNewEndingF(data.ending, data.type, dispatch);
+    };
+
+    socket.on("ENDING_ADDED", handleNewEnding);
+    socket.on("ENDING_EDITED", handleEditedEnding);
+    socket.on("ENDING_DELETED", handleDeletedEnding);
+    socket.on("ENDING_DUPLICATED", handleDuplicatedEnding);
+
+    return () => {
+      socket.off("ENDING_ADDED", handleNewEnding);
+      socket.off("ENDING_EDITED", handleEditedEnding);
+      socket.off("ENDING_DELETED", handleDeletedEnding);
+      socket.off("ENDING_DUPLICATED", handleDuplicatedEnding);
+    };
+  }, [socket, currentSurvey, dispatch]);
+
+  if (!currentSurvey) {
+    return <div>Loading ....</div>;
+  }
 
   return (
     <>
@@ -123,7 +208,7 @@ const EndingsContainer: React.FC<{
         {allEndings.length > 0 ? (
           allEndings.map((ending) => (
             <div
-              key={ending.id}
+              key={ending.id * Math.ceil(Math.random()) * Date.now()}
               className="relative flex w-full items-center transition-all hover:bg-[#303033] hover:text-white rounded-lg py-1 px-3"
               onClick={() =>
                 navigate(

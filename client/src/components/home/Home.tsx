@@ -8,7 +8,6 @@ import { setWorkspaces } from "../../store/slices/workspaceSlice";
 import { useLanguage } from "../lang/LanguageProvider";
 import CreateWorkspaceDialog from "../Dialog/workspaces/CreateWorkspaceDialog";
 import UpdateWorkspaceTitleDialog from "../Dialog/workspaces/UpdateWorkspaceTitleDialog";
-import { setCurrentWorkspace } from "../../store/slices/currentWorkspaceSlice";
 import SearchDialog from "../Dialog/workspaces/searchDialog";
 
 const Home = () => {

@@ -107,7 +107,6 @@ const EditWeclome: React.FC<WelcomeProps> = ({
         formData
       );
       transformDataIntoFormData(options, formData);
-      console.log(formData);
       await handleEditWelcomePart({
         welcomePartId: welcomePart.id,
         welcomePart: formData,
@@ -155,7 +154,6 @@ const EditWeclome: React.FC<WelcomeProps> = ({
   ]);
 
   const handleFileChange = async (file: File | null) => {
-    console.log("called file change");
     const { file: _file, url } = await returnFileAndUrl(file);
 
     setFile(_file);
