@@ -30,7 +30,7 @@ export const addSurvey = async (
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("SURVEY_ADDED", {
-          surveyData: { ...surveyData },
+          survey: { ...surveyData },
         });
       }
     });
@@ -136,18 +136,23 @@ export const updateSurveyUrl = async (
 
 export const deleteSurvey = async (
   req: Request<{ surveyId: string }, {}>,
-  res: Response<{}, { userId: string; groupMembers?: UserGroupModel[] }>,
+  res: Response<
+    {},
+    { userId: string; groupMembers?: UserGroupModel[]; workspaceId: string }
+  >,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { groupMembers } = res.locals;
+    const { workspaceId } = req.body;
     await deleteSurveyService(+surveyId);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("SURVEY_DELETED", {
           surveyId: surveyId,
+          workspaceId,
         });
       }
     });
@@ -201,7 +206,6 @@ export const moveSurvey = async (
     const { targetWorkspaceId } = req.body;
     const { surveyId } = req.params;
     const { groupMembers } = res.locals;
-
 
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];

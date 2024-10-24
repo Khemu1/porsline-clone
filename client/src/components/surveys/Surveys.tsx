@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentSurvey } from "../../store/slices/currentSurveySlice";
 import { RootState } from "../../store/store";
@@ -6,6 +6,8 @@ import { SurveyModel } from "../../types";
 import Survey from "./Survey";
 import CreateSurveyDialog from "../Dialog/survey/CreateSurveyDialog";
 import { useLanguage } from "../lang/LanguageProvider";
+import { useSocket } from "../socket/userSocket";
+import { updateWorkspace } from "../../store/slices/workspaceSlice";
 
 const Surveys = () => {
   const { t } = useLanguage();
@@ -22,6 +24,58 @@ const Surveys = () => {
     setSelectedSurvey(survey);
     dispatch(setCurrentSurvey(survey));
   };
+
+  const socket = useSocket();
+  useEffect(() => {
+    const handleNewWorkspace = async (data: { workspace: WorkSpaceModel }) => {
+      console.log("arrived to add", data);
+
+      try {
+        await addNewWorkspaceF(data.workspace, dispatch);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const handleEditWorkspace = async (data: {
+      workspace: WorkSpaceModel;
+      workspaceId: number;
+    }) => {
+      try {
+        console.log("incming edit", data);
+        await updateWorkspace(
+          data.workspace,
+          dispatch
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const handleDeleteWorkspace = async (data: { workspaceId: number }) => {
+      try {
+        console.log("arrived to delete", data);
+        await deleteWorkspaceF(
+          +data.workspaceId,
+          +currentWorkspace!.id,
+          workspaces,
+          dispatch
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    socket.on("SURVEY_ADDED", handleNewWorkspace);
+    socket.on("WORKSPACE_EDITED", handleEditWorkspace);
+    socket.on("WORKSPACE_DELETED", handleDeleteWorkspace);
+
+    return () => {
+      socket.off("SURVEY_ADDED", handleNewWorkspace);
+      socket.off("WORKSPACE_EDITED", handleEditWorkspace);
+      socket.off("WORKSPACE_DELETED", handleDeleteWorkspace);
+    };
+  }, [socket, workspaces, currentWorkspace, dispatch]);
 
   return (
     <>

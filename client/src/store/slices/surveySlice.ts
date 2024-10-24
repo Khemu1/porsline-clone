@@ -19,7 +19,7 @@ const surveySlice = createSlice({
     signOut: (state) => {
       state.surveys = []; // Reset surveys on sign out
     },
-    updateSurvey: (state, action: PayloadAction<SurveyModel>) => {
+    updateSurveys: (state, action: PayloadAction<SurveyModel>) => {
       const index = state.surveys.findIndex(
         (survey) => survey.id === action.payload.id
       );
@@ -32,9 +32,12 @@ const surveySlice = createSlice({
         (survey) => survey.id !== action.payload
       ); // Delete the survey by ID
     },
+    addSurvey: (state,action:PayloadAction<SurveyModel>) => {
+      state.surveys.push(action.payload);
+    }
   },
 });
 
-export const { setSurveys, signOut, updateSurvey, deleteSurvey } =
+export const { setSurveys, signOut, updateSurveys, deleteSurvey, addSurvey } =
   surveySlice.actions;
 export default surveySlice.reducer;
