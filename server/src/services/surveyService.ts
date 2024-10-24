@@ -102,7 +102,7 @@ export const updateSurveyTitleService = async (
       }
     );
 
-    return { title, updatedAt: updatedDate };
+    return { id: surveyId, title: title, updatedAt: updatedDate };
   } catch (error) {
     throw error;
   }
@@ -123,7 +123,7 @@ export const updateSurveyUrlService = async (
       }
     );
 
-    return { url, updatedAt: updatedDate };
+    return { id: surveyId, url, updatedAt: updatedDate };
   } catch (error) {
     throw error;
   }
@@ -165,12 +165,12 @@ export const duplicateSurveyService = async (
   survey: SurveyModel
 ) => {
   try {
+    const { id, createdAt, updatedAt, workspace, ...dubed } = survey;
     const duplicatedSurvey = await Survey.create({
-      ...survey,
-      id: undefined,
+      ...dubed,
       workspace: targetWorkspaceId,
     });
-    return duplicatedSurvey;
+    return duplicatedSurvey.get({ plain: true });
   } catch (error) {
     throw error;
   }

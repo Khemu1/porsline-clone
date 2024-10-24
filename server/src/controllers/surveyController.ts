@@ -55,7 +55,11 @@ export const getSurvey = async (
 };
 
 export const updateSurveyTitle = async (
-  req: Request<{ surveyId: string }, {}, { title: string }>,
+  req: Request<
+    { surveyId: string },
+    {},
+    { title: string; workspaceId: string }
+  >,
   res: Response<
     {},
     { userId: string; workspaceId: string; groupMembers?: UserGroupModel[] }
@@ -64,14 +68,15 @@ export const updateSurveyTitle = async (
 ) => {
   try {
     const { surveyId } = req.params;
-    const { title } = req.body;
+    const { title, workspaceId } = req.body;
     const { groupMembers } = res.locals;
     const surveyData = await updateSurveyTitleService(+surveyId, title);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY_TITLE_UPDATED", {
-          surveyData: { ...surveyData },
+        io.to(memberSocketId).emit("SURVEY__EDITED", {
+          survey: { ...surveyData, workspace: +workspaceId },
+          surveyWorkspaceId: +workspaceId,
         });
       }
     });
@@ -82,21 +87,25 @@ export const updateSurveyTitle = async (
 };
 
 export const updateSurvyStatus = async (
-  req: Request<{ surveyId: string }, { isActive: boolean; title: string }>,
+  req: Request<
+    { surveyId: string },
+    { isActive: boolean; title: string; workspaceId: string }
+  >,
   res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
-    const { isActive } = req.body;
+    const { isActive, workspaceId } = req.body;
     const { groupMembers } = res.locals;
     const surveyData = await updateSurveyStatusService(+surveyId, isActive);
 
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY_STATUS_UPDATED", {
-          surveyData: { ...surveyData },
+        io.to(memberSocketId).emit("SURVEY__EDITED", {
+          surveyData: { ...surveyData, workspace: workspaceId },
+          surveyWorkspaceId: workspaceId,
         });
       }
     });
@@ -110,21 +119,22 @@ export const updateSurvyStatus = async (
 export const updateSurveyUrl = async (
   req: Request<
     { surveyId: string },
-    { url: string; isActive: boolean; title: string }
+    { url: string; isActive: boolean; title: string; workspaceId: string }
   >,
   res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
-    const { url } = req.body;
+    const { url, workspaceId } = req.body;
     const { groupMembers } = res.locals;
     const surveyData = await updateSurveyUrlService(+surveyId, url);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY_URL_UPDATED", {
+        io.to(memberSocketId).emit("SURVEY__EDITED", {
           surveyData: { ...surveyData },
+          surveyWorkspaceId: workspaceId,
         });
       }
     });
@@ -152,7 +162,7 @@ export const deleteSurvey = async (
       if (memberSocketId) {
         io.to(memberSocketId).emit("SURVEY_DELETED", {
           surveyId: surveyId,
-          workspaceId,
+          surveyWorkspaceId: workspaceId,
         });
       }
     });
@@ -170,7 +180,7 @@ export const duplicateSurvey = async (
   >,
   res: Response<
     {},
-    { duplicateSurvey: SurveyModel; groupMembers?: UserGroupModel[] }
+    { duplicateSurvey?: SurveyModel; groupMembers?: UserGroupModel[] }
   >,
   next: NextFunction
 ) => {
@@ -180,13 +190,13 @@ export const duplicateSurvey = async (
     const { groupMembers } = res.locals;
     const survey = await duplicateSurveyService(
       +targetWorkspaceId,
-      duplicateSurvey
+      duplicateSurvey!
     );
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("SURVEY_DUPLICATED", {
-          surveyData: { ...survey },
+          survey: { ...survey },
         });
       }
     });
@@ -198,12 +208,16 @@ export const duplicateSurvey = async (
 };
 
 export const moveSurvey = async (
-  req: Request<{ surveyId: string }, {}, { targetWorkspaceId: string }>,
+  req: Request<
+    { surveyId: string },
+    {},
+    { targetWorkspaceId: string; workspaceId: string }
+  >,
   res: Response<{}, { groupMembers?: UserGroupModel[] }>,
   next: NextFunction
 ) => {
   try {
-    const { targetWorkspaceId } = req.body;
+    const { targetWorkspaceId, workspaceId } = req.body;
     const { surveyId } = req.params;
     const { groupMembers } = res.locals;
 
@@ -212,6 +226,7 @@ export const moveSurvey = async (
       if (memberSocketId) {
         io.to(memberSocketId).emit("SURVEY_MOVED", {
           surveyId: +surveyId,
+          sourceWorkspaceId: +workspaceId,
           targetWorkspaceId: +targetWorkspaceId,
         });
       }

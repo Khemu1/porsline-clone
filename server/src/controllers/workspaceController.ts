@@ -30,7 +30,7 @@ export const addWorkSpace = async (
         });
       }
     });
-    res.status(201).json(workspaceData);
+    res.status(201).json({ workspace: { ...workspaceData } });
   } catch (error) {
     next(error);
   }

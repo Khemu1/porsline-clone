@@ -18,7 +18,7 @@ export const validateNewSurvey = async (
       workspaceId: string;
       groupId: string;
       userId: string;
-      duplicateSurvey: SurveyModel;
+      duplicateSurvey?: SurveyModel;
     }
   >,
   next: NextFunction
@@ -66,23 +66,23 @@ export const checkWorkspaceExistsForSurvey = async (
       workspaceId: string;
       groupId: string;
       userId: string;
-      duplicateSurvey: SurveyModel;
+      duplicateSurvey?: SurveyModel;
     }
   >,
   next: NextFunction
 ) => {
-  console.log(req.body);
   const { workspaceId } = req.params;
-  console.log(workspaceId ?? false);
+  const { workspaceId: workspaceIdFromBody } = req.body;
   try {
-    if (isNaN(+workspaceId)) {
+    const idToLookFor = workspaceId ?? workspaceIdFromBody;
+    if (isNaN(+idToLookFor)) {
       return next(
         new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
       );
     }
 
     const workspace = await WorkSpace.findOne({
-      where: { id: workspaceId },
+      where: { id: idToLookFor },
     });
 
     if (!workspace) {
@@ -117,7 +117,7 @@ export const checkSurveyExists = async (
       workspaceId: string;
       groupId: string;
       userId: string;
-      duplicateSurvey: SurveyModel;
+      duplicateSurvey?: SurveyModel;
     }
   >,
   next: NextFunction

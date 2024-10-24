@@ -9,7 +9,6 @@ import {
 } from "../types";
 import {
   clearCurrentSurvey,
-  setCurrentSurvey,
   updateCurrentSurvey,
 } from "../store/slices/currentSurveySlice";
 import {
@@ -23,11 +22,12 @@ import {
   addWorkspace,
   deleteWorkspace,
   deleteWorkspaceSurvey,
-  setWorkspaces,
+  moveSurveyToAnotherWorkspace,
   updateWorkspace,
   updateWorkspaceSurvey,
 } from "../store/slices/workspaceSlice";
 import {
+  addSurveyToCurrentWorkspace,
   deleteCurrnetWorkspaceSurvey,
   setCurrentWorkspace,
   updateCurrentWorkspace,
@@ -121,16 +121,23 @@ export const deleteSurveyF = async (
 
 export const updateSurveyF = async (
   survey: SurveyModel,
-  currentSurvey: number,
+  currentSurveyId: number,
   surveyWorkspaceId: number,
   currentWorkspaceId: number,
   dispatch: Dispatch
 ) => {
   try {
+    console.log(
+      "updating survey",
+      survey,
+      currentSurveyId,
+      surveyWorkspaceId,
+      currentWorkspaceId
+    );
     if (currentWorkspaceId === surveyWorkspaceId) {
       dispatch(updateCurrentWorkspaceSurveys(survey));
     }
-    if (currentSurvey === survey.id) {
+    if (currentSurveyId === survey.id) {
       dispatch(updateCurrentSurvey(survey));
     }
     dispatch(updateSurveys(survey));
@@ -141,34 +148,17 @@ export const updateSurveyF = async (
 };
 
 export const duplicateSurveyF = async (
-  duplicatedSurvey: SurveyModel,
-  targetWorkspaceId: number,
-  workspaces: WorkSpaceModel[],
-  surveys: SurveyModel[],
-  currentWorkspace: WorkSpaceModel,
+  newSurvey: SurveyModel,
+  currentWorkspaceId: number,
   dispatch: Dispatch
 ) => {
   try {
-    const updatedSurveys = [...surveys, duplicatedSurvey];
+    if (newSurvey.workspace === currentWorkspaceId) {
+      dispatch(addSurveyToCurrentWorkspace(newSurvey));
+      dispatch(addSurvey(newSurvey));
+    }
 
-    const updatedWorkspaces = workspaces.map((workspace) => {
-      if (workspace.id === targetWorkspaceId) {
-        return {
-          ...workspace,
-          surveys: [...workspace.surveys, duplicatedSurvey],
-        };
-      } else if (workspace.id === currentWorkspace.id) {
-        return {
-          ...workspace,
-          surveys: updatedSurveys,
-        };
-      }
-      return workspace;
-    });
-
-    dispatch(setSurveys(updatedSurveys));
-    dispatch(setWorkspaces(updatedWorkspaces));
-    dispatch(setCurrentSurvey(duplicatedSurvey));
+    dispatch(addSurveyToWorkspace(newSurvey));
   } catch (error) {
     console.error("Error duplicating survey:", error);
   }
@@ -176,84 +166,30 @@ export const duplicateSurveyF = async (
 
 export const moveSurveyF = async (
   surveyId: number,
+  sourceWorkspaceId: number,
   targetWorkspaceId: number,
-  workspaces: WorkSpaceModel[],
-  surveys: SurveyModel[],
-  currentWorkspace: WorkSpaceModel,
+  currentWorkspaceId: number,
   dispatch: Dispatch
 ) => {
   try {
-    const surveyToMove = surveys.find((survey) => survey.id === surveyId);
-
-    const filteredSurveys = surveys.filter((survey) => survey.id !== surveyId);
-
-    const newCurrentWorkspace = {
-      ...currentWorkspace,
-      surveys: [...filteredSurveys],
-    };
-
-    const updatedWorkspaces = workspaces.map((workspace) => {
-      if (workspace.id === targetWorkspaceId) {
-        return {
-          ...workspace,
-          surveys: [...workspace.surveys, surveyToMove!],
-        };
-      }
-      return workspace;
-    });
-
-    dispatch(setSurveys(filteredSurveys));
-    dispatch(setWorkspaces(updatedWorkspaces));
-    dispatch(setCurrentWorkspace(newCurrentWorkspace));
-    dispatch(clearCurrentSurvey());
+    if (currentWorkspaceId === sourceWorkspaceId) {
+      dispatch(deleteCurrnetWorkspaceSurvey(surveyId));
+      dispatch(clearCurrentSurvey());
+    }
+    dispatch(deleteSurvey(surveyId));
+    dispatch(
+      moveSurveyToAnotherWorkspace({
+        surveyId,
+        sourceWorkspaceId,
+        targetWorkspaceId,
+      })
+    );
   } catch (error) {
     console.error("Error moving survey:", error);
   }
 };
 
-export const toggleSurveyActiveF = async (
-  surveyId: number,
-  workspaces: WorkSpaceModel[],
-  surveys: SurveyModel[],
-  currentWorkspace: WorkSpaceModel,
-  dispatch: Dispatch
-) => {
-  try {
-    const surveyToToggle = surveys.find((survey) => survey.id === surveyId);
-
-    const updatedSurvey: SurveyModel = {
-      ...surveyToToggle!,
-      isActive: !surveyToToggle!.isActive,
-    };
-    console.log("updatedSurvey status", updatedSurvey.isActive);
-    const updatedSurveys = surveys.map((survey) =>
-      survey.id === surveyId ? updatedSurvey : survey
-    );
-
-    const newCurrentWorkspace = {
-      ...currentWorkspace,
-      surveys: updatedSurveys.filter(
-        (survey) => survey.workspace === currentWorkspace.id
-      ),
-    };
-
-    const updatedWorkspaces = workspaces.map((workspace) => {
-      if (workspace.id === currentWorkspace.id) {
-        return newCurrentWorkspace;
-      }
-      return workspace;
-    });
-
-    dispatch(setSurveys(updatedSurveys));
-    dispatch(setWorkspaces(updatedWorkspaces));
-    dispatch(setCurrentWorkspace(newCurrentWorkspace));
-    dispatch(setCurrentSurvey(updatedSurvey));
-  } catch (error) {
-    console.error("Error toggling survey active status:", error);
-  }
-};
-
-export const updateWorkspaceTitleF = async (
+export const updateWorkspaceF = async (
   workspaceId: number,
   workspaceData: WorkSpaceModel,
   dispatch: Dispatch

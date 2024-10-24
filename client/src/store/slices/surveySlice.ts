@@ -30,11 +30,11 @@ const surveySlice = createSlice({
     deleteSurvey: (state, action: PayloadAction<number>) => {
       state.surveys = state.surveys.filter(
         (survey) => survey.id !== action.payload
-      ); // Delete the survey by ID
+      );
     },
-    addSurvey: (state,action:PayloadAction<SurveyModel>) => {
+    addSurvey: (state, action: PayloadAction<SurveyModel>) => {
       state.surveys.push(action.payload);
-    }
+    },
   },
 });
 

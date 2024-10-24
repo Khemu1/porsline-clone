@@ -26,6 +26,7 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
   const currentWorkspace = useSelector(
     (state: RootState) => state.currentWorkspace.currentWorkspace
   );
+
   const toggleSurveyStatus = async () => {
     try {
       dispatch(setCurrentSurvey(survey));
@@ -42,37 +43,36 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
 
   const handleOpenUpdateTitleDialog = () => {
     setMenuOpen(false);
-    console.log("Opening update dialog");
     setUpdateDialogOpen(true);
-  };
-
-  const handleCloseUpdateTitleDialog = () => {
-    console.log("Closing update dialog");
-    setUpdateDialogOpen(false);
   };
 
   const handleOpenMoveDialog = () => {
     setMenuOpen(false);
-    console.log("Opening move dialog");
     setMoveDialogOpen(true);
   };
 
-  const handleCloseMoveDialog = () => {
-    console.log("Closing move dialog");
-    setMoveDialogOpen(false);
-  };
-
   const handleOpenDuplicateDialog = () => {
-    setMenuOpen(true);
-    console.log("Opening update dialog");
+    setMenuOpen(false);
     setIsDuplicateDialogOpen(true);
   };
 
-  const handleCloseDuplicateDialog = () => {
-    console.log("Closing move dialog");
+  const handleCloseDialogs = () => {
+    setUpdateDialogOpen(false);
+    setMoveDialogOpen(false);
     setIsDuplicateDialogOpen(false);
   };
 
+  const handleDelete = () => {
+    handleDeleteSurvey({
+      surveyId: survey.id,
+      workspaceId: survey.workspace,
+      getCurrentLanguageTranslations,
+      currentLang: getCurrentLanguage(),
+    });
+  };
+  const toggleMenu = async () => {
+    setMenuOpen((prev) => !prev);
+  };
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -81,7 +81,6 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
         toggleButtonRef.current &&
         !toggleButtonRef.current.contains(event.target as Node)
       ) {
-        console.log("Clicked outside, closing menu");
         setMenuOpen(false);
       }
     };
@@ -91,10 +90,6 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  useEffect(() => {
-    setCurrentSurvey(survey);
-  }, [toggleSurveyStatus]);
 
   return (
     <>
@@ -112,7 +107,7 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
             <div className="flex flex-col h-full w-full relative">
               <button className="survey_card_buttons">{t("preview")}</button>
               <button
-                onClick={toggleSurveyStatus} // Use the toggle function here
+                onClick={toggleSurveyStatus}
                 className={`survey_card_buttons ${
                   survey.isActive ? "text-red-600" : "text-green-600"
                 }`}
@@ -135,8 +130,8 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
             <button
               ref={toggleButtonRef}
               className="border opacity-100 border-gray-500 w-max h-max rounded-md"
-              onClick={() => {
-                setMenuOpen((prev) => !prev);
+              onClick={async () => {
+                await toggleMenu();
                 onSelect(survey);
               }}
             >
@@ -172,16 +167,7 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
                 </span>
                 <span
                   className="survey_card_buttons text-red-600"
-                  onClick={() => {
-                    console.log(survey.workspace);
-                    handleDeleteSurvey({
-                      surveyId: survey.id,
-                      workspaceId: survey.workspace,
-                      getCurrentLanguageTranslations:
-                        getCurrentLanguageTranslations,
-                      currentLang: getCurrentLanguage(),
-                    });
-                  }}
+                  onClick={handleDelete}
                 >
                   {t("delete")}
                 </span>
@@ -194,20 +180,19 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
       {isUpdateDialogOpen && (
         <UpdateSurveyTitleDialog
           isOpen={isUpdateDialogOpen}
-          onClose={handleCloseUpdateTitleDialog}
+          onClose={handleCloseDialogs}
         />
       )}
-
       {isMoveDialogOpen && (
         <MoveSurveyDialog
           isOpen={isMoveDialogOpen}
-          onClose={handleCloseMoveDialog}
+          onClose={handleCloseDialogs}
         />
       )}
       {isDuplicateDialogOpen && (
         <DuplicateSurveyDialog
           isOpen={isDuplicateDialogOpen}
-          onClose={handleCloseDuplicateDialog}
+          onClose={handleCloseDialogs}
         />
       )}
     </>

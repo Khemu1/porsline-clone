@@ -3,7 +3,7 @@ export const workspaceTranslations = {
   en: {
     title: "Workspaces",
     delete: "Delete Workspace",
-    rename: "Rename Workspace",
+    rename: "Rename",
     workSpaceTitle: "workspaces",
     createWorkspace: "Create New Workspace",
     enterWorkspaceTitle: "Enter Workspace Title",
@@ -12,7 +12,7 @@ export const workspaceTranslations = {
   de: {
     title: "Arbeitsbereiche",
     delete: "Arbeitsbereich löschen",
-    rename: "Arbeitsbereich umbenennen",
+    rename: "Arbeitsbereich",
     workSpaceTitle: "Arbeitsbereiche",
     createWorkspace: "Neues Arbeitsbereich erstellen",
     enterWorkspaceTitle: "Arbeitsbereichtitel eingeben",

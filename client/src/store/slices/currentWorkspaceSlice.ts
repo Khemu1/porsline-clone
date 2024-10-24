@@ -29,7 +29,10 @@ const currentWorkspaceSlice = createSlice({
       const updatedSurveys = state.currentWorkspace!.surveys.map((survey) =>
         survey.id === action.payload.id ? action.payload : survey
       );
-      state.currentWorkspace = { ...state.currentWorkspace!, surveys:updatedSurveys };
+      state.currentWorkspace = {
+        ...state.currentWorkspace!,
+        surveys: updatedSurveys,
+      };
     },
     deleteCurrnetWorkspaceSurvey: (state, action: PayloadAction<number>) => {
       const updatedSurveys =
@@ -41,6 +44,12 @@ const currentWorkspaceSlice = createSlice({
         surveys: updatedSurveys,
       };
     },
+    addSurveyToCurrentWorkspace: (
+      state,
+      action: PayloadAction<SurveyModel>
+    ) => {
+      state.currentWorkspace!.surveys.push(action.payload);
+    },
   },
 });
 
@@ -50,5 +59,6 @@ export const {
   updateCurrentWorkspace,
   deleteCurrnetWorkspaceSurvey,
   updateCurrentWorkspaceSurveys,
+  addSurveyToCurrentWorkspace,
 } = currentWorkspaceSlice.actions;
 export default currentWorkspaceSlice.reducer;

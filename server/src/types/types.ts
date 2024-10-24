@@ -111,10 +111,12 @@ export interface UpdateSurveyStatusResponse {
 }
 
 export interface UpdateSurveyTitleResponse {
+  id: number;
   title: string;
   updatedAt: Date;
 }
 export interface UpdateSurveyUrlResponse {
+  id: number;
   url: string;
   updatedAt: Date;
 }

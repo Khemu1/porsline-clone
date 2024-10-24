@@ -7,44 +7,59 @@ import Survey from "./Survey";
 import CreateSurveyDialog from "../Dialog/survey/CreateSurveyDialog";
 import { useLanguage } from "../lang/LanguageProvider";
 import { useSocket } from "../socket/userSocket";
-import { updateWorkspace } from "../../store/slices/workspaceSlice";
+import {
+  addSurveyF,
+  deleteSurveyF,
+  duplicateSurveyF,
+  moveSurveyF,
+  updateSurveyF,
+} from "../../utils";
 
 const Surveys = () => {
   const { t } = useLanguage();
   const dispatch = useDispatch();
 
-  const surveys = useSelector((state: RootState) => state.survey.surveys);
-
+  const { surveys, currentWorkspace, currentSurvey } = useSelector(
+    (state: RootState) => ({
+      currentWorkspace: state.currentWorkspace.currentWorkspace,
+      surveys: state.survey.surveys,
+      currentSurvey: state.currentSurvey.currentSurvey,
+    })
+  );
   const [selectedSurvey, setSelectedSurvey] = useState<SurveyModel | null>(
     null
   );
   const [isCreateSurveyOpen, setIsCreateSurveyOpen] = useState(false);
 
   const handleSurveySelect = (survey: SurveyModel) => {
-    setSelectedSurvey(survey);
-    dispatch(setCurrentSurvey(survey));
+    try {
+      setSelectedSurvey(survey);
+      dispatch(setCurrentSurvey(survey));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const socket = useSocket();
   useEffect(() => {
-    const handleNewWorkspace = async (data: { workspace: WorkSpaceModel }) => {
-      console.log("arrived to add", data);
-
+    const handleSurvey = async (data: { survey: SurveyModel }) => {
       try {
-        await addNewWorkspaceF(data.workspace, dispatch);
+        await addSurveyF(+currentWorkspace!.id, data.survey, dispatch);
       } catch (error) {
         console.error(error);
       }
     };
 
-    const handleEditWorkspace = async (data: {
-      workspace: WorkSpaceModel;
-      workspaceId: number;
+    const handleEditSurvey = async (data: {
+      survey: SurveyModel;
+      surveyWorkspaceId: number;
     }) => {
       try {
-        console.log("incming edit", data);
-        await updateWorkspace(
-          data.workspace,
+        await updateSurveyF(
+          data.survey,
+          currentSurvey!.id,
+          data.surveyWorkspaceId,
+          currentWorkspace!.id,
           dispatch
         );
       } catch (error) {
@@ -52,13 +67,17 @@ const Surveys = () => {
       }
     };
 
-    const handleDeleteWorkspace = async (data: { workspaceId: number }) => {
+    const handleMoveSurvey = async (data: {
+      surveyId: string | number;
+      sourceWorkspaceId: string | number;
+      targetWorkspaceId: string | number;
+    }) => {
       try {
-        console.log("arrived to delete", data);
-        await deleteWorkspaceF(
-          +data.workspaceId,
+        await moveSurveyF(
+          +data.surveyId,
+          +data.sourceWorkspaceId,
+          +data.targetWorkspaceId,
           +currentWorkspace!.id,
-          workspaces,
           dispatch
         );
       } catch (error) {
@@ -66,16 +85,52 @@ const Surveys = () => {
       }
     };
 
-    socket.on("SURVEY_ADDED", handleNewWorkspace);
-    socket.on("WORKSPACE_EDITED", handleEditWorkspace);
-    socket.on("WORKSPACE_DELETED", handleDeleteWorkspace);
-
-    return () => {
-      socket.off("SURVEY_ADDED", handleNewWorkspace);
-      socket.off("WORKSPACE_EDITED", handleEditWorkspace);
-      socket.off("WORKSPACE_DELETED", handleDeleteWorkspace);
+    const handleDeleteSurvey = async (data: {
+      surveyId: string | number;
+      surveyWorkspaceId: string | number;
+    }) => {
+      try {
+        await deleteSurveyF(
+          +data.surveyId,
+          +currentWorkspace!.id,
+          +data.surveyWorkspaceId,
+          dispatch
+        );
+      } catch (error) {
+        console.error(error);
+      }
     };
-  }, [socket, workspaces, currentWorkspace, dispatch]);
+
+    const handleSurveyDuplicated = async (data: { survey: SurveyModel }) => {
+      try {
+        if (currentWorkspace?.id) {
+          console.log("arrived to duplicate", data);
+          console.log(currentWorkspace?.id);
+          await duplicateSurveyF(data.survey, +currentWorkspace.id, dispatch);
+        } else {
+          console.error("Current workspace ID not found.");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    // Add socket listeners
+    socket.on("SURVEY_ADDED", handleSurvey);
+    socket.on("SURVEY_EDITED", handleEditSurvey);
+    socket.on("SURVEY_DELETED", handleDeleteSurvey);
+    socket.on("SURVEY_MOVED", handleMoveSurvey);
+    socket.on("SURVEY_DUPLICATED", handleSurveyDuplicated);
+
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off("SURVEY_ADDED", handleSurvey);
+      socket.off("SURVEY_EDITED", handleEditSurvey);
+      socket.off("SURVEY_DELETED", handleDeleteSurvey);
+      socket.off("SURVEY_MOVED", handleMoveSurvey);
+      socket.off("SURVEY_DUPLICATED", handleSurveyDuplicated);
+    };
+  }, [socket, currentWorkspace, currentSurvey, dispatch]);
 
   return (
     <>
@@ -97,7 +152,7 @@ const Surveys = () => {
         {surveys.map((survey) => (
           <Survey
             key={
-              survey.id * Math.random() * Date.now() * Math.ceil(Math.random())
+              survey.id * Date.now() * Math.ceil(Math.random()) * Math.random()
             }
             selected={selectedSurvey?.id === survey.id}
             survey={survey}
@@ -106,7 +161,6 @@ const Surveys = () => {
         ))}
       </div>
 
-      {/* Create Survey Dialog */}
       <CreateSurveyDialog
         isOpen={isCreateSurveyOpen}
         onClose={() => setIsCreateSurveyOpen(false)}

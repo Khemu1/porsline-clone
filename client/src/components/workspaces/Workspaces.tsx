@@ -9,7 +9,7 @@ import { useSocket } from "../socket/userSocket";
 import {
   addNewWorkspaceF,
   deleteWorkspaceF,
-  updateWorkspaceTitleF,
+  updateWorkspaceF,
 } from "../../utils";
 
 const Workspaces = () => {
@@ -57,7 +57,7 @@ const Workspaces = () => {
     }) => {
       try {
         console.log("incming edit", data);
-        await updateWorkspaceTitleF(+data.workspaceId, data.workspace, dispatch);
+        await updateWorkspaceF(+data.workspaceId, data.workspace, dispatch);
       } catch (error) {
         console.error(error);
       }

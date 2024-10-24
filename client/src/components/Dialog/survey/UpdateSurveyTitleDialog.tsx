@@ -47,6 +47,7 @@ const UpdateSurveyTitleDialog: React.FC<UpdateSurveyTitleDialogProps> = ({
 
     try {
       newSurveySchema().parse({ title });
+      console.log("heading to update", title);
       await handleUpdateSurvey({
         title,
         surveyId: currentSurveyId,

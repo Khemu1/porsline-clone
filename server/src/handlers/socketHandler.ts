@@ -50,7 +50,6 @@ export const initializeSocket = (server) => {
         userSocketMap[userId] = [socket.id];
       }
       console.log(`User ${userId} connected with socket ID: ${socket.id}`);
-      console.log("all users", userSocketMap);
     }
 
     socket.on("message", (message) => {
@@ -69,7 +68,6 @@ export const initializeSocket = (server) => {
           delete userSocketMap[userId];
         }
       }
-      console.log("users after disconned", userSocketMap);
     });
   });
 
