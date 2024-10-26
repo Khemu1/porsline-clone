@@ -20,6 +20,7 @@ class DefaultEnding
   declare buttonText?: string;
   declare anotherLink?: string;
   declare autoReload?: boolean;
+  declare redirectToWhat?: string;
   declare reloadTimeInSeconds?: number;
   declare defaultEnding?: boolean;
   declare createdAt?: Date;
@@ -43,6 +44,10 @@ DefaultEnding.init(
       },
       onDelete: "CASCADE",
       allowNull: false,
+    },
+    redirectToWhat: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     type: {
       type: DataTypes.ENUM,

@@ -141,6 +141,7 @@ export const checkSurveyExists = async (
         new CustomError("Survey not found", 404, true, "surveyNotFound")
       );
     }
+    console.log("survey found from middleware");
 
     if (title !== survey.title) {
       res.locals.duplicateSurvey = {

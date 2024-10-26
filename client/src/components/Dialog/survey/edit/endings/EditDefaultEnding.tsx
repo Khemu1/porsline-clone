@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLanguage } from "../../../../lang/LanguageProvider";
 import {
@@ -45,8 +45,6 @@ const EditDefaultEnding: React.FC<{
     { id: 3, name: "Another Link" },
   ];
 
-  const [selected, setSelected] = useState(options[0].name);
-
   const {
     isLabelEnabled,
     label,
@@ -60,6 +58,7 @@ const EditDefaultEnding: React.FC<{
     autoReload,
     reloadTimeInSeconds,
     redirectToWhat,
+    anotherLink,
   } = useSelector((state: RootState) => ({
     isLabelEnabled: state.welcomePage.isLabelEnabled,
     label: state.sharedForm.label,
@@ -74,8 +73,10 @@ const EditDefaultEnding: React.FC<{
     autoReload: state.defaultEnding.autoReload,
     reloadTimeInSeconds: state.defaultEnding.reloadTimeInSeconds,
     redirectToWhat: state.defaultEnding.redirectToWhat,
+    anotherLink: state.defaultEnding.anotherLink,
   }));
-
+  const [selected, setSelected] = useState<string>(redirectToWhat);
+  console.log("in default ending", redirectToWhat);
   const [file, setFile] = useState<File | null>(null);
 
   const handleSwitchChange =
@@ -100,10 +101,20 @@ const EditDefaultEnding: React.FC<{
       } else if (field === "reloadOrRedirectButton") {
         dispatch(setReloadOrRedirect(enabled));
         setSelected(options[0].name);
+        dispatch(setRedirectToWhat("Survey Link (Reaload the Survey)"));
       } else if (field === "autoReload") {
         dispatch(setAutoReload(enabled));
       }
     };
+
+  useEffect(() => {
+    if (redirectToWhat) {
+      setSelected(redirectToWhat);
+    } else {
+      setSelected(options[0].name);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [redirectToWhat]);
 
   const handleFileChange = async (file: File | null) => {
     const { file: _file, url } = await returnFileAndUrl(file);
@@ -180,7 +191,7 @@ const EditDefaultEnding: React.FC<{
           <div className="flex flex-col justify-between gap-2 px-4  main_text  flex-wrap">
             <span className="main_text">Redirect To</span>
             <Listbox
-              value={selected}
+              value={redirectToWhat}
               onChange={(
                 value:
                   | "Results Link"
@@ -200,7 +211,7 @@ const EditDefaultEnding: React.FC<{
             >
               <div className="relative">
                 <ListboxButton className="cursor-default py-2 px-4 w-full text-left bg-transparent border border-[#85808025]">
-                  <span className="block truncate">{selected}</span>
+                  <span className="block truncate">{redirectToWhat}</span>
                 </ListboxButton>
                 <ListboxOptions className="absolute mt-1 bg-black border w-full top-8 border-[#85808025] shadow-lg max-h-60 overflow-y-auto z-[51]">
                   {options.map((option) => (
@@ -231,20 +242,20 @@ const EditDefaultEnding: React.FC<{
             </Listbox>
           </div>
         )}
-        {selected.toLowerCase() === "Another Link".toLowerCase() &&
-          reloadOrRedirect && (
-            <EnterRedirectLink
-              label={t("enterLink")}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                dispatch(setAnotherLink(e.target.value))
-              }
-              errorMessage={validationErrors?.anotherLink}
-            />
-          )}
+        {selected.toLowerCase() === "Another Link".toLowerCase() && (
+          <EnterRedirectLink
+            label={t("enterLink")}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              dispatch(setAnotherLink(e.target.value))
+            }
+            errorMessage={validationErrors?.anotherLink}
+            value={anotherLink ?? undefined}
+          />
+        )}
       </div>
       {(selected.toLowerCase() ===
         "Survey Link (Reaload the Survey)".toLowerCase() ||
-        selected.toLowerCase() === "Results Link".toLowerCase()) && (
+        redirectToWhat.toLowerCase() === "Results Link".toLowerCase()) && (
         <InputSwitchField
           label={t("autoReload")}
           value={reloadTimeInSeconds.toString()}

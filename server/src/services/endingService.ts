@@ -133,7 +133,6 @@ export const editEndingService = async (
     }
 
     let endingType;
-    let updated = false;
 
     if (currentEndingType !== ending.type) {
       await Promise.all([
@@ -141,11 +140,10 @@ export const editEndingService = async (
         DefaultEnding.destroy({ where: { id: endingId } }),
       ]);
 
-      if (ending.type === "custom") {
-        endingType = await CustomEnding.create(ending as CustomEndingModel);
-      } else {
-        endingType = await DefaultEnding.create(ending as DefaultEndingModel);
-      }
+      endingType =
+        ending.type === "custom"
+          ? await CustomEnding.create(ending as CustomEndingModel)
+          : await DefaultEnding.create(ending as DefaultEndingModel);
     } else {
       if (currentEndingType === "custom") {
         await CustomEnding.update(ending as CustomEndingModel, {
@@ -158,10 +156,9 @@ export const editEndingService = async (
         });
         endingType = await DefaultEnding.findByPk(endingId);
       }
-      updated = true;
     }
 
-    return updated ? endingType : endingType?.get({ plain: true });
+    return endingType?.get({ plain: true });
   } catch (error) {
     console.error("Error editing ending:", error);
     throw new Error("Failed to edit ending. Please try again.");

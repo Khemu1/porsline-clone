@@ -79,6 +79,7 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
   }));
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
+      console.log("current ending", ending);
       e.preventDefault();
       setValidationErrors(null);
       setIsSubmitting(true);
@@ -147,6 +148,7 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
       }
 
       finalizeFormData();
+      console.log(formData);
       await handleEditEnding({
         endingId: ending.id,
         endingData: formData,

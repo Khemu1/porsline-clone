@@ -13,6 +13,7 @@ import welcomePartRouter from "./routes/welcomePartRouter";
 import multer from "multer";
 import genericTextRouter from "./routes/genericTextRouter";
 import endingsRouter from "./routes/endingsRouter";
+import surveyPreviewRouter from "./routes/surveyPreviewRouter";
 import path from "path";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -42,13 +43,12 @@ app.use("/survey", surveyRouter);
 app.use("/welcomepart/", welcomePartRouter);
 app.use("/question", genericTextRouter);
 app.use("/ending", endingsRouter);
+app.use("/preview-survey", surveyPreviewRouter);
 
-// Handle unmatched routes
 app.use("*", (req, res, next) => {
   next(new CustomError("Route not found", 404, true));
 });
 
-// Global error handling middleware
 app.use(errorHandler);
 
 export default app;

@@ -75,14 +75,6 @@ const SurveyBuilder = () => {
     }
   }, [survey]);
 
-  useEffect(() => {
-    if (currentSurvey) {
-      console.log("exists", currentSurvey);
-    } else {
-      console.log("no");
-    }
-  }, [currentSurvey]);
-
   return (
     <div className="survey_builder">
       <aside>

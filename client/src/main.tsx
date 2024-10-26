@@ -6,6 +6,7 @@ import store from "./store/store";
 import { Provider } from "react-redux";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SocketProvider } from "./components/socket/socketProvider";
+import { LanguageProvider } from "./components/lang/LanguageProvider";
 const rootElement = document.getElementById("root");
 const queryClient = new QueryClient();
 if (rootElement) {
@@ -17,7 +18,9 @@ if (rootElement) {
         <Provider store={store}>
           <SocketProvider>
             <QueryClientProvider client={queryClient}>
-              <App />
+              <LanguageProvider>
+                <App />
+              </LanguageProvider>
             </QueryClientProvider>
           </SocketProvider>
         </Provider>

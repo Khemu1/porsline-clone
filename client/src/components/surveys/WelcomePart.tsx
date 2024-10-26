@@ -134,7 +134,7 @@ const WelcomePart: React.FC<{
             className="flex gap-2 w-full items-center justify-between transition-all hover:bg-[#303033] cursor-pointer hover:text-white rounded-lg py-1 px-3"
             onClick={() =>
               navigate(
-                `/survey/${workspaceId}/${surveyId}/edit?type=welcome&id=${welcomePartState.id}`
+                `/survey/${workspaceId}/${surveyId}/build/edit?type=welcome&id=${welcomePartState.id}`
               )
             }
           >

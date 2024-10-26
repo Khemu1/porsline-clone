@@ -20,6 +20,19 @@ export interface SurveyModel {
   customEndings: CustomEndingModel[];
 }
 
+export interface SurveyPreviewModel {
+  id: number;
+  title: string;
+  isActive: boolean;
+  url: string;
+  workspace: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  welcomePart?: WelcomePartModel[];
+  questions: GenericTextModel[];
+  ending: DefaultEndingModel | CustomEndingModel;
+}
+
 export interface WorkSpaceModel {
   id: number;
   maker: number;

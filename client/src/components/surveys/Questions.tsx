@@ -191,7 +191,7 @@ const Questions: React.FC = () => {
           key={question.id}
           onClick={() =>
             navigate(
-              `/survey/${workspaceId}/${surveyId}/edit?type=question&id=${question.id}`
+              `/survey/${workspaceId}/${surveyId}/build/edit?type=question&id=${question.id}`
             )
           }
           className="relative flex w-full items-center transition-all hover:bg-[#303033] hover:text-white rounded-lg py-1 px-3"

@@ -8,6 +8,7 @@ import {
   NotFound,
   SurveyBuilder,
 } from "./components";
+import SurveyPreview from "./components/survey_preview/SurveyPreview";
 function App() {
   return (
     <Router>
@@ -15,13 +16,14 @@ function App() {
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/authportal" element={<SignIn />} />
+          <Route path="/survey/:surveyId" element={<SurveyPreview />} />
         </Route>
 
         {/* Private Routes */}
         <Route element={<PrivateLayout />}>
           <Route path="/" element={<Home />} />
           <Route
-            path="/survey/:workspaceId/:surveyId/*"
+            path="/survey/:workspaceId/:surveyId/build/*"
             element={<SurveyBuilder />}
           />
         </Route>

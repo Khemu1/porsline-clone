@@ -105,7 +105,9 @@ const Survey: React.FC<SurveyProps> = ({ survey, onSelect }) => {
           </Link>
           <div className="flex flex-col justify-end h-full w-[40%] bg-[#1b1b1b] p-2 gap-1">
             <div className="flex flex-col h-full w-full relative">
-              <button className="survey_card_buttons">{t("preview")}</button>
+              <Link to={`/survey/${survey.id}`} className="survey_card_buttons">
+                {t("preview")}
+              </Link>
               <button
                 onClick={toggleSurveyStatus}
                 className={`survey_card_buttons ${

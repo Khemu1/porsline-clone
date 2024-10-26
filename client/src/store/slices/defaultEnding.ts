@@ -64,6 +64,15 @@ const defaultEndingSlice = createSlice({
       state,
       action: PayloadAction<Partial<DefaultEndingModel>>
     ) => {
+      console.log(
+        "in slice",
+        action.payload.redirectToWhat,
+        [
+          "Results Link",
+          "Another Link",
+          "Survey Link (Reaload the Survey)",
+        ].includes(action.payload.redirectToWhat as string)
+      );
       return {
         ...state,
         shareSurvey: action.payload.shareSurvey ?? initialState.shareSurvey,

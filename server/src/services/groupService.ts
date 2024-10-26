@@ -1,4 +1,3 @@
-import { promise } from "zod";
 import Group from "../db/models/Group";
 import User from "../db/models/User";
 import { CustomError } from "../errors/customError";

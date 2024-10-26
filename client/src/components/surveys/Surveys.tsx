@@ -43,6 +43,8 @@ const Surveys = () => {
   const socket = useSocket();
   useEffect(() => {
     const handleSurvey = async (data: { survey: SurveyModel }) => {
+      console.log("survey arrived", data);
+      console.log(currentWorkspace!.id);
       try {
         await addSurveyF(+currentWorkspace!.id, data.survey, dispatch);
       } catch (error) {

@@ -182,12 +182,10 @@ export const validateNewEnding = async (
     const customEndingData = processCustomEndingData(req.body);
     const defaultEndingData = processDefaultEndingData(req.body);
     const defaultEndingOptions = processDefaultEndingOptions(req.body);
-    console.log(defaultEnding);
     const defaultSchema = defaultEndingSchema(defaultEndingOptions);
     const customSchema = customEndingSchema(defaultEnding);
 
     if (type === "custom") {
-      console.log(customEndingData);
       customSchema.parse(customEndingData);
       res.locals.newEnding = customEndingData;
     } else {
@@ -331,17 +329,14 @@ export const validateEditEnding = async (
     const customEndingData = processEditCustomEndingData(req.body);
     const defaultEndingData = processEditDefaultEndingData(req.body);
     const defaultEndingOptions = processDefaultEndingOptions(req.body);
-    console.log(defaultEndingData);
 
     const defaultSchema = editDefaultEndingSchema(defaultEndingOptions);
     const customSchema = customEndingSchema(defaultEnding);
 
     if (type === "custom") {
-      console.log(customEndingData);
       customSchema.parse(customEndingData);
       res.locals.editEnding = customEndingData as CustomEndingModel;
     } else {
-      console.log(defaultEndingData);
       defaultSchema.parse(defaultEndingData);
 
       if (

@@ -1,6 +1,11 @@
 // sharedFormSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DefaultEndingModel, GenericTextModel, WelcomePartModel } from "../../types";
+import {
+  CustomEndingModel,
+  DefaultEndingModel,
+  GenericTextModel,
+  WelcomePartModel,
+} from "../../types";
 
 interface SharedFormState {
   label: string;
@@ -78,7 +83,9 @@ const sharedFormSlice = createSlice({
     },
     modifySharedFormSliceFields: (
       state,
-      action: PayloadAction<Partial<WelcomePartModel|GenericTextModel|DefaultEndingModel>>
+      action: PayloadAction<
+        Partial<WelcomePartModel | GenericTextModel | DefaultEndingModel|CustomEndingModel>
+      >
     ) => {
       return {
         ...state,
@@ -92,6 +99,8 @@ const sharedFormSlice = createSlice({
         description: action.payload.description || initialState.description,
         previewImageUrl:
           action.payload.imageUrl || initialState.previewImageUrl,
+        defaultEnding:
+          action.payload.defaultEnding || initialState.defaultEnding,
       };
     },
   },

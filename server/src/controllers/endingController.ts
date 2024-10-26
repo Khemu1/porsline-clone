@@ -193,6 +193,8 @@ export const editEnding = async (
       +endingId,
       currentEndingType
     );
+    console.log("icoming", editEnding);
+    console.log("ending", ending);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {

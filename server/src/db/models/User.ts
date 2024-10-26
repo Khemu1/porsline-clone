@@ -47,8 +47,8 @@ class User
     Survey.belongsTo(WorkSpace, { foreignKey: "workspace" });
 
     // User to Group (created by the user)
-    User.hasOne(Group, { foreignKey: "maker" ,as:"userGroup" }); 
-    Group.belongsTo(User, { foreignKey: "maker" }); 
+    User.hasOne(Group, { foreignKey: "maker", as: "userGroup" });
+    Group.belongsTo(User, { foreignKey: "maker" });
 
     // Group to UserGroup
     Group.hasMany(UserGroup, { foreignKey: "groupId" }); // Group can have many user memberships

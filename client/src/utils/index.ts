@@ -88,12 +88,11 @@ export const addSurveyF = async (
   dispatch: Dispatch<UnknownAction>
 ) => {
   try {
-    dispatch(addSurvey(newSurvey));
     if (newSurvey.workspace === currentWorkspaceId) {
       dispatch(updateCurrentWorkspaceSurveys(newSurvey));
+      dispatch(updateSurveys(newSurvey));
     }
     dispatch(addSurveyToWorkspace(newSurvey));
-    dispatch(updateSurveys(newSurvey));
   } catch (error) {
     console.error("Error adding survey:", error);
   }
@@ -526,6 +525,7 @@ export const servePath = (path: string | undefined) => {
       "H:\\porsline\\server\\",
       `${import.meta.env.VITE_PROXY_URL}\\`
     );
+    console.log("relativePath", relativePath);
     return relativePath;
   }
   return undefined;
