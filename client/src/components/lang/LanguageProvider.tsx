@@ -1,5 +1,10 @@
-// LanguageProvider.tsx
-import { createContext, useState, useContext, ReactNode } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import { translations } from "./translations";
 
 type Translations = typeof translations;
@@ -10,8 +15,8 @@ type LanguageContextType = {
   language: keyof Translations;
   setLanguage: (lang: keyof Translations) => void;
   t: (key: TranslationKeys) => string;
-  getCurrentLanguageTranslations: () => (typeof translations)["en"];
-  getCurrentLanguage: () => keyof Translations; // New function
+  getCurrentLanguageTranslations: () => Translations["en"];
+  getCurrentLanguage: () => keyof Translations;
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -19,7 +24,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<keyof Translations>("en");
+  const [language, setLanguage] = useState<keyof Translations>(() => {
+    return (localStorage.getItem("language") as keyof Translations) || "en";
+  });
 
   const t = (key: TranslationKeys) => {
     return translations[language][key] || key;
@@ -29,10 +36,13 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     return translations[language];
   };
 
-  // New function to return the current language
   const getCurrentLanguage = () => {
     return language;
   };
+
+  useEffect(() => {
+    localStorage.setItem("language", language);
+  }, [language]);
 
   return (
     <LanguageContext.Provider
@@ -41,7 +51,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         setLanguage,
         t,
         getCurrentLanguageTranslations,
-        getCurrentLanguage, // Expose the new function here
+        getCurrentLanguage,
       }}
     >
       {children}

@@ -33,6 +33,9 @@ export interface SurveyPreviewModel {
   ending: DefaultEndingModel | CustomEndingModel;
 }
 
+export interface UserModel {
+  groupMembers?: UserGroupModel[];
+}
 export interface WorkSpaceModel {
   id: number;
   maker: number;

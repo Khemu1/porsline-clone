@@ -155,7 +155,7 @@ const SurveyPreview = () => {
         )}
       </div>
       {current === 1 && (
-        <div className="flex w-full justify-between items-center gap-4 mb-4 px-3">
+        <div className="flex w-full justify-between items-center gap-4 mb-4 px-3 pt-4 border-t border-t-[#0a6f9127]">
           <div className="flex bg-[#0a7091] rounded-md">
             <button
               className=" p-2 border-r border-r-[#91929242]"

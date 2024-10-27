@@ -20,7 +20,9 @@ export const commonTranslations = {
     surveys: "Surveys",
     workspaces: "Workspaces",
     enterLink: "Enter Link",
-    // Other common translations
+    switchLanguage: "Switch Language",
+    english: "English",
+    german: "German",
   },
   de: {
     unknownError: "Ein unbekannter Fehler ist aufgetreten.",
@@ -43,6 +45,9 @@ export const commonTranslations = {
     surveys: "Umfragen",
     workspaces: "Arbeitsbereiche",
     enterLink: "Link eingeben",
+    switchLanguage: "Sprache wechseln",
+    english: "Englisch",
+    german: "Deutsch",
     // Other common translations
   },
 };

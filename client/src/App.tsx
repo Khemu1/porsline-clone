@@ -9,6 +9,7 @@ import {
   SurveyBuilder,
 } from "./components";
 import SurveyPreview from "./components/survey_preview/SurveyPreview";
+import Profile from "./components/profile/Profile";
 function App() {
   return (
     <Router>
@@ -26,6 +27,7 @@ function App() {
             path="/survey/:workspaceId/:surveyId/build/*"
             element={<SurveyBuilder />}
           />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Catch-All Route */}

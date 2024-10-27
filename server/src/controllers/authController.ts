@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { addUser, getUser } from "../services/userService";
+import {
+  addUser,
+  getUserService,
+  signInService,
+} from "../services/userService";
 import { signInParams, SignUpParams } from "../types/types";
 import { generateToken } from "../services/jwtService";
 import { NextFunction } from "connect";
@@ -25,7 +29,7 @@ const signIn = async (
 ) => {
   try {
     const { username, password } = req.body as signInParams;
-    const user = await getUser({ username, password });
+    const user = await signInService({ username, password });
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" }); // Handle invalid user case
@@ -45,6 +49,21 @@ const signIn = async (
       sameSite: "strict", // Prevent CSRF attacks
     });
 
+    return res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUserData = async (
+  req: Request,
+  res: Response<{}, { userId: string }>,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = res.locals;
+    const user = await getUserService(+userId);
+    console.log("user", user);
     return res.status(200).json(user);
   } catch (error) {
     next(error);

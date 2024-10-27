@@ -37,7 +37,7 @@ const addUser = async ({
   }
 };
 
-const getUser = async ({
+const signInService = async ({
   username,
   password,
 }: signInParams): Promise<SafeUser> => {
@@ -63,10 +63,28 @@ const getUser = async ({
 
     return existingUser.omitFields(["password", "createdAt", "updatedAt"]);
   } catch (error) {
-    console.log("failed to find user :", error);
     throw error;
   }
-
 };
 
-export { addUser, getUser };
+const getUserService = async (userId: number): Promise<SafeUser> => {
+  try {
+    const existingUser = await User.findByPk(userId, {
+      include: [
+        {
+          model: UserGroup,
+          as: "groups",
+        },
+        {
+          model: Group,
+          as: "userGroup",
+        },
+      ],
+    });
+    return existingUser!.omitFields(["password", "createdAt", "updatedAt"]);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { addUser, signInService, getUserService };

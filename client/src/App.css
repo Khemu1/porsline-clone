@@ -38,7 +38,7 @@ body {
 }
 
 nav {
-  @apply flex w-full  items-end bg-[#1e1e1e] p-3;
+  @apply flex w-full items-center h-[40px]  bg-[#1e1e1e] p-3;
 }
 
 .btn-secondary {

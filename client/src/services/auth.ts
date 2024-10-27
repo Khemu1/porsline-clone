@@ -1,3 +1,4 @@
+import { translations } from "../components/lang/translations";
 import { SignInProps, SignInResponseProps } from "../types";
 import { CustomError } from "../utils/CustomError";
 
@@ -32,7 +33,7 @@ export const signIn = async (
     return data;
   } catch (error) {
     if (!(error instanceof CustomError)) {
-      throw new CustomError(("error500"), 500);
+      throw new CustomError("error500", 500);
     }
     console.error(error);
     throw error;
@@ -128,6 +129,49 @@ export const sendEmail = async (email: string) => {
     }
 
     return;
+  } catch (error) {
+    if (!(error instanceof CustomError)) {
+      throw new CustomError("Network error", 500);
+    }
+    throw error;
+  }
+};
+
+export const getUserData = async (
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+) => {
+  try {
+    const response = await fetch("/api/auth/user", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": currentLang,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "getUserData",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    return response.json();
   } catch (error) {
     if (!(error instanceof CustomError)) {
       throw new CustomError("Network error", 500);
