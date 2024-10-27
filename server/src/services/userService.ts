@@ -18,19 +18,16 @@ const addUser = async ({
     });
 
     if (existingUser) {
-      throw new CustomError("Username  already exists.", 400, true);
+      throw new CustomError("Username already exists.", 400, true);
     }
-    // made an instance of User to use it for validation before insertion
+
     const user = User.build({
       username,
-      password: password,
+      password: await bcrypt.hash(password, 10), // Hash the password
     });
     await user.validate();
 
-    const newUser = await User.create({
-      username,
-      password,
-    });
+    const newUser = await User.create(user);
     return newUser.omitFields(["password", "createdAt", "updatedAt"]);
   } catch (error) {
     throw error;
@@ -49,7 +46,7 @@ const signInService = async ({
       include: [
         {
           model: UserGroup,
-          as: "groups",
+          as: "userGroups", // Updated to match the interface
         },
         {
           model: Group,
@@ -57,7 +54,11 @@ const signInService = async ({
         },
       ],
     });
-    if (!existingUser || password !== existingUser.password) {
+
+    if (
+      !existingUser ||
+      !(await bcrypt.compare(password, existingUser.password))
+    ) {
       throw new CustomError("Invalid credentials", 401, true);
     }
 
@@ -69,41 +70,29 @@ const signInService = async ({
 
 const getUserService = async (userId: number) => {
   try {
-    const existingUser = await User.findByPk(userId, {
+    const userData = await User.findByPk(userId, {
       include: [
-        {
-          model: UserGroup,
-          as: "groups",
-        },
+        // get user group
+        // get user group members
         {
           model: Group,
-          as: "userGroup",
+          as: "createdGroup",
+          attributes: ["id", "name"],
+          include: [
+            {
+              model: UserGroup,
+              as: "members",
+            },
+          ],
         },
       ],
     });
 
-    const userGroupMemebers = await UserGroup.findAll({
-      where: { groupId: 1 },
-    });
-    // const userToLookFor = userGroupMemebers.map((user) =>
-    //   user.get({ plain: true })
-    // );
-
-    const groupMemebers = [];
-
-    userGroupMemebers.forEach(async (user) => {
-      console.log("looking for", user.get());
-      const maUser = await User.findByPk(user.get({ plain: true }).userId, {
-        attributes: ["id", "username"],
-      });
-      console.log("found ", maUser);
-      if (maUser) groupMemebers.push(maUser.get());
-    });
-
-    // console.log(groupMemebers);
-    return existingUser!.get({ plain: true });
+    const groupsUserIn = await UserGroup.findAll({ where: { userId: userId } });
+    console.log(userData, groupsUserIn);
+    return { userData, groupsUserIn };
   } catch (error) {
-    throw error;
+    throw error; // Propagate any errors
   }
 };
 

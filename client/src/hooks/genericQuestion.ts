@@ -30,6 +30,8 @@ export const useAddQuestion = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await addQuestion(
         question,
         getCurrentLanguageTranslations,
@@ -90,6 +92,8 @@ export const useDeleteQuestion = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await deleteQuestion(
         questionId,
         workspaceAndSurvey,
@@ -151,6 +155,8 @@ export const useDuplicateQuestion = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await duplicateQuestion(
         questionId,
         workspaceAndSurvey,
@@ -212,6 +218,8 @@ export const useEditQuestion = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await editQuestion(
         questionId,
         questionData,

@@ -1,11 +1,8 @@
 "use strict";
 
-const dotenv = require("dotenv");
-dotenv.config({ path: `${process.cwd()}/.env` });
-
-/** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up(queryInterface) {
+    // Seed Users
     const usernames = [
       "user1",
       "user2",
@@ -26,7 +23,6 @@ module.exports = {
       updatedAt: new Date(),
     }));
 
-    // Insert users
     await queryInterface.bulkInsert("user", users);
 
     // Retrieve all users to create groups
@@ -34,40 +30,35 @@ module.exports = {
       `SELECT id, username FROM "user"`
     );
 
+    // Seed Groups for Each User
     const groups = insertedUsers.map((user) => ({
-      name: `${user.username}'s Group`,
       maker: user.id, // User is the owner of the group
+      name: `${user.username}'s Group`,
+      description: `${user.username}'s description`,
       createdAt: new Date(),
       updatedAt: new Date(),
     }));
 
-    // Insert groups for each user
     await queryInterface.bulkInsert("group", groups);
 
     // Retrieve all groups to get their IDs
     const [insertedGroups] = await queryInterface.sequelize.query(
-      `SELECT id FROM "group"`
+      `SELECT id, name FROM "group"`
     );
 
     // Create user-group associations
     const userGroups = [];
 
     insertedGroups.forEach((group, index) => {
-      const ownerUserId = insertedUsers[index].id; // Owner is the user who created the group
-      userGroups.push({
-        userId: ownerUserId,
-        groupId: group.id,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-
       // Select two random users to add to the group (excluding the owner)
+      const ownerUserId = insertedUsers[index].id; // Owner is the user who created the group
       const otherUsers = insertedUsers.filter(
         (user) => user.id !== ownerUserId
       );
       const randomUsers = [];
 
-      while (randomUsers.length < 2) {
+      // Randomly select two users for the group
+      while (randomUsers.length < 2 && otherUsers.length > 0) {
         const randomIndex = Math.floor(Math.random() * otherUsers.length);
         const randomUser = otherUsers[randomIndex];
         if (!randomUsers.includes(randomUser)) {
@@ -80,6 +71,8 @@ module.exports = {
         userGroups.push({
           userId: user.id,
           groupId: group.id,
+          username: user.username,
+          groupName: group.name, // Add the group name here
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -87,11 +80,11 @@ module.exports = {
     });
 
     // Insert user-group associations
-    await queryInterface.bulkInsert("user_group", userGroups);
+    await queryInterface.bulkInsert("userGroup", userGroups);
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete("user_group", null, {});
+  async down(queryInterface) {
+    await queryInterface.bulkDelete("userGroup", null, {});
     await queryInterface.bulkDelete("group", null, {});
     await queryInterface.bulkDelete("user", null, {});
   },

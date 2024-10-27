@@ -21,9 +21,7 @@ export const addQuestion = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -65,9 +63,7 @@ export const deleteQuestion = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -109,9 +105,7 @@ export const duplicateQuestion = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -153,9 +147,7 @@ export const editQuestion = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,

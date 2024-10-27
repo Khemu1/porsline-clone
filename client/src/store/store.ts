@@ -13,6 +13,7 @@ import welcomePartSlice from "./slices/welcomePartSlice";
 import questionsSlice from "./slices/questionsSlice";
 import endingsSlice from "./slices/endingsSlice";
 import socketSlice from "./slices/socketSlice";
+import userGroupReducer from "./slices/userGroup";
 
 const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ const store = configureStore({
     genericTexts: questionsSlice,
     endings: endingsSlice,
     socket: socketSlice,
+    userGroup: userGroupReducer,
   },
 });
 

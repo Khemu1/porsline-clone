@@ -69,6 +69,8 @@ export const useUpdateWorkspaceTitle = () => {
       getCurrentLanguageTranslations: () => (typeof translations)["en"];
       currentLang: "en" | "de";
     }) => {
+      setErrorState(null);
+
       return await updateWorkspaceTitle(
         workspaceId,
         title,
@@ -122,6 +124,8 @@ export const useDeleteWorkspace = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       await deleteWorkspace(
         workspaceId,
         getCurrentLanguageTranslations,
@@ -173,6 +177,8 @@ export const useCreateWorkspace = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await createNewWorkspace(
         title,
         getCurrentLanguageTranslations,

@@ -4,6 +4,7 @@ import {
   DefaultEndingModel,
   GenericTextModel,
   SurveyModel,
+  UserGroupModel,
   WelcomePartModel,
   WorkSpaceModel,
 } from "../types";
@@ -57,6 +58,7 @@ import { resetWelcomePartSliceFields } from "../store/slices/welcomePageSlice";
 import { resetRedirectEndingSliceFields } from "../store/slices/redirectEnding";
 import { resetGenericTextSliceFields } from "../store/slices/genericTextSlice";
 import { resetSharedFormSliceFields } from "../store/slices/sharedFormSlice";
+import { addMember, deleteMember } from "../store/slices/userGroup";
 
 export const mapSurveyErrorsTranslations = (translations: string) => {
   return Object.entries(translations).map(([lang, errors]) => {
@@ -525,8 +527,42 @@ export const servePath = (path: string | undefined) => {
       "H:\\porsline\\server\\",
       `${import.meta.env.VITE_PROXY_URL}\\`
     );
-    console.log("relativePath", relativePath);
     return relativePath;
   }
   return undefined;
+};
+
+export const addGroupMemberF = async (
+  member: UserGroupModel,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(
+      addMember({
+        ...member,
+        createdAt:
+          member.createdAt instanceof Date
+            ? member.createdAt.toISOString()
+            : member.createdAt ?? "",
+        updatedAt:
+          member.updatedAt instanceof Date
+            ? member.updatedAt.toISOString()
+            : member.updatedAt ?? "",
+      })
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+export const removeGroupMemberF = async (
+  memberId: number,
+  dispatch: Dispatch<UnknownAction>
+) => {
+  try {
+    dispatch(deleteMember(+memberId));
+  } catch (error) {
+    console.error(error);
+  }
 };

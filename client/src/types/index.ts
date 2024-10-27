@@ -33,8 +33,35 @@ export interface SurveyPreviewModel {
   ending: DefaultEndingModel | CustomEndingModel;
 }
 
+export interface GroupModel {
+  id: number;
+  maker: number;
+  name: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  members: UserGroupModel[];
+}
+
 export interface UserModel {
-  groupMembers?: UserGroupModel[];
+  id: number;
+  username: string;
+  password: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  groupId: number;
+  workspaces?: WorkSpaceModel[];
+  userGroups?: UserGroupModel[];
+  createdGroup: GroupModel;
+}
+
+export interface UserGroupModel {
+  userId: number;
+  groupId: number;
+  createdAt?: string;
+  updatedAt?: string;
+  groupName: string;
+  username: string;
 }
 export interface WorkSpaceModel {
   id: number;
@@ -45,12 +72,7 @@ export interface WorkSpaceModel {
   updatedAt: Date;
   surveys: SurveyModel[];
 }
-export interface UserGroupModel {
-  userId: number;
-  groupId: number;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+
 export interface SignInResponseProps {
   id: number;
   username: string;

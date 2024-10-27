@@ -3,6 +3,7 @@ import { defaultEnding } from "./defaultEndings";
 import { GenericTextErrorTranslations } from "./GenericTextError";
 import { surveyTranslations } from "./survey";
 import { surveyBuilderTranslations } from "./surveyBuilder";
+import { groupTranslations } from "./group";
 
 export const translations = {
   en: {
@@ -11,6 +12,7 @@ export const translations = {
     ...surveyBuilderTranslations.en,
     ...GenericTextErrorTranslations.en,
     ...defaultEnding.en,
+    ...groupTranslations.en,
   },
   de: {
     ...surveyTranslations.de,
@@ -18,5 +20,6 @@ export const translations = {
     ...surveyBuilderTranslations.de,
     ...GenericTextErrorTranslations.de,
     ...defaultEnding.de,
+    ...groupTranslations.de,
   },
 };

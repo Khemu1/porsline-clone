@@ -23,6 +23,10 @@ export const commonTranslations = {
     switchLanguage: "Switch Language",
     english: "English",
     german: "German",
+    add: "add",
+    remove: "remove",
+    enterUserId: "Enter User ID",
+    members: "Members",
   },
   de: {
     unknownError: "Ein unbekannter Fehler ist aufgetreten.",
@@ -48,6 +52,10 @@ export const commonTranslations = {
     switchLanguage: "Sprache wechseln",
     english: "Englisch",
     german: "Deutsch",
+    add: "hinzufügen",
+    remove: "entfernen",
+    enterUserId: "Benutzer-ID eingeben",
+    members: "Mitglieder",
     // Other common translations
   },
 };

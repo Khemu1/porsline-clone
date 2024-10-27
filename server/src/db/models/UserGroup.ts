@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
-import { UserGroupModel } from "../../types/types";
+import { GroupMemberModel, UserGroupModel } from "../../types/types";
 
 interface UserGroupModelCreationAttributes
   extends Optional<UserGroupModel, "createdAt" | "updatedAt"> {}
@@ -13,8 +13,16 @@ class UserGroup
   declare groupId: number;
   declare createdAt: Date;
   declare updatedAt: Date;
+  declare username: string;
+  declare groupName: string;
 
-  static associate() {}
+  // Adding a members field to keep track of group members
+  declare members?: GroupMemberModel[]; // Optional field for members
+
+  static associate(models: any) {
+    UserGroup.belongsTo(models.User, { foreignKey: "userId" });
+    UserGroup.belongsTo(models.Group, { foreignKey: "groupId" });
+  }
 }
 
 UserGroup.init(
@@ -28,6 +36,14 @@ UserGroup.init(
       },
       allowNull: false,
       onDelete: "CASCADE",
+    },
+    username: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    groupName: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     groupId: {
       type: DataTypes.INTEGER,
@@ -52,7 +68,7 @@ UserGroup.init(
   },
   {
     sequelize,
-    tableName: "user_group",
+    tableName: "userGroup",
     timestamps: true,
     indexes: [
       {

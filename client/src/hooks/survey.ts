@@ -17,7 +17,6 @@ import {
 import { CustomError } from "../utils/CustomError";
 import { translations } from "../components/lang/translations";
 
-
 export const useUpdateSurvey = () => {
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
@@ -35,6 +34,8 @@ export const useUpdateSurvey = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }: UpdateSurveyTitleProps) => {
+      setErrorState(null);
+
       return await updateSurveyTitle(
         title,
         workspaceId,
@@ -98,6 +99,8 @@ export const useDuplicateSurvey = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await duplicateSurvey(
         title,
         workspaceId,
@@ -153,6 +156,8 @@ export const useMoveSurvey = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       return await moveSurveyToWorkspace(
         workspaceId,
         surveyId,
@@ -209,6 +214,8 @@ export const useChangeSurveyStatus = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       return await updateSurveyStatus(
         workspaceId,
         surveyId,
@@ -264,6 +271,8 @@ export const useDeleteSurvey = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       await deleteSurveyFromWorkspace(
         workspaceId,
         surveyId,
@@ -318,6 +327,8 @@ export const useCreateSurvey = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await createNewSurvey(
         workspaceId,
         title,
@@ -370,6 +381,8 @@ export const useGetSurvey = (
     queryKey: ["getSurvey", workspaceId, surveyId],
     queryFn: async () => {
       try {
+        setErrorState(null);
+
         const survey = await getSurvey(
           workspaceId,
           surveyId,

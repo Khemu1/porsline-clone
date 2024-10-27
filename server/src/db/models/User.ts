@@ -1,6 +1,12 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
-import { SafeUser, UserModel } from "../../types/types";
+import {
+  GroupModel,
+  SafeUser,
+  UserGroupModel,
+  UserModel,
+  WorkSpaceModel,
+} from "../../types/types";
 import WorkSpace from "./WorkSpace";
 import Survey from "./Survey";
 import Group from "./Group";
@@ -13,7 +19,10 @@ import DefaultEnding from "./DefaultEnding";
 import CustomEnding from "./CustomEnding";
 
 interface UserModelCreationAttributes
-  extends Optional<UserModel, "id" | "createdAt" | "updatedAt"> {}
+  extends Optional<
+    UserModel,
+    "id" | "createdAt" | "updatedAt" | "createdGroup"
+  > {}
 
 class User
   extends Model<UserModel, UserModelCreationAttributes>
@@ -38,7 +47,7 @@ class User
   }
 
   static associate() {
-    // User to WorkSpace
+    // User to Workspace
     User.hasMany(WorkSpace, { foreignKey: "maker" });
     WorkSpace.belongsTo(User, { foreignKey: "maker" });
 
@@ -47,21 +56,22 @@ class User
     Survey.belongsTo(WorkSpace, { foreignKey: "workspace" });
 
     // User to Group (created by the user)
-    User.hasOne(Group, { foreignKey: "maker", as: "userGroup" });
-    Group.belongsTo(User, { foreignKey: "maker" });
+    User.hasOne(Group, { foreignKey: "maker", as: "createdGroup" });
+    Group.belongsTo(User, { foreignKey: "maker", as: "makerUser" });
 
     // Group to UserGroup
-    Group.hasMany(UserGroup, { foreignKey: "groupId" }); // Group can have many user memberships
-    UserGroup.belongsTo(Group, { foreignKey: "groupId" }); // UserGroup belongs to one group
+    Group.hasMany(UserGroup, { foreignKey: "groupId", as: "members" });
+    UserGroup.belongsTo(Group, { foreignKey: "groupId", as: "group" });
 
     // User to UserGroup
-    User.hasMany(UserGroup, { foreignKey: "userId", as: "groups" }); // User can join multiple groups through UserGroup
-    UserGroup.belongsTo(User, { foreignKey: "userId" }); // UserGroup belongs to one user
+    User.hasMany(UserGroup, { as: "userGroups", foreignKey: "userId" });
+    UserGroup.belongsTo(User, { foreignKey: "userId", as: "groupMember" });
 
+    // Other Associations
     WelcomePart.belongsTo(Survey, {
       foreignKey: "surveyId",
     });
-    Survey.hasMany(WelcomePart, { foreignKey: "surveyId", as: "welcomePart" });
+    Survey.hasMany(WelcomePart, { foreignKey: "surveyId", as: "welcomeParts" });
 
     GenericText.belongsTo(Survey, { foreignKey: "surveyId" });
     Survey.hasMany(GenericText, { foreignKey: "surveyId", as: "questions" });
@@ -71,6 +81,7 @@ class User
       as: "defaultEndings",
     });
     DefaultEnding.belongsTo(Survey, { foreignKey: "surveyId" });
+
     Survey.hasMany(CustomEnding, {
       foreignKey: "surveyId",
       as: "customEndings",
@@ -81,7 +92,6 @@ class User
       foreignKey: "questionId",
       as: "generalText",
     });
-
     GeneralText.belongsTo(GenericText, {
       foreignKey: "questionId",
     });

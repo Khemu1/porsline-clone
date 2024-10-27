@@ -10,7 +10,6 @@ import {
 } from "../services/welcomePart";
 
 export const useAddWelcomePart = () => {
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -30,8 +29,10 @@ export const useAddWelcomePart = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await addWelcomePart(
-          welcomePart,
+        welcomePart,
         getCurrentLanguageTranslations,
         currentLang
       );
@@ -86,6 +87,8 @@ export const useDeleteWelcomePart = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await deleteWelcomePart(
         welcomePartId,
         serviceAndWorkspace,
@@ -125,7 +128,6 @@ export const useDeleteWelcomePart = () => {
 };
 
 export const useEditWelcomePart = () => {
-
   const [errorState, setErrorState] = useState<Record<
     string,
     string | undefined
@@ -147,6 +149,8 @@ export const useEditWelcomePart = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await editWelcomePart(
         welcomePartId,
         welcomePart,

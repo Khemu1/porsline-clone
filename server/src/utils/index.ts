@@ -12,6 +12,8 @@ import {
   NewWelcomePart,
   welcomePartOptions,
 } from "../types/types";
+import { translations } from "../locals/translations";
+import { TranslationKeys } from "./validations/survey";
 
 export const makeImage = (image: string) => {
   const imageType = image.match(/data:image\/(\w+);base64,/)![1];
@@ -270,4 +272,11 @@ export const copyFileWithNewName = async (srcPath: string) => {
   } catch (err) {
     throw err;
   }
+};
+
+export const getTranslation = (
+  language: "en" | "de",
+  errorKey: TranslationKeys
+): string => {
+  return translations[language][errorKey] || "Unknown error";
 };

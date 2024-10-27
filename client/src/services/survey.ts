@@ -254,9 +254,7 @@ export const createNewSurvey = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -298,9 +296,7 @@ export const getSurvey = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,

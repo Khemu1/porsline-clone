@@ -34,6 +34,8 @@ export const useAddEnding = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await addEnding(
         ending,
         getCurrentLanguageTranslations,
@@ -93,6 +95,8 @@ export const useDeleteEnding = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await deleteEnding(
         endingId,
         ending,
@@ -152,6 +156,8 @@ export const useDuplicateEnding = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await duplicateEnding(
         endingId,
         ending,
@@ -212,6 +218,8 @@ export const useEditEnding = () => {
       getCurrentLanguageTranslations,
       currentLang,
     }) => {
+      setErrorState(null);
+
       const response = await editEnding(
         endingId,
         endingData,

@@ -1,34 +1,42 @@
 import { NextFunction, Request, Response } from "express";
-import { NewGroup } from "../types/types";
+import { NewGroup, UserModel } from "../types/types";
 import { getSurveyService } from "../services/surveyService";
-import { addToGroupService, getGroupService } from "../services/groupService";
+import {
+  addToGroupService,
+  removeGroupMemberService,
+} from "../services/groupService";
 
-export const newGroup = async (
-  req: Request<{}, {}, {}, {}, { groupData: NewGroup }>,
-  res: Response<{}, { groupData: NewGroup; userId: number }>,
+export const addToGroup = async (
+  req: Request<
+    {},
+    {},
+    {
+      username: string;
+      groupName: string;
+      groupId: number;
+    }
+  >,
+  res: Response<{}, { groupId: string; user: UserModel }>,
   next: NextFunction
 ) => {
   try {
-    const { groupName, invitedUsers } = res.locals.groupData;
-    const groupData = await addToGroupService(
-      invitedUsers,
-      groupName,
-      res.locals.userId
-    );
+    const { user } = res.locals;
+    const { groupName, groupId } = req.body;
+    const groupData = await addToGroupService(user, +groupId, groupName);
     return res.status(201).json(groupData);
   } catch (error) {
     next(error);
   }
 };
-export const getGroup = async (
-  req: Request<{ workspaceId: string }, {}, {}>,
-  res: Response<{}, { userId: string }>,
+export const removeFromGroup = async (
+  req: Request<{}, {}, { userId: number; groupName: string; groupId: number }>,
+  res: Response<{}, { userId: string; user: UserModel }>,
   next: NextFunction
 ) => {
   try {
-    const userId = Number(res.locals.userId);
-    const groupData = (await getGroupService(userId)) || [];
-    return res.status(200).json(groupData);
+    const { userId, groupId } = req.body;
+    await removeGroupMemberService(+userId, +groupId);
+    return res.status(200).json(userId);
   } catch (error) {
     next(error);
   }

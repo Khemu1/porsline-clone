@@ -4,7 +4,7 @@ const DataTypes = require("sequelize");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    await queryInterface.createTable("user_group", {
+    await queryInterface.createTable("userGroup", {
       userId: {
         type: DataTypes.INTEGER,
         primaryKey: true, // Set as primary key
@@ -14,6 +14,10 @@ module.exports = {
         },
         allowNull: false,
         onDelete: "CASCADE",
+      },
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
       groupId: {
         type: DataTypes.INTEGER,
@@ -35,12 +39,14 @@ module.exports = {
         defaultValue: DataTypes.NOW,
         allowNull: false,
       },
+      groupName: {
+        type: DataTypes.STRING, // Optional: Store group name for quick reference
+        allowNull: false,
+      },
     });
-
-    // No need to add a constraint here; it's already covered in the userId and groupId fields
   },
 
   async down(queryInterface) {
-    await queryInterface.dropTable("user_group");
+    await queryInterface.dropTable("userGroup");
   },
 };

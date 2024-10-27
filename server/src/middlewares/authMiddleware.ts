@@ -2,9 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CustomError } from "../errors/customError";
 import { verifyToken } from "../services/jwtService";
 import UserGroup from "../db/models/UserGroup";
-import WorkSpace from "../db/models/WorkSpace";
-import { UserGroupModel } from "../types/types";
-import { group } from "console";
+import { UserGroupModel, UserModel } from "../types/types";
 
 export const authUser = async (
   req: Request,
@@ -15,6 +13,7 @@ export const authUser = async (
       workspaceId: string;
       groupMembers?: UserGroupModel[];
       groupId: string;
+      user: UserModel;
     }
   >,
   next: NextFunction

@@ -156,9 +156,7 @@ export const getUserData = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -172,38 +170,6 @@ export const getUserData = async (
     }
 
     return response.json();
-  } catch (error) {
-    if (!(error instanceof CustomError)) {
-      throw new CustomError("Network error", 500);
-    }
-    throw error;
-  }
-};
-
-export const resetPassword = async (password: string) => {
-  try {
-    const response = await fetch("/api/auth/reset-password", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(password),
-    });
-
-    if (!response.ok) {
-      const errorData: CustomError = await response.json();
-      const err = new CustomError(
-        errorData.message || "PassWord Reset Failed",
-        response.status,
-        "password reset",
-        true,
-        errorData.details,
-        errorData.errors
-      );
-      throw err;
-    }
-
-    return;
   } catch (error) {
     if (!(error instanceof CustomError)) {
       throw new CustomError("Network error", 500);

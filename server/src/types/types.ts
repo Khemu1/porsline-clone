@@ -7,18 +7,19 @@ export interface GroupModel {
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  userGroups?: UserGroupModel[];
+  members: UserGroupModel[];
 }
+
 export interface UserModel {
   id: number;
   username: string;
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
-  groupId?: number;
+  groupId?: number; 
   workspaces?: WorkSpaceModel[];
-  userGroup?: UserGroupModel;
-  groups?:GroupModel[];
+  userGroups?: UserGroupModel[]; 
+  createdGroup: GroupModel; 
 }
 
 export interface UserGroupModel {
@@ -26,6 +27,8 @@ export interface UserGroupModel {
   groupId: number;
   createdAt?: Date;
   updatedAt?: Date;
+  groupName: string;
+  username: string;
 }
 
 export interface WorkSpaceModel {

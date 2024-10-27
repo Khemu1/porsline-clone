@@ -55,9 +55,7 @@ export const createNewWorkspace = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -100,9 +98,7 @@ export const updateWorkspaceTitle = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
@@ -143,9 +139,7 @@ export const deleteWorkspace = async (
       const currentLanguageTranslations = lang();
 
       const errorMessage =
-        currentLanguageTranslations[
-          errorData.type as keyof typeof currentLanguageTranslations
-        ] || currentLanguageTranslations.unknownError;
+        errorData.message ?? currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
