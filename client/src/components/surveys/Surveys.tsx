@@ -50,7 +50,7 @@ const Surveys = () => {
       } catch (error) {
         console.error(error);
       }
-    };
+    }; 
 
     const handleEditSurvey = async (data: {
       survey: SurveyModel;

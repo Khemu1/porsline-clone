@@ -63,7 +63,6 @@ export const getUserData = async (
   try {
     const { userId } = res.locals;
     const user = await getUserService(+userId);
-    console.log("user", user);
     return res.status(200).json(user);
   } catch (error) {
     next(error);

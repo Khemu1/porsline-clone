@@ -1,9 +1,30 @@
+import { useGetUserData } from "../../hooks/userData";
 import { useLanguage } from "../lang/LanguageProvider";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const { t, getCurrentLanguage, setLanguage } = useLanguage();
+  const { t, getCurrentLanguage, setLanguage, getCurrentLanguageTranslations } =
+    useLanguage();
+  const navigateTo = useNavigate();
+  const { isLoading, user } = useGetUserData(
+    getCurrentLanguageTranslations,
+    getCurrentLanguage()
+  );
+
+  console.log(user);
+  useEffect(() => {
+    if (!user && !isLoading) {
+      navigateTo("/authportal");
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="flex flex-col p-3">
+    <div className="flex flex-col p-3 gap-5">
       <div className="flex flex-col gap-4">
         <h2 className="main_text_bold text-2xl">{t("switchLanguage")}</h2>
         <div className="flex gap-2 main_text font-semibold">
@@ -34,6 +55,9 @@ const Profile = () => {
             {t("german")}
           </button>
         </div>
+      </div>
+      <div className="main_text">
+        <h2 className="main_text_bold">Your Group</h2>
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ const signInService = async ({
   }
 };
 
-const getUserService = async (userId: number): Promise<SafeUser> => {
+const getUserService = async (userId: number) => {
   try {
     const existingUser = await User.findByPk(userId, {
       include: [
@@ -81,7 +81,27 @@ const getUserService = async (userId: number): Promise<SafeUser> => {
         },
       ],
     });
-    return existingUser!.omitFields(["password", "createdAt", "updatedAt"]);
+
+    const userGroupMemebers = await UserGroup.findAll({
+      where: { groupId: 1 },
+    });
+    // const userToLookFor = userGroupMemebers.map((user) =>
+    //   user.get({ plain: true })
+    // );
+
+    const groupMemebers = [];
+
+    userGroupMemebers.forEach(async (user) => {
+      console.log("looking for", user.get());
+      const maUser = await User.findByPk(user.get({ plain: true }).userId, {
+        attributes: ["id", "username"],
+      });
+      console.log("found ", maUser);
+      if (maUser) groupMemebers.push(maUser.get());
+    });
+
+    // console.log(groupMemebers);
+    return existingUser!.get({ plain: true });
   } catch (error) {
     throw error;
   }
