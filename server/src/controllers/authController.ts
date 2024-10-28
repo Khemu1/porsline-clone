@@ -37,8 +37,8 @@ const signIn = async (
 
     const jwtToken = generateToken({
       id: user.id,
-      groups: user.groups,
-      userGroup: user.userGroup,
+      groups: user.userGroups,
+      userGroup: user.createdGroup,
     });
 
     // Set the cookie with a 90-day expiration

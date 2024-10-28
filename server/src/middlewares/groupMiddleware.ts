@@ -6,6 +6,7 @@ import UserGroup from "../db/models/UserGroup";
 import { connect } from "http2";
 import { Op } from "sequelize";
 import { getTranslation } from "../utils";
+import Group from "../db/models/Group";
 
 export const NewGroupValidation = async (
   req: Request<{}, {}, NewGroup>,
@@ -57,39 +58,46 @@ export const checkGroupMembership = async (
   next: NextFunction
 ) => {
   try {
-    const lanuage = (req.headers["accept-language"] as "en" | "de") ?? "en";
-
     const { groupId, userId } = res.locals;
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
+    // Check if the user is a member or owner in a single query
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
         groupId,
       },
     });
-
-    const groupMembers = await UserGroup.findAll({
-      where: {
-        groupId: groupId,
-      },
+    const isGroupOwner = await Group.findOne({
+      where: { id: groupId, maker: userId },
     });
 
-    if (!userGroupMembership) {
+    // Check if the user is either a member or the owner of the group
+    if (!userGroupMembership && !isGroupOwner) {
       return next(
         new CustomError(
-          getTranslation(lanuage, "notAMemberOfGroup"),
+          getTranslation(currentLang, "notAMemberOfGroup"),
           403,
           true,
           "notAMemberOfGroup"
         )
       );
     }
-    res.locals.groupId = userGroupMembership.groupId.toString();
+
+    // Retrieve group members only if access is granted
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId },
+    });
+
+    // Set relevant data in response locals for use in the next middleware
+    res.locals.groupId = groupId;
     res.locals.groupMembers = groupMembers.map((group) =>
       group.get({ plain: true })
     );
+
     next();
   } catch (error) {
-    throw error;
+    next(error);
   }
 };
 

@@ -30,6 +30,12 @@ export const addWorkSpace = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("WORKSPACE_ADDED", {
+        workspace: { ...workspaceData },
+      });
+    }
     res.status(201).json({ workspace: { ...workspaceData } });
   } catch (error) {
     next(error);
@@ -84,7 +90,7 @@ export const deleteWorkspace = async (
 ) => {
   try {
     const { workspaceId } = req.params;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     await deleteWorkspaceService(+workspaceId);
 
     groupMembers?.forEach((member) => {
@@ -95,6 +101,13 @@ export const deleteWorkspace = async (
         });
       }
     });
+
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("WORKSPACE_DELETED", {
+        workspaceId: workspaceId,
+      });
+    }
     return res.status(204).send();
   } catch (error) {
     next(error);

@@ -256,7 +256,10 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
                   {t("cancel")}

@@ -166,8 +166,9 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isSuccess) {
       onClose();
+      clearSlices(dispatch);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
   return (
@@ -192,7 +193,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                     className="w-[30px] h-[30px]"
                   />
                 </button>
-                <span>{t("genericText")}</span>
+                <span>{t("endings")}</span>
               </div>
 
               <div className="px-4">
@@ -245,10 +246,13 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>

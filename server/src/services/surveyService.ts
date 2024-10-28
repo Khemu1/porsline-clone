@@ -5,6 +5,7 @@ import GeneralText from "../db/models/GeneralText";
 import GenericText from "../db/models/GenericText";
 import Survey from "../db/models/Survey";
 import WelcomePart from "../db/models/WelcomePart";
+import WorkSpace from "../db/models/WorkSpace";
 import { CustomError } from "../errors/customError";
 import {
   SurveyModel,
@@ -57,6 +58,10 @@ export const getSurveyService = async (
           as: "defaultEndings",
         },
         { model: CustomEnding, as: "customEndings" },
+        {
+          model: WorkSpace,
+          as: "itsWorkspace",
+        },
       ],
       order: [["questions", "createdAt", "ASC"]], // order should be out of the include block
     });

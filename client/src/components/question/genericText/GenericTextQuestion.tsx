@@ -212,9 +212,14 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
   };
 
   useEffect(() => {
+    if (label) console.log(label);
+    else console.log("no label");
+  }, [label]);
+
+  useEffect(() => {
     if (isSuccess) {
       onClose();
-      clearSlices(dispatch)
+      clearSlices(dispatch);
     }
   }, [isSuccess]);
 
@@ -253,6 +258,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
               </div>
               <div className="flex flex-col flex-grow gap-5 px-4">
                 <InputSwitchField
+                  editorId="label"
                   label={t("Label")}
                   value={label}
                   onChange={(e) => dispatch(setLabel(e.target.value))}
@@ -265,6 +271,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   errorMessage={validationErrors?.label}
                 />
                 <InputSwitchField
+                  editorId="description"
                   label={t("description")}
                   value={description}
                   onChange={(e) => dispatch(setDescription(e.target.value))}
@@ -278,7 +285,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   errorMessage={validationErrors?.description}
                 />
                 <div className="flex justify-between gap-4 p-4 main_text items-center flex-wrap">
-                  <span className="main_text_bold">Answer Format</span>
+                  <span className="main_text_bold">{t("answerFormat")}</span>
                   <Listbox
                     value={selected}
                     onChange={(value) => {
@@ -288,7 +295,13 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   >
                     <div className="relative">
                       <ListboxButton className="cursor-default py-2 px-4 w-[150px] text-left bg-transparent border border-[#85808025]">
-                        <span className="block truncate">{selected}</span>
+                        <span className="block truncate">
+                          {t(
+                            selected.toLowerCase() === "text"
+                              ? "text"
+                              : "customPattern"
+                          )}
+                        </span>
                       </ListboxButton>
                       <ListboxOptions className="absolute mt-1 bg-black border w-full top-8 border-[#85808025] shadow-lg max-h-60 overflow-y-auto z-[51]">
                         {options.map((option) => (
@@ -311,7 +324,9 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                                     : "font-normal"
                                 }`}
                               >
-                                {option.name}
+                                {option.name.toLowerCase() === "text"
+                                  ? t("text")
+                                  : t("customPattern")}
                               </span>
                             )}
                           </ListboxOption>
@@ -325,7 +340,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 {selected.toLowerCase() === "custom pattern" && (
                   <>
                     <InputSwitchField
-                      label="Pattern(RegEx validation)"
+                      label={t("regexPattern")}
                       value={regex}
                       onChange={(e) => dispatch(setRegex(e.target.value))}
                       hasSwitch={false}
@@ -336,7 +351,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                       errorMessage={validationErrors?.regex}
                     />
                     <InputSwitchField
-                      label="Example"
+                      label={t("example")}
                       value={regexPlaceHolder}
                       onChange={(e) =>
                         dispatch(setRegexPlaceHolder(e.target.value))
@@ -349,7 +364,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                       errorMessage={validationErrors?.regexPlaceHolder}
                     />
                     <InputSwitchField
-                      label="Message to display when answer does not pass RegEx "
+                      label={t("regexMessage")}
                       value={regexErrorMessage}
                       onChange={(e) =>
                         dispatch(setRegexErrorMessage(e.target.value))
@@ -365,7 +380,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 )}
                 {selected.toLowerCase() === "text" && (
                   <div className=" flex flex-col gap-2 border-b border-b-[#85808025] px-4">
-                    <span className="main_text_bold">Min/Max characters</span>
+                    <span className="main_text_bold">{t("minOrMaxChars")}</span>
                     <InputSwitchField
                       label={t("min")}
                       value={minLength.toString()}
@@ -399,7 +414,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   file={file}
                   setFile={handleFileChange}
                   title=""
-                  label="Image"
+                  label={t("image")}
                   switchChecked={isImageUploadEnabled}
                   onSwitchChange={handleSwitchChange("imageUpload")}
                   errorMessage={validationErrors?.imageFile}
@@ -417,7 +432,6 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   errorMessage={validationErrors?.hideQuestionNumber}
                 />
               </div>
-
               <div className="flex justify-start gap-5 items-center p-4">
                 <button
                   disabled={
@@ -446,7 +460,7 @@ const GenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                   }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>

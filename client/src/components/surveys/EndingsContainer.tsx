@@ -149,11 +149,11 @@ const EndingsContainer: React.FC<{
 
   useEffect(() => {
     const handleNewEnding = async (data: {
-      newEnding: { surveyId: string | number };
       ending: CustomEndingModel | DefaultEndingModel;
       type: "custom" | "default";
     }) => {
-      if (currentSurvey?.id !== +data.newEnding.surveyId) return;
+      console.log(data);
+      if (currentSurvey?.id !== +data.ending.surveyId) return;
       await addNewEndingF(data.ending, data.type, dispatch);
     };
 

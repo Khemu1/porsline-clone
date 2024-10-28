@@ -1,26 +1,32 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 
 const Nav = () => {
+  const { surveyId, workspaceId } = useParams();
   const location = useLocation();
-  const isSurveyBuilderPath = /^\/survey\/[0-9]+\/\/[0-9]+\/build$/.test(
+
+  const isSurveyBuilderPath = /^\/survey\/[0-9]+\/[0-9]+\/build(\/.*)?$/.test(
     location.pathname
   );
   const isProfilePath = location.pathname === "/profile";
+
   const currentWorkspace = useSelector(
     (state: RootState) => state.currentWorkspace.currentWorkspace
   );
+
+  console.log(location.pathname, isSurveyBuilderPath);
+
   return (
     <nav
-      className={`  ${
+      className={`${
         isSurveyBuilderPath || isProfilePath ? "justify-between" : "justify-end"
       }`}
     >
-      {location.pathname === "/profile" && (
+      {isProfilePath && (
         <Link
           to={`/`}
-          className="flex items-center justify-center rounded-md main_text text-sm transition-all  gap-1"
+          className="flex items-center justify-center rounded-md main_text text-sm transition-all gap-1"
         >
           <img
             src="/assets/icons/back-arrow.svg"
@@ -30,19 +36,29 @@ const Nav = () => {
           <span>Surveys</span>
         </Link>
       )}
+
       {isSurveyBuilderPath && (
         <div className="flex flex-grow">
-          <Link to={`/`}>{currentWorkspace?.title ?? "Go back"}</Link>
-
+          <Link to={`/`} className="flex items-center ">
+            <img
+              src="/assets/icons/back-arrow.svg"
+              alt="Profile"
+              className="w-[25px] rotate-180 transition-all rounded-md hover:bg-[#4d4c4c6f]"
+            />
+            <span className="text pb-1">
+              {currentWorkspace?.title ?? "Go back"}
+            </span>
+          </Link>
           <div className="flex justify-center flex-grow ">
             <button>
               Create
-              <span className="mx-2">{">"}</span>
+              <span className="mx-2 text-sm">{">"}</span>
             </button>
-            <button>Share {}</button>
+            <Link to={`survey/${workspaceId}/${surveyId}/share`}>Share</Link>
           </div>
         </div>
       )}
+
       <Link
         to={"/profile"}
         className="p-[1px] cursor-pointer transition-all hover:bg-[#6272a4] rounded-md"

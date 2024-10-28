@@ -14,7 +14,7 @@ export interface SurveyModel {
   workspace: number;
   createdAt?: Date;
   updatedAt?: Date;
-  welcomePart?: WelcomePartModel[];
+  welcomePart?: WelcomePartModel;
   questions: GenericTextModel[];
   defaultEndings: DefaultEndingModel[];
   customEndings: CustomEndingModel[];
@@ -134,6 +134,7 @@ export interface UpdateWorkspaceOwnerResponse {
 }
 
 export interface InputSwitchFieldProps {
+  editorId?: string;
   label: string;
   value: string;
   onChange?: (

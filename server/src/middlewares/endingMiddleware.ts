@@ -14,6 +14,7 @@ import {
 import { validateWithSchema } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
 import {
+  getTranslation,
   makeImage,
   processCustomEndingData,
   processDefaultEndingData,
@@ -28,6 +29,7 @@ import {
 } from "../utils/validations/endings";
 import DefaultEnding from "../db/models/DefaultEnding";
 import CustomEnding from "../db/models/CustomEnding";
+import Group from "../db/models/Group";
 
 export const checkGroupMembership = async (
   req: Request<{ endingId: string; type: "default" | "custom" }, {}, {}>,
@@ -43,36 +45,42 @@ export const checkGroupMembership = async (
 ) => {
   try {
     const { groupId, userId } = res.locals;
+    console.log(res.locals ? "not empty" : "empty");
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
         groupId,
       },
     });
-
-    const groupMembers = await UserGroup.findAll({
-      where: {
-        groupId,
-      },
+    const isGroupOwner = await Group.findOne({
+      where: { id: groupId, maker: userId },
     });
 
-    if (!userGroupMembership) {
+    if (!userGroupMembership && !isGroupOwner) {
       return next(
         new CustomError(
-          "User is not a member of the group",
+          getTranslation(currentLang, "notAMemberOfGroup"),
           403,
           true,
           "notAMemberOfGroup"
         )
       );
     }
-    res.locals.groupId = userGroupMembership.groupId.toString();
+
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId },
+    });
+
+    res.locals.groupId = groupId;
     res.locals.groupMembers = groupMembers.map((group) =>
       group.get({ plain: true })
     );
+
     next();
   } catch (error) {
-    throw error;
+    next(error);
   }
 };
 
@@ -88,7 +96,7 @@ export const checkWorkspaceExists = async (
       workspaceId: string;
       userId: string;
       groupId: string;
-      newEnding: NewDefaultEnding | NewCustomEnding;
+      newEnding?: NewDefaultEnding | NewCustomEnding;
     }
   >,
   next: NextFunction
@@ -235,7 +243,7 @@ export const checkEndingExists = async (
   res: Response<
     {},
     {
-      newEnding: NewDefaultEnding | NewCustomEnding;
+      newEnding?: NewDefaultEnding | NewCustomEnding;
       workspaceId: string;
       userId: string;
       groupId: string;

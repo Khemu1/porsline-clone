@@ -53,7 +53,10 @@ class User
 
     // WorkSpace to Survey
     WorkSpace.hasMany(Survey, { foreignKey: "workspace", as: "surveys" });
-    Survey.belongsTo(WorkSpace, { foreignKey: "workspace" });
+    Survey.belongsTo(WorkSpace, {
+      foreignKey: "workspace",
+      as: "itsWorkspace",
+    });
 
     // User to Group (created by the user)
     User.hasOne(Group, { foreignKey: "maker", as: "createdGroup" });
@@ -71,7 +74,7 @@ class User
     WelcomePart.belongsTo(Survey, {
       foreignKey: "surveyId",
     });
-    Survey.hasMany(WelcomePart, { foreignKey: "surveyId", as: "welcomeParts" });
+    Survey.hasOne(WelcomePart, { foreignKey: "surveyId", as: "welcomePart" });
 
     GenericText.belongsTo(Survey, { foreignKey: "surveyId" });
     Survey.hasMany(GenericText, { foreignKey: "surveyId", as: "questions" });

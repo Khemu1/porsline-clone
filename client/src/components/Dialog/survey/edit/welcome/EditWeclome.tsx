@@ -218,6 +218,7 @@ const EditWeclome: React.FC<WelcomeProps> = ({
 
                 <InputSwitchField
                   label={t("Label")}
+                  editorId="label"
                   value={label}
                   onChange={(e) => dispatch(setLabel(e.target.value))}
                   switchChecked={isLabelEnabled}
@@ -232,6 +233,7 @@ const EditWeclome: React.FC<WelcomeProps> = ({
 
                 <InputSwitchField
                   label={t("description")}
+                  editorId="description"
                   value={description}
                   onChange={(e) => dispatch(setDescription(e.target.value))}
                   switchChecked={isDescriptionEnabled}
@@ -268,14 +270,17 @@ const EditWeclome: React.FC<WelcomeProps> = ({
                       : "bg-[#2f2b72] "
                   } transition-all main_text_bold py-2 px-4 rounded`}
                 >
-                  Save
+                  {t("save")}
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>

@@ -24,7 +24,7 @@ export const addSurvey = async (
 ) => {
   try {
     const { title, workspaceId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const surveyData = await addSurveyService(+workspaceId, title);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
@@ -34,6 +34,12 @@ export const addSurvey = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY_ADDED", {
+        survey: { ...surveyData },
+      });
+    }
     res.status(201).json(surveyData);
   } catch (error) {
     next(error);
@@ -69,7 +75,7 @@ export const updateSurveyTitle = async (
   try {
     const { surveyId } = req.params;
     const { title, workspaceId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const surveyData = await updateSurveyTitleService(+surveyId, title);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
@@ -80,6 +86,13 @@ export const updateSurveyTitle = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY__EDITED", {
+        survey: { ...surveyData, workspace: +workspaceId },
+        surveyWorkspaceId: +workspaceId,
+      });
+    }
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -91,13 +104,16 @@ export const updateSurvyStatus = async (
     { surveyId: string },
     { isActive: boolean; title: string; workspaceId: string }
   >,
-  res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
+  res: Response<
+    {},
+    { workspaceId: string; groupMembers?: UserGroupModel[]; userId: string }
+  >,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { isActive, workspaceId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const surveyData = await updateSurveyStatusService(+surveyId, isActive);
 
     groupMembers?.forEach((member) => {
@@ -109,6 +125,13 @@ export const updateSurvyStatus = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY__EDITED", {
+        surveyData: { ...surveyData, workspace: workspaceId },
+        surveyWorkspaceId: workspaceId,
+      });
+    }
 
     return res.status(200).json(surveyData);
   } catch (error) {
@@ -121,13 +144,16 @@ export const updateSurveyUrl = async (
     { surveyId: string },
     { url: string; isActive: boolean; title: string; workspaceId: string }
   >,
-  res: Response<{}, { workspaceId: string; groupMembers?: UserGroupModel[] }>,
+  res: Response<
+    {},
+    { workspaceId: string; groupMembers?: UserGroupModel[]; userId: string }
+  >,
   next: NextFunction
 ) => {
   try {
     const { surveyId } = req.params;
     const { url, workspaceId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const surveyData = await updateSurveyUrlService(+surveyId, url);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
@@ -138,6 +164,13 @@ export const updateSurveyUrl = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY__EDITED", {
+        surveyData: { ...surveyData },
+        surveyWorkspaceId: workspaceId,
+      });
+    }
     return res.status(200).json(surveyData);
   } catch (error) {
     next(error);
@@ -154,7 +187,7 @@ export const deleteSurvey = async (
 ) => {
   try {
     const { surveyId } = req.params;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const { workspaceId } = req.body;
     await deleteSurveyService(+surveyId);
     groupMembers?.forEach((member) => {
@@ -166,6 +199,13 @@ export const deleteSurvey = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY_DELETED", {
+        surveyId: surveyId,
+        surveyWorkspaceId: workspaceId,
+      });
+    }
     return res.status(200).json("deleted");
   } catch (error) {
     next(error);
@@ -180,14 +220,17 @@ export const duplicateSurvey = async (
   >,
   res: Response<
     {},
-    { duplicateSurvey?: SurveyModel; groupMembers?: UserGroupModel[] }
+    {
+      duplicateSurvey?: SurveyModel;
+      groupMembers?: UserGroupModel[];
+      userId: string;
+    }
   >,
   next: NextFunction
 ) => {
   try {
-    const { duplicateSurvey } = res.locals;
     const { targetWorkspaceId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId, duplicateSurvey } = res.locals;
     const survey = await duplicateSurveyService(
       +targetWorkspaceId,
       duplicateSurvey!
@@ -200,6 +243,12 @@ export const duplicateSurvey = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY_DUPLICATED", {
+        survey: { ...survey },
+      });
+    }
 
     return res.status(201).json(survey);
   } catch (error) {
@@ -213,13 +262,13 @@ export const moveSurvey = async (
     {},
     { targetWorkspaceId: string; workspaceId: string }
   >,
-  res: Response<{}, { groupMembers?: UserGroupModel[] }>,
+  res: Response<{}, { groupMembers?: UserGroupModel[]; userId: string }>,
   next: NextFunction
 ) => {
   try {
     const { targetWorkspaceId, workspaceId } = req.body;
     const { surveyId } = req.params;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
 
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
@@ -231,6 +280,15 @@ export const moveSurvey = async (
         });
       }
     });
+
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("SURVEY_MOVED", {
+        surveyId: +surveyId,
+        sourceWorkspaceId: +workspaceId,
+        targetWorkspaceId: +targetWorkspaceId,
+      });
+    }
 
     return res.status(200).json({ targetWorkspaceId });
   } catch (error) {

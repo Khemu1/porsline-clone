@@ -5,7 +5,6 @@ import Survey from "../db/models/Survey";
 import UserGroup from "../db/models/UserGroup";
 import {
   NewWelcomePart,
-  NewWorkSpace,
   UserGroupModel,
   welcomePartOptions,
 } from "../types/types";
@@ -16,12 +15,14 @@ import {
 } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
 import {
+  getTranslation,
   makeImage,
   processEditWelcomePartData,
   processWelcomePartData,
   processWelcomePartOptions,
 } from "../utils";
 import WelcomePart from "../db/models/WelcomePart";
+import Group from "../db/models/Group";
 
 export const checkGroupMembership = async (
   req: Request<
@@ -42,36 +43,46 @@ export const checkGroupMembership = async (
 ) => {
   try {
     const { groupId, userId } = res.locals;
+    console.log(res.locals ? "not empty" : "empty");
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
+    // Check if the user is a member or owner in a single query
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
         groupId,
       },
     });
-
-    const groupMembers = await UserGroup.findAll({
-      where: {
-        groupId,
-      },
+    const isGroupOwner = await Group.findOne({
+      where: { id: groupId, maker: userId },
     });
 
-    if (!userGroupMembership) {
+    // Check if the user is either a member or the owner of the group
+    if (!userGroupMembership && !isGroupOwner) {
       return next(
         new CustomError(
-          "User is not a member of the group",
+          getTranslation(currentLang, "notAMemberOfGroup"),
           403,
           true,
           "notAMemberOfGroup"
         )
       );
     }
-    res.locals.groupId = userGroupMembership.groupId.toString();
+
+    // Retrieve group members only if access is granted
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId },
+    });
+
+    // Set relevant data in response locals for use in the next middleware
+    res.locals.groupId = groupId;
     res.locals.groupMembers = groupMembers.map((group) =>
       group.get({ plain: true })
     );
+
     next();
   } catch (error) {
-    throw error;
+    next(error);
   }
 };
 
@@ -114,7 +125,6 @@ export const checkSurveyExists = async (
     {
       surveyId: string;
       workspaceId: string;
-      
     }
   >,
   res: Response<

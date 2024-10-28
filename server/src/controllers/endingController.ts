@@ -41,7 +41,7 @@ export const addEnding = async (
   next: NextFunction
 ) => {
   try {
-    const { newEnding, groupMembers } = res.locals;
+    const { newEnding, groupMembers, userId } = res.locals;
     const { type } = req.body;
 
     const {
@@ -60,6 +60,14 @@ export const addEnding = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("ENDING_ADDED", {
+        ending,
+        type: endingType,
+        defaultEnding,
+      });
+    }
 
     return res.status(201).json({ ending, type: endingType, defaultEnding });
   } catch (error) {
@@ -94,7 +102,7 @@ export const deleteEnding = async (
   try {
     const { endingId } = req.params;
     const { type, surveyId } = req.body;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     await deleteEndingService(+endingId, type);
 
     groupMembers?.forEach((member) => {
@@ -107,6 +115,15 @@ export const deleteEnding = async (
         });
       }
     });
+
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("ENDING_DELETED", {
+        surveyId,
+        endingId,
+        type,
+      });
+    }
 
     return res.status(200).json({ endingId, type });
   } catch (error) {
@@ -139,7 +156,7 @@ export const duplicateEnding = async (
   next: NextFunction
 ) => {
   try {
-    const { ending, groupMembers } = res.locals;
+    const { ending, groupMembers, userId } = res.locals;
     const { type } = req.body;
 
     const newEnding = await duplicateEndingService(ending, type);
@@ -153,6 +170,14 @@ export const duplicateEnding = async (
         });
       }
     });
+
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("ENDING_DUPLICATED", {
+        ending: newEnding,
+        type,
+      });
+    }
 
     return res.status(201).json({ ending: newEnding, type });
   } catch (error) {
@@ -185,7 +210,7 @@ export const editEnding = async (
   next: NextFunction
 ) => {
   try {
-    const { editEnding, groupMembers } = res.locals;
+    const { editEnding, groupMembers, userId } = res.locals;
     const { endingId } = req.params;
     const { currentEndingType } = req.body;
     const ending = await editEndingService(
@@ -193,12 +218,19 @@ export const editEnding = async (
       +endingId,
       currentEndingType
     );
-    console.log("icoming", editEnding);
-    console.log("ending", ending);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("ENDING_EDITED", {
+          ending,
+          prevType: currentEndingType,
+          prevId: +endingId,
+        });
+      }
+
+      if (userSocketMap[+userId]) {
+        const emitTo = userSocketMap[+userId];
+        io.to(emitTo).emit("ENDING_EDITED", {
           ending,
           prevType: currentEndingType,
           prevId: +endingId,

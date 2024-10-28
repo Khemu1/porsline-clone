@@ -38,6 +38,7 @@ const signInService = async ({
   username,
   password,
 }: signInParams): Promise<SafeUser> => {
+  console.log("username", username, password);
   try {
     const existingUser = await User.findOne({
       where: {
@@ -46,19 +47,16 @@ const signInService = async ({
       include: [
         {
           model: UserGroup,
-          as: "userGroups", // Updated to match the interface
+          as: "userGroups",
         },
         {
           model: Group,
-          as: "userGroup",
+          as: "createdGroup",
         },
       ],
     });
 
-    if (
-      !existingUser ||
-      !(await bcrypt.compare(password, existingUser.password))
-    ) {
+    if (!existingUser || password !== existingUser.password) {
       throw new CustomError("Invalid credentials", 401, true);
     }
 

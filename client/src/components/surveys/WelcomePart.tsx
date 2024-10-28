@@ -85,6 +85,7 @@ const WelcomePart: React.FC<{
       socket.on("message", () => console.log("We have a change"));
 
       socket.on("WELCOME_PART_ADDED", (data) => {
+        console.log("Welcome part added", data);
         if (data.welcomePart.surveyId === currentSurvey?.id) {
           addWelcomePartF(data.welcomePart, dispatch);
         }

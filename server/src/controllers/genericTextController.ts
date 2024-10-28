@@ -48,6 +48,12 @@ export const addGenericQuestion = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("GENERIC_TEXT_ADDED", {
+        newGenericText: { ...newQuestionData },
+      });
+    }
 
     return res.status(201).json(newQuestionData);
   } catch (error) {
@@ -113,7 +119,7 @@ export const deleteGenericQuestion = async (
 ) => {
   try {
     const { questionId } = req.params;
-    const { groupMembers } = res.locals;
+    const { groupMembers, userId } = res.locals;
     const { surveyId } = req.body;
 
     await deleteGenricTextService(+questionId);
@@ -127,6 +133,13 @@ export const deleteGenericQuestion = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("GENERIC_TEXT_DELETED", {
+        surveyId: surveyId,
+        questionId: questionId,
+      });
+    }
     return res.status(200).json({ questionId });
   } catch (error) {
     next(error);
@@ -158,7 +171,7 @@ export const duplicateGenericText = async (
   next: NextFunction
 ) => {
   try {
-    const { question, groupMembers } = res.locals;
+    const { question, groupMembers, userId } = res.locals;
     const newQuestionData = await duplicateGenericTextService(question);
 
     groupMembers?.forEach((member) => {
@@ -169,6 +182,12 @@ export const duplicateGenericText = async (
         });
       }
     });
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("GENERIC_TEXT_DUPLICATED", {
+        duplicatedGenericText: { ...newQuestionData },
+      });
+    }
 
     return res.status(201).json({ question: { ...newQuestionData } });
   } catch (error) {
@@ -200,7 +219,7 @@ export const editGenericText = async (
   next: NextFunction
 ) => {
   try {
-    const { newQuestion, groupMembers } = res.locals;
+    const { newQuestion, groupMembers, userId } = res.locals;
     const { questionId } = req.params;
     const newQuestionData = await editGenericTextService(
       newQuestion,
@@ -214,6 +233,13 @@ export const editGenericText = async (
         });
       }
     });
+
+    if (userSocketMap[+userId]) {
+      const emitTo = userSocketMap[+userId];
+      io.to(emitTo).emit("GENERIC_TEXT_EDITED", {
+        duplicatedGenericText: { ...newQuestionData },
+      });
+    }
 
     return res.status(200).json({ question: { ...newQuestionData } });
   } catch (error) {

@@ -23,14 +23,18 @@ import {
   setButtonText,
   setIsLabelEnabled,
 } from "../../../store/slices/welcomePageSlice";
-import { returnFileAndUrl, transformDataIntoFormData } from "../../../utils";
+import {
+  clearSlices,
+  returnFileAndUrl,
+  transformDataIntoFormData,
+} from "../../../utils";
 import { useAddWelcomePart } from "../../../hooks/welcomePart";
 import { useParams } from "react-router-dom";
 interface WelcomeProps {
   isOpen: boolean;
   onClose: () => void;
 }
-const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
+const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
   const { workspaceId, surveyId } = useParams();
   const dispatch = useDispatch();
   const [validationErrors, setValidationErrors] = useState<Record<
@@ -98,7 +102,6 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
       );
       transformDataIntoFormData(options, formData);
       await handleAddWelcomePart({
-        socketId,
         welcomePart: formData,
         getCurrentLanguageTranslations,
         currentLang: getCurrentLanguage(),
@@ -156,6 +159,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
   useEffect(() => {
     if (isSuccess) {
       onClose();
+      clearSlices(dispatch);
     }
   }, [isSuccess]);
   return (
@@ -193,6 +197,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
                 />
 
                 <InputSwitchField
+                  editorId="label"
                   label={t("Label")}
                   value={label}
                   onChange={(e) => dispatch(setLabel(e.target.value))}
@@ -207,6 +212,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
                 />
 
                 <InputSwitchField
+                  editorId="description"
                   label={t("description")}
                   value={description}
                   onChange={(e) => dispatch(setDescription(e.target.value))}
@@ -248,10 +254,13 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose, socket }) => {
                 </button>
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={() => {
+                    onClose();
+                    clearSlices(dispatch);
+                  }}
                   className="bg-[#2f2b7226] main_text_bold py-2 px-4 rounded"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
               </div>
             </form>

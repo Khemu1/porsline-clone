@@ -127,6 +127,7 @@ const DefaultEnding: React.FC<{
 
       <InputSwitchField
         label={t("Label")}
+        editorId="label"
         value={label}
         onChange={(e) => dispatch(setLabel(e.target.value))}
         switchChecked={isLabelEnabled}
@@ -140,6 +141,7 @@ const DefaultEnding: React.FC<{
 
       <InputSwitchField
         label={t("description")}
+        editorId="description"
         value={description}
         onChange={(e) => dispatch(setDescription(e.target.value))}
         switchChecked={isDescriptionEnabled}

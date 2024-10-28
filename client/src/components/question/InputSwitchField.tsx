@@ -4,6 +4,7 @@ import { InputSwitchFieldProps } from "../../types";
 import EditorComponent from "./EditorComponent"; // Adjust the path as necessary
 
 const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
+  editorId,
   label,
   value,
   onChange,
@@ -73,7 +74,7 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
           {type === "editor" && (
             <EditorComponent
               editorRef={editorRef}
-              id={`${label}-editor`}
+              id={`${editorId}-editor`}
               value={value}
             />
           )}

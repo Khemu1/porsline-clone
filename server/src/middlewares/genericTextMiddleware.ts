@@ -14,6 +14,7 @@ import {
 import { validateWithSchema } from "../utils/validations/welcomeQuestion";
 import { ZodError } from "zod";
 import {
+  getTranslation,
   makeImage,
   processEditQuestionData,
   processNewQuestionOptions,
@@ -26,6 +27,7 @@ import {
 import GenericText from "../db/models/GenericText";
 import GeneralRegex from "../db/models/GeneralRegex";
 import GeneralText from "../db/models/GeneralText";
+import Group from "../db/models/Group";
 
 export const checkGroupMembership = async (
   req: Request<
@@ -44,38 +46,46 @@ export const checkGroupMembership = async (
   >,
   next: NextFunction
 ) => {
-  try {
-    const { groupId, userId } = res.locals;
-    const userGroupMembership = await UserGroup.findOne({
-      where: {
-        userId,
-        groupId,
-      },
-    });
-    const groupMembers = await UserGroup.findAll({
-      where: {
-        groupId,
-      },
-    });
+    try {
+      const { groupId, userId } = res.locals;
+      console.log(res.locals ? "not empty" : "empty");
+      const currentLang =
+        (req.headers["accept-language"] as "en" | "de") ?? "en";
 
-    if (!userGroupMembership) {
-      return next(
-        new CustomError(
-          "User is not a member of the group",
-          403,
-          true,
-          "notAMemberOfGroup"
-        )
+      const userGroupMembership = await UserGroup.findOne({
+        where: {
+          userId,
+          groupId,
+        },
+      });
+      const isGroupOwner = await Group.findOne({
+        where: { id: groupId, maker: userId },
+      });
+
+      if (!userGroupMembership && !isGroupOwner) {
+        return next(
+          new CustomError(
+            getTranslation(currentLang, "notAMemberOfGroup"),
+            403,
+            true,
+            "notAMemberOfGroup"
+          )
+        );
+      }
+
+      const groupMembers = await UserGroup.findAll({
+        where: { groupId },
+      });
+
+      res.locals.groupId = groupId;
+      res.locals.groupMembers = groupMembers.map((group) =>
+        group.get({ plain: true })
       );
+
+      next();
+    } catch (error) {
+      next(error);
     }
-    res.locals.groupId = userGroupMembership.groupId.toString();
-    res.locals.groupMembers = groupMembers.map((group) =>
-      group.get({ plain: true })
-    );
-    next();
-  } catch (error) {
-    throw error;
-  }
 };
 
 export const checkWorkspaceExists = async (
@@ -123,7 +133,7 @@ export const checkSurveyExists = async (
     {},
     {
       workspaceId: string;
-      newQuestion: NewQuestion;
+      newQuestion?: NewQuestion;
       userId: string;
       groupId: string;
     }

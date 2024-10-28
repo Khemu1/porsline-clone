@@ -10,6 +10,7 @@ import {
 } from "./components";
 import SurveyPreview from "./components/survey_preview/SurveyPreview";
 import Profile from "./components/profile/Profile";
+import Share from "./components/surveys/Share";
 function App() {
   return (
     <Router>
@@ -26,6 +27,10 @@ function App() {
           <Route
             path="/survey/:workspaceId/:surveyId/build/*"
             element={<SurveyBuilder />}
+          />
+          <Route
+            path="/survey/:workspaceId/:surveyId/share/*"
+            element={<Share />}
           />
           <Route path="/profile" element={<Profile />} />
         </Route>

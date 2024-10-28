@@ -107,7 +107,6 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
 
   const [selected, setSelected] = useState(answerFormat);
 
-
   const { workspaceId, surveyId } = useParams();
 
   const [file, setFile] = useState<File | null>(null);
@@ -282,6 +281,7 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
               <div className="flex flex-col flex-grow gap-5 px-4">
                 <InputSwitchField
                   label={t("Label")}
+                  editorId="label"
                   value={label}
                   onChange={(e) => dispatch(setLabel(e.target.value))}
                   switchChecked={true}
@@ -294,6 +294,7 @@ const EditGenericTextQuestion: React.FC<GenericTextQuestionProps> = ({
                 />
                 <InputSwitchField
                   label={t("description")}
+                  editorId="description"
                   value={description}
                   onChange={(e) => dispatch(setDescription(e.target.value))}
                   switchChecked={isDescriptionEnabled}

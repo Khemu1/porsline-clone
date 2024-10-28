@@ -59,7 +59,7 @@ const SurveyBuilder = () => {
       localStorage.setItem("currentSurvey", JSON.stringify(survey)); // Save survey to local storage
 
       if (survey.welcomePart) {
-        dispatch(updateWelcomePart(survey.welcomePart[0]));
+        dispatch(updateWelcomePart(survey.welcomePart));
       }
       if (survey.questions) {
         dispatch(setGenericTexts(survey.questions ?? []));

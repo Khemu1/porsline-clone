@@ -16,10 +16,10 @@ export interface UserModel {
   password: string;
   createdAt?: Date;
   updatedAt?: Date;
-  groupId?: number; 
+  groupId?: number;
   workspaces?: WorkSpaceModel[];
-  userGroups?: UserGroupModel[]; 
-  createdGroup: GroupModel; 
+  userGroups?: UserGroupModel[];
+  createdGroup?: GroupModel;
 }
 
 export interface UserGroupModel {
@@ -86,8 +86,8 @@ export interface SafeUser {
   username: string;
   email: string;
   role: string;
-  groups?: UserGroupModel[];
-  userGroup?: GroupModel;
+  createdGroup: GroupModel;
+  userGroups: UserGroupModel[];
 }
 export interface ReturnedJWTPaylod {
   id: number;
