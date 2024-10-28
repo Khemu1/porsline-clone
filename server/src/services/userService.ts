@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import User from "../db/models/User";
 import { SafeUser, signInParams, SignUpParams } from "../types/types";
 import { CustomError } from "../errors/customError";
@@ -23,7 +22,7 @@ const addUser = async ({
 
     const user = User.build({
       username,
-      password: await bcrypt.hash(password, 10), // Hash the password
+      password: password, // Hash the password
     });
     await user.validate();
 

@@ -7,6 +7,7 @@ import {
   moveSurveyToWorkspace,
   updateSurveyStatus,
   updateSurveyTitle,
+  updateSurveyUrl,
 } from "../services/survey";
 import { useState } from "react";
 import {
@@ -37,6 +38,64 @@ export const useUpdateSurvey = () => {
       setErrorState(null);
 
       return await updateSurveyTitle(
+        title,
+        workspaceId,
+        surveyId,
+        getCurrentLanguageTranslations,
+        currentLang
+      );
+    },
+    onError: (err: CustomError | unknown) => {
+      const message =
+        err instanceof CustomError
+          ? err.errors || { message: err.message }
+          : { message: "Unknown Error" };
+
+      setErrorState(message);
+      console.error("Error updating survey title:", err);
+    },
+    onSettled: () => {
+      console.log("Mutation has either succeeded or failed");
+    },
+  });
+
+  const {
+    mutateAsync: handleUpdateSurvey,
+    isError,
+    isSuccess,
+    isPending,
+  } = mutation;
+
+  return {
+    handleUpdateSurvey,
+    isError,
+    isSuccess,
+    errorState,
+    isPending,
+  };
+};
+
+
+export const useUpdateSurveyUrl = () => {
+  const [errorState, setErrorState] = useState<Record<string, string> | null>(
+    null
+  );
+
+  const mutation = useMutation<
+    UpdateSurveyTitleResponse,
+    CustomError | unknown,
+    UpdateSurveyTitleProps
+  >({
+    mutationFn: async ({
+      title,
+      workspaceId,
+      surveyId,
+      getCurrentLanguageTranslations,
+      currentLang,
+    }: UpdateSurveyTitleProps) => {
+      setErrorState(null);
+
+      return await updateSurveyUrl(
         title,
         workspaceId,
         surveyId,

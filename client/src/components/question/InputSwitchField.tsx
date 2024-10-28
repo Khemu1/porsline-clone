@@ -71,6 +71,7 @@ const InputSwitchField: React.FC<InputSwitchFieldProps> = ({
               required={required}
             />
           )}
+          {type === "editor" && <div>{editorId}</div>}
           {type === "editor" && (
             <EditorComponent
               editorRef={editorRef}

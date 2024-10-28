@@ -316,3 +316,48 @@ export const getSurvey = async (
     throw error;
   }
 };
+
+
+export const updateSurveyUrl = async (
+  workspaceId: number,
+  surveyId: number,
+  url:string,
+  lang: () => (typeof translations)["en"],
+  currentLang: "en" | "de"
+): Promise<SurveyModel> => {
+  try {
+    const response = await fetch(`/api/survey/${surveyId}/update-url`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": currentLang,
+      },
+      body: JSON.stringify({workspaceId,url})
+    });
+
+    if (!response.ok) {
+      const errorData: CustomError = await response.json();
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        errorData.message ?? currentLanguageTranslations.unknownError;
+
+      const err = new CustomError(
+        errorMessage,
+        response.status,
+        "getSurveyError",
+        true,
+        errorData.details,
+        errorData.errors
+      );
+      throw err;
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

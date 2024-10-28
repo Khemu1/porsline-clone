@@ -27,6 +27,9 @@ export const commonTranslations = {
     remove: "remove",
     enterUserId: "Enter User ID",
     members: "Members",
+    share: "Share",
+    create: "Create",
+    change: "Change",
   },
   de: {
     unknownError: "Ein unbekannter Fehler ist aufgetreten.",
@@ -56,6 +59,11 @@ export const commonTranslations = {
     remove: "entfernen",
     enterUserId: "Benutzer-ID eingeben",
     members: "Mitglieder",
+    share: "Akite",
+
+    // todo: comeback
+    create: "Create",
+    change: "Change",
     // Other common translations
   },
 };

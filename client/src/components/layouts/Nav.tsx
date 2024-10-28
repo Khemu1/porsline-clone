@@ -1,8 +1,10 @@
 import { Link, useLocation, useParams } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
+import { useLanguage } from "../lang/LanguageProvider";
 
 const Nav = () => {
+  const { t } = useLanguage();
   const { surveyId, workspaceId } = useParams();
   const location = useLocation();
 
@@ -50,11 +52,13 @@ const Nav = () => {
             </span>
           </Link>
           <div className="flex justify-center flex-grow ">
-            <button>
-              Create
+            <Link to={`survey/${workspaceId}/${surveyId}/build`}>
+              {t("create")}
               <span className="mx-2 text-sm">{">"}</span>
-            </button>
-            <Link to={`survey/${workspaceId}/${surveyId}/share`}>Share</Link>
+            </Link>
+            <Link to={`survey/${workspaceId}/${surveyId}/share`}>
+              {t("share")}
+            </Link>
           </div>
         </div>
       )}
