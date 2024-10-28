@@ -7,10 +7,8 @@ import Survey from "../db/models/Survey";
 import WelcomePart from "../db/models/WelcomePart";
 import { CustomError } from "../errors/customError";
 
-import { Op } from "sequelize";
 
-export const getSurveyPreviewService = async (surveyId: number) => {
-  console.log("getting preview", surveyId);
+export const getSurveyPreviewService = async (surveyPath: string) => {
 
   try {
     const survey = await Survey.findOne({
@@ -37,7 +35,7 @@ export const getSurveyPreviewService = async (surveyId: number) => {
         },
       ],
       where: {
-        id: surveyId,
+        url: surveyPath,
       },
       order: [["questions", "createdAt", "ASC"]],
     });

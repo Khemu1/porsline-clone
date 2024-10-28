@@ -6,7 +6,7 @@ import { useState } from "react";
 import { translations } from "../components/lang/translations";
 
 export const useGetForPreviewSurvey = (
-  surveyId: number,
+  surveyPath: string,
   getCurrentLanguageTranslations: () => (typeof translations)["en"],
   currentLang: "en" | "de"
 ) => {
@@ -19,11 +19,11 @@ export const useGetForPreviewSurvey = (
     isError,
     isLoading,
   } = useQuery<SurveyPreviewModel, CustomError>({
-    queryKey: ["getForPreviewSurvey", surveyId],
+    queryKey: ["getForPreviewSurvey", surveyPath],
     queryFn: async () => {
       try {
         const survey = await getSurveyForPreview(
-          surveyId,
+          surveyPath,
           getCurrentLanguageTranslations,
           currentLang
         );

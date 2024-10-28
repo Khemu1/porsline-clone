@@ -84,8 +84,8 @@ const SurveyBuilder = () => {
             className={`flex justify-start items-center ${
               welcomePartState.id !== null
                 ? "bg-[#0e0f0f81] cursor-not-allowed"
-                : "bg-[#0e0f0f]"
-            }  py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all `}
+                : "bg-[#0e0f0f] cursor-pointer"
+            }  py-1 px-3 gap-2 rounded-lg w-full  transition-all `}
             onClick={() => setOpenWelcomePage(true)}
           >
             <div className="survey_builder_icon_welcome_style">

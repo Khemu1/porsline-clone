@@ -90,9 +90,10 @@ export const addSurveyF = async (
   dispatch: Dispatch<UnknownAction>
 ) => {
   try {
+    console.log(newSurvey.workspace, currentWorkspaceId);
     if (newSurvey.workspace === currentWorkspaceId) {
-      dispatch(updateCurrentWorkspaceSurveys(newSurvey));
-      dispatch(updateSurveys(newSurvey));
+      dispatch(addSurveyToCurrentWorkspace(newSurvey));
+      dispatch(addSurvey(newSurvey));
     }
     dispatch(addSurveyToWorkspace(newSurvey));
   } catch (error) {
@@ -554,7 +555,6 @@ export const addGroupMemberF = async (
     console.error(error);
   }
 };
-
 
 export const removeGroupMemberF = async (
   memberId: number,

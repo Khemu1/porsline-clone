@@ -24,8 +24,9 @@ export const addSurvey = async (
 ) => {
   try {
     const { title, workspaceId } = req.body;
-    const { groupMembers, userId } = res.locals;
+    const { groupMembers } = res.locals;
     const surveyData = await addSurveyService(+workspaceId, title);
+    console.log("groupMembers", groupMembers);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
@@ -34,12 +35,6 @@ export const addSurvey = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("SURVEY_ADDED", {
-        survey: { ...surveyData },
-      });
-    }
     res.status(201).json(surveyData);
   } catch (error) {
     next(error);
@@ -80,7 +75,7 @@ export const updateSurveyTitle = async (
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY__EDITED", {
+        io.to(memberSocketId).emit("SURVEY_EDITED", {
           survey: { ...surveyData, workspace: +workspaceId },
           surveyWorkspaceId: +workspaceId,
         });
@@ -88,7 +83,7 @@ export const updateSurveyTitle = async (
     });
     if (userSocketMap[+userId]) {
       const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("SURVEY__EDITED", {
+      io.to(emitTo).emit("SURVEY_EDITED", {
         survey: { ...surveyData, workspace: +workspaceId },
         surveyWorkspaceId: +workspaceId,
       });
@@ -112,23 +107,23 @@ export const updateSurvyStatus = async (
 ) => {
   try {
     const { surveyId } = req.params;
-    const { isActive, workspaceId } = req.body;
+    const { workspaceId } = req.body;
     const { groupMembers, userId } = res.locals;
-    const surveyData = await updateSurveyStatusService(+surveyId, isActive);
+    const surveyData = await updateSurveyStatusService(+surveyId);
 
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY__EDITED", {
-          surveyData: { ...surveyData, workspace: workspaceId },
+        io.to(memberSocketId).emit("SURVEY_EDITED", {
+          survey: { ...surveyData, workspace: workspaceId },
           surveyWorkspaceId: workspaceId,
         });
       }
     });
     if (userSocketMap[+userId]) {
       const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("SURVEY__EDITED", {
-        surveyData: { ...surveyData, workspace: workspaceId },
+      io.to(emitTo).emit("SURVEY_EDITED", {
+        survey: { ...surveyData, workspace: workspaceId },
         surveyWorkspaceId: workspaceId,
       });
     }
@@ -158,20 +153,21 @@ export const updateSurveyUrl = async (
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        io.to(memberSocketId).emit("SURVEY__EDITED", {
-          surveyData: { ...surveyData },
-          surveyWorkspaceId: workspaceId,
+        io.to(memberSocketId).emit("SURVEY_EDITED", {
+          survey: { ...surveyData, workspace: +workspaceId },
+          surveyWorkspaceId: +workspaceId,
         });
       }
     });
+    console.log("users with owner id", userSocketMap[+userId]);
     if (userSocketMap[+userId]) {
       const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("SURVEY__EDITED", {
-        surveyData: { ...surveyData },
-        surveyWorkspaceId: workspaceId,
+      io.to(emitTo).emit("SURVEY_EDITED", {
+        survey: { ...surveyData, workspace: +workspaceId },
+        surveyWorkspaceId: +workspaceId,
       });
     }
-    return res.status(200).json(surveyData);
+    return res.status(200).json({ ...surveyData, workspace: +workspaceId });
   } catch (error) {
     next(error);
   }
@@ -243,13 +239,6 @@ export const duplicateSurvey = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("SURVEY_DUPLICATED", {
-        survey: { ...survey },
-      });
-    }
-
     return res.status(201).json(survey);
   } catch (error) {
     next(error);
@@ -269,7 +258,7 @@ export const moveSurvey = async (
     const { targetWorkspaceId, workspaceId } = req.body;
     const { surveyId } = req.params;
     const { groupMembers, userId } = res.locals;
-
+    await moveSurveyService(+targetWorkspaceId, +surveyId);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {

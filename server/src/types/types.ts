@@ -35,7 +35,6 @@ export interface WorkSpaceModel {
   id: number;
   maker: number;
   title: string;
-  groupId: number;
   createdAt?: Date;
   updatedAt?: Date;
   surveys?: SurveyModel[];
@@ -80,6 +79,7 @@ export interface SignUpParams {
 export interface signInParams {
   username: string;
   password: string;
+  currentLang: "en" | "de";
 }
 export interface SafeUser {
   id: string;
@@ -321,4 +321,12 @@ export interface DefaultEndingOptions {
   defaultEnding: boolean;
   reloadOrRedirect: boolean;
   autoReload: boolean;
+}
+
+export interface WorkspaceGroupModel {
+  id: number;
+  workspaceId: number;
+  groupId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

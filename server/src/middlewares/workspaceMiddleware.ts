@@ -35,13 +35,13 @@ export const checkWorkspaceExists = async (
     {
       workspaceId: string;
       userId: string;
-      groupId: string;
       groupMembers?: UserGroupModel[];
     }
   >,
   next: NextFunction
 ) => {
   const { workspaceId } = req.params;
+
   if (isNaN(+workspaceId) || +workspaceId < 1) {
     return next(
       new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
@@ -52,17 +52,20 @@ export const checkWorkspaceExists = async (
     where: { id: +workspaceId },
   });
 
-  const groupMembers = await UserGroup.findAll({
-    where: {
-      groupId: workspace?.groupId,
-    },
-  });
-
   if (!workspace) {
     return next(new CustomError("Workspace not found", 404, true));
   }
-  res.locals.groupId = workspace.groupId.toString();
-  res.locals.groupMembers = groupMembers.map((group) =>
+
+  const userId = res.locals;
+  const userGroups = await UserGroup.findAll({
+    where: {
+      userId: +userId,
+    },
+  });
+
+  const groupIds = userGroups.map((group) => group.groupId);
+
+  res.locals.groupMembers = userGroups.map((group) =>
     group.get({ plain: true })
   );
 
@@ -71,22 +74,21 @@ export const checkWorkspaceExists = async (
 
 export const checkDuplicateWorkspaceTitle = async (
   req: Request<{ workspaceId: string }, {}, { title: string }>,
-  res: Response<{}, { groupId: string }>,
+  res: Response<{}, { userId: string }>, // Adjust response locals as needed
   next: NextFunction
 ) => {
   try {
     const { title } = req.body;
     const { workspaceId } = req.params;
-    const { groupId } = res.locals;
 
-    const exsitingWorkspace = await WorkSpace.findOne({
-      where: { id: { [Op.not]: workspaceId }, title, groupId: +groupId },
+    const existingWorkspace = await WorkSpace.findOne({
+      where: { id: { [Op.not]: workspaceId }, title }, // No need for groupId
     });
 
-    if (exsitingWorkspace) {
+    if (existingWorkspace) {
       return next(
         new CustomError(
-          "workspace with this title already exists",
+          "Workspace with this title already exists",
           409,
           true,
           "workspaceTitleExists"
@@ -102,9 +104,9 @@ export const checkDuplicateWorkspaceTitle = async (
     const currentLang = headers["accept-language"] as "en" | "de";
     if (error instanceof ZodError) {
       console.log(validateWithSchema(error, currentLang));
-      next(
+      return next(
         new CustomError(
-          "validation Error",
+          "Validation Error",
           400,
           true,
           "`validationError`",

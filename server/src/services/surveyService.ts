@@ -72,21 +72,24 @@ export const getSurveyService = async (
   }
 };
 
-export const updateSurveyStatusService = async (
-  surveyId: number,
-  isActive: boolean
-): Promise<UpdateSurveyStatusResponse> => {
+export const updateSurveyStatusService = async (surveyId: number) => {
+  console.log("in service", surveyId);
   try {
+    const survey = await Survey.findByPk(surveyId);
     const updatedDate = new Date();
     await Survey.update(
-      { isActive, updatedAt: updatedDate },
+      { isActive: !survey!.isActive, updatedAt: updatedDate },
       {
         where: {
           id: surveyId,
         },
       }
     );
-    return { updatedAt: updatedDate };
+    return {
+      ...survey!.get({ plain: true }),
+      updatedAt: updatedDate,
+      isActive: !survey!.isActive,
+    };
   } catch (error) {
     throw error;
   }
@@ -170,9 +173,8 @@ export const duplicateSurveyService = async (
   survey: SurveyModel
 ) => {
   try {
-    const { id, createdAt, updatedAt, workspace, ...dubed } = survey;
     const duplicatedSurvey = await Survey.create({
-      ...dubed,
+      ...survey,
       workspace: targetWorkspaceId,
     });
     return duplicatedSurvey.get({ plain: true });

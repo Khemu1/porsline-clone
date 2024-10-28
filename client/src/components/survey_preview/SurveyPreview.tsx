@@ -13,11 +13,13 @@ import PreviewQuestion from "./PreviewQuestion";
 import SurveyEndingPreview from "./SurveyEndingPreview";
 
 const SurveyPreview = () => {
-  const { surveyId } = useParams();
+  const { t } = useLanguage();
+  const { surveyPath } = useParams();
   const { getCurrentLanguageTranslations, getCurrentLanguage } = useLanguage();
 
   const [welcomePart, setWelcomePart] = useState<WelcomePartModel | null>(null);
   const [questions, setQuestions] = useState<GenericTextModel[]>([]);
+  const [requiredError, setRequiredError] = useState(false);
   const [ending, setEnding] = useState<
     CustomEndingModel | DefaultEndingModel | null
   >(null);
@@ -29,7 +31,7 @@ const SurveyPreview = () => {
   >([]);
 
   const { survey, isLoading } = useGetForPreviewSurvey(
-    Number(surveyId),
+    surveyPath ?? "",
     getCurrentLanguageTranslations,
     getCurrentLanguage()
   );
@@ -64,7 +66,17 @@ const SurveyPreview = () => {
     if (current === 0) {
       setCurrent(1);
     } else if (current === 1) {
-      setCurrentIndex((prev) => prev + 1);
+      const questionReponse = responses.find(
+        (response) => response.questionId === questions[currentIndex].id
+      );
+      if (questions[currentIndex].required && !questionReponse?.response) {
+        setRequiredError(true);
+      } else {
+        if (requiredError) {
+          setRequiredError(false);
+        }
+        setCurrentIndex((prev) => prev + 1);
+      }
     }
   };
 
@@ -125,6 +137,11 @@ const SurveyPreview = () => {
                 }
                 onResponseChange={handleResponseChange}
               />
+              {requiredError && (
+                <span className="text-red-600 font-semibold">
+                  {t("requiredAnswer")}
+                </span>
+              )}
               <div className="flex justify-between mt-4">
                 <button
                   className="bg-[#0a7091] text-white w-[150px] p-2 rounded-md transition-all hover:scale-105"
@@ -138,18 +155,15 @@ const SurveyPreview = () => {
         {current === 2 && ending && <SurveyEndingPreview {...ending} />}
         {current === 2 && !ending && (
           <div className="text-center flex flex-col gap-5 items-center text-xl main_text bg-[#1a1b1d] py-8 px-5 w-[430px] rounded-md">
-            <p className="w-[250px] main_text_bold mb-4">
-              Your information has been sent successfully.
+            <p className=" main_text_bold mb-4 whitespace-normal text-wrap">
+              {t("suervyEndingHeader")}.
             </p>
-            <p>
-              You can create your own forms and surveys for free or use a
-              Porsline template.
-            </p>
+            <p>{t("surveyEndingbody")}.</p>
             <Link to="/" className="bg-[#262A2B] w-[83%] p-2 rounded-md">
-              Create survey with Porsline
+              {t("surveyEndingButton1")}
             </Link>
             <Link to="#" className="input_border w-[85%] p-2 rounded-md">
-              Know more about Porsline
+              {t("surveyEndingButton2")}
             </Link>
           </div>
         )}

@@ -20,11 +20,9 @@ export const addWorkSpace = async (
     const { groupMembers } = res.locals;
     const workspaceData = await addWorkSpaceService(+userId, title);
 
-    console.log("group to emit to", groupMembers);
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        console.log("emitting to", memberSocketId);
         io.to(memberSocketId).emit("WORKSPACE_ADDED", {
           workspace: { ...workspaceData },
         });

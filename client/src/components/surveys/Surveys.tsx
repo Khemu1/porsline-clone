@@ -43,14 +43,13 @@ const Surveys = () => {
   const socket = useSocket();
   useEffect(() => {
     const handleSurvey = async (data: { survey: SurveyModel }) => {
-      console.log("survey arrived", data);
-      console.log(currentWorkspace!.id);
+      console.log("just arrived", data);
       try {
         await addSurveyF(+currentWorkspace!.id, data.survey, dispatch);
       } catch (error) {
         console.error(error);
       }
-    }; 
+    };
 
     const handleEditSurvey = async (data: {
       survey: SurveyModel;
@@ -106,8 +105,6 @@ const Surveys = () => {
     const handleSurveyDuplicated = async (data: { survey: SurveyModel }) => {
       try {
         if (currentWorkspace?.id) {
-          console.log("arrived to duplicate", data);
-          console.log(currentWorkspace?.id);
           await duplicateSurveyF(data.survey, +currentWorkspace.id, dispatch);
         } else {
           console.error("Current workspace ID not found.");
@@ -117,7 +114,6 @@ const Surveys = () => {
       }
     };
 
-    // Add socket listeners
     socket.on("SURVEY_ADDED", handleSurvey);
     socket.on("SURVEY_EDITED", handleEditSurvey);
     socket.on("SURVEY_DELETED", handleDeleteSurvey);

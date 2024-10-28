@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { getSurveyPreview } from "../controllers/surveyPreviewController";
-import { checkSurveyExists } from "../middlewares/surveyMiddleware";
+import { checkSurveyExists, checkSurveyExistsForPreview } from "../middlewares/surveyMiddleware";
 
 const surveyPreviewRouter = Router();
 
-surveyPreviewRouter.get("/:surveyId", checkSurveyExists, getSurveyPreview);
+surveyPreviewRouter.get("/:surveyPath", checkSurveyExistsForPreview, getSurveyPreview);
 
 export default surveyPreviewRouter;

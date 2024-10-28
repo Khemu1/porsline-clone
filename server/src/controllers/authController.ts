@@ -7,6 +7,7 @@ import {
 import { signInParams, SignUpParams } from "../types/types";
 import { generateToken } from "../services/jwtService";
 import { NextFunction } from "connect";
+import { getTranslation } from "../utils";
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -28,12 +29,9 @@ const signIn = async (
   next: NextFunction
 ) => {
   try {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { username, password } = req.body as signInParams;
-    const user = await signInService({ username, password });
-
-    if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" }); // Handle invalid user case
-    }
+    const user = await signInService({ username, password, currentLang });
 
     const jwtToken = generateToken({
       id: user.id,
@@ -41,12 +39,11 @@ const signIn = async (
       userGroup: user.createdGroup,
     });
 
-    // Set the cookie with a 90-day expiration
     res.cookie("jwt", jwtToken, {
-      httpOnly: true, // Prevents client-side access to the cookie
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days in milliseconds
-      sameSite: "strict", // Prevent CSRF attacks
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 90 * 24 * 60 * 60 * 1000,
+      sameSite: "strict",
     });
 
     return res.status(200).json(user);

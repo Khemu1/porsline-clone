@@ -3,12 +3,12 @@ import { SurveyPreviewModel } from "../types";
 import { CustomError } from "../utils/CustomError";
 
 export const getSurveyForPreview = async (
-  surveyId: number,
+  surveyPath: string,
   lang: () => (typeof translations)["en"],
   currentLang: "en" | "de"
 ): Promise<SurveyPreviewModel> => {
   try {
-    const response = await fetch(`/api/preview-survey/${surveyId}`, {
+    const response = await fetch(`/api/preview-survey/${surveyPath}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +21,6 @@ export const getSurveyForPreview = async (
 
       const currentLanguageTranslations = lang();
 
-    
       const errorMessage =
         errorData.message ?? currentLanguageTranslations.unknownError;
 

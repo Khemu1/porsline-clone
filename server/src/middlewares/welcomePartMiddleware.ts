@@ -46,7 +46,6 @@ export const checkGroupMembership = async (
     console.log(res.locals ? "not empty" : "empty");
     const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
-    // Check if the user is a member or owner in a single query
     const userGroupMembership = await UserGroup.findOne({
       where: {
         userId,
@@ -57,7 +56,6 @@ export const checkGroupMembership = async (
       where: { id: groupId, maker: userId },
     });
 
-    // Check if the user is either a member or the owner of the group
     if (!userGroupMembership && !isGroupOwner) {
       return next(
         new CustomError(
@@ -74,7 +72,6 @@ export const checkGroupMembership = async (
       where: { groupId },
     });
 
-    // Set relevant data in response locals for use in the next middleware
     res.locals.groupId = groupId;
     res.locals.groupMembers = groupMembers.map((group) =>
       group.get({ plain: true })
@@ -139,9 +136,7 @@ export const checkSurveyExists = async (
 
   try {
     if (Number.isNaN(+surveyId)) {
-      return next(
-        new CustomError("Invalid survey ID", 400, true, "invalidSurveyId")
-      );
+      return next(new CustomError("", 400, true, "invalidSurveyId"));
     }
 
     const survey = await Survey.findOne({
@@ -149,9 +144,7 @@ export const checkSurveyExists = async (
     });
 
     if (!survey) {
-      return next(
-        new CustomError("Survey not found", 404, true, "surveyNotFound")
-      );
+      return next(new CustomError("", 404, true, "surveyNotFound"));
     }
 
     next();
@@ -183,11 +176,44 @@ export const validateNewWelcomePart = async (
   next: NextFunction
 ) => {
   try {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+    const { userId } = res.locals;
+    // const workspace = await WorkSpace.findOne({
+    //   where: { maker: +userId },
+    //   include: [
+    //     {
+    //       model: Survey,
+    //       as: "surveys",
+    //       where: { id: req.body.surveyId },
+    //       required: true,
+    //       include: [
+    //         {
+    //           model: WelcomePart,
+    //           as: "welcomePart",
+    //           required: true,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
+
+    // if (workspace && workspace.get({ plain: true }).surveys?.length !== 0) {
+    //   return next(
+    //     new CustomError(
+    //       getTranslation(currentLang, "welcomePartExists"),
+    //       409,
+    //       true,
+    //       "welcomePartExists"
+    //     )
+    //   );
+    // }
+
+    // Process and validate `welcomePart` data if no existing record is found
     const data = processWelcomePartData(req.body);
     const options = processWelcomePartOptions(req.body);
-
     const schema = welcomeFormSchema(options);
     schema.parse(data);
+
     res.locals.welcomePartData = { ...data };
     if (data.imageUrl) {
       const imageUrl = makeImage(data.imageUrl);
@@ -195,21 +221,21 @@ export const validateNewWelcomePart = async (
     }
     next();
   } catch (error) {
-    const { headers } = req;
-    const currentLang = headers["accept-language"] as "en" | "de";
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     if (error instanceof ZodError) {
       next(
         new CustomError(
           "validation Error",
           400,
           true,
-          "`validationError`",
+          "validationError",
           "",
           validateWithSchema(error, currentLang)
         )
       );
+    } else {
+      next(error);
     }
-    next(error);
   }
 };
 
@@ -295,6 +321,7 @@ export const checkQuestionExists = async (
   next: NextFunction
 ) => {
   try {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { welcomeId } = req.params;
     const welcomePart = await WelcomePart.findOne({
       where: { id: welcomeId },
@@ -303,7 +330,7 @@ export const checkQuestionExists = async (
     if (!welcomePart) {
       return next(
         new CustomError(
-          "Welcome part not found",
+          getTranslation(currentLang, "welcomePartNotFound"),
           404,
           true,
           "welcomePartNotFound"

@@ -41,19 +41,31 @@ module.exports = {
 
     await queryInterface.bulkInsert("group", groups);
 
-    // Retrieve all groups to get their IDs
+    // Retrieve all groups to get their IDs and names
     const [insertedGroups] = await queryInterface.sequelize.query(
-      `SELECT id, name FROM "group"`
+      `SELECT id, maker, name FROM "group"` // Retrieve maker and name for groupName
     );
 
     // Create user-group associations
     const userGroups = [];
 
     insertedGroups.forEach((group, index) => {
+      // Add the group maker (owner) to the userGroups array
+      const ownerUser = insertedUsers.find((user) => user.id === group.maker);
+      if (ownerUser) {
+        userGroups.push({
+          userId: ownerUser.id,
+          groupId: group.id,
+          username: ownerUser.username, // Include the username of the maker
+          groupName: group.name, // Include the group name
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+
       // Select two random users to add to the group (excluding the owner)
-      const ownerUserId = insertedUsers[index].id; // Owner is the user who created the group
       const otherUsers = insertedUsers.filter(
-        (user) => user.id !== ownerUserId
+        (user) => user.id !== group.maker
       );
       const randomUsers = [];
 
@@ -71,8 +83,8 @@ module.exports = {
         userGroups.push({
           userId: user.id,
           groupId: group.id,
-          username: user.username,
-          groupName: group.name, // Add the group name here
+          username: user.username, // Include username for each user
+          groupName: group.name, // Include group name for each entry
           createdAt: new Date(),
           updatedAt: new Date(),
         });

@@ -18,7 +18,7 @@ function App() {
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/authportal" element={<SignIn />} />
-          <Route path="/survey/:surveyId" element={<SurveyPreview />} />
+          <Route path="/survey/:surveyPath" element={<SurveyPreview />} />
         </Route>
 
         {/* Private Routes */}

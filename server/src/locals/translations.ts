@@ -4,6 +4,7 @@ import { GenericTextErrorTranslations } from "./GenericTextError";
 import { surveyTranslations } from "./survey";
 import { surveyBuilderTranslations } from "./surveyBuilder";
 import { groupTranslations } from "./group";
+import { workspaceErrorsTranslations } from "./workspace";
 
 export const translations = {
   en: {
@@ -13,6 +14,7 @@ export const translations = {
     ...GenericTextErrorTranslations.en,
     ...defaultEnding.en,
     ...groupTranslations.en,
+    ...workspaceErrorsTranslations.en,
   },
   de: {
     ...surveyTranslations.de,
@@ -21,5 +23,6 @@ export const translations = {
     ...GenericTextErrorTranslations.de,
     ...defaultEnding.de,
     ...groupTranslations.de,
+    ...workspaceErrorsTranslations.de,
   },
 };

@@ -208,7 +208,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                       clearSlices(dispatch);
                     }}
                   >
-                    End Page
+                    {t("endingPage")}
                   </button>
                   <button
                     type="button"
@@ -220,7 +220,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                       clearSlices(dispatch);
                     }}
                   >
-                    Redirect to URL
+                    {t("redirectToUrl")}
                   </button>
                 </div>
               </div>
@@ -242,7 +242,7 @@ const Endings: React.FC<EndingsProps> = ({ isOpen, onClose }) => {
                       : "bg-[#2f2b72] "
                   } transition-all main_text_bold py-2 px-4 rounded`}
                 >
-                  Save
+                  {t("save")}
                 </button>
                 <button
                   type="button"

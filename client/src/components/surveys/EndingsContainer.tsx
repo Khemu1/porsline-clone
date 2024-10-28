@@ -226,7 +226,7 @@ const EndingsContainer: React.FC<{
                 </div>
                 {ending.defaultEnding && (
                   <span className="main_text rounded-lg bg-[#272626] border border-[#42484b] px-2">
-                    Default
+                    {t("default")}
                   </span>
                 )}
                 <p

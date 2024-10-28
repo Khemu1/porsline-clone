@@ -67,7 +67,6 @@ export interface WorkSpaceModel {
   id: number;
   maker: number;
   title: string;
-  groupId: number;
   createdAt: Date;
   updatedAt: Date;
   surveys: SurveyModel[];
@@ -294,4 +293,12 @@ export interface DefaultEndingOptions {
   defaultEnding: boolean;
   reloadOrRedirectButton: boolean;
   autoReload: boolean;
+}
+
+export interface UpdateSurveyUrlProps {
+  workspaceId: number;
+  surveyId: number;
+  url: string;
+  getCurrentLanguageTranslations: () => (typeof translations)["en"];
+  currentLang: "de" | "en";
 }

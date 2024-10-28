@@ -20,14 +20,10 @@ module.exports = {
 
     // Ensure each user has at least 2 workspaces
     users.forEach((user) => {
-      // Find the group for the current user
-      const group = groups.find((g) => g.maker === user.id); // Assuming maker is the user id
-
       for (let i = 1; i <= 2; i++) {
         workspaces.push({
           title: `${user.username} Workspace ${i}`,
           maker: user.id,
-          groupId: group ? group.id : null, // Use group id or null if not found
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -37,13 +33,30 @@ module.exports = {
     // Bulk insert workspaces for each user
     await queryInterface.bulkInsert("workspace", workspaces);
 
-    // Retrieve all inserted workspaces to use their IDs for surveys
+    // Retrieve all inserted workspaces with their IDs
     const [insertedWorkspaces] = await queryInterface.sequelize.query(
-      `SELECT id, title FROM "workspace"`
+      `SELECT id, title, maker FROM "workspace"`
     );
 
-    const surveys = [];
+    // Prepare the workspace-group association entries
+    const workspaceGroupEntries = [];
+    insertedWorkspaces.forEach((workspace) => {
+      // Find the group corresponding to the workspace maker (owner)
+      const group = groups.find((g) => g.maker === workspace.maker);
+      if (group) {
+        workspaceGroupEntries.push({
+          workspaceId: workspace.id,
+          groupId: group.id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    });
 
+    // Associate workspaces with groups in the WorkspaceGroup table
+    await queryInterface.bulkInsert("WorkspaceGroup", workspaceGroupEntries);
+
+    const surveys = [];
     // Create 2 surveys for each workspace
     insertedWorkspaces.forEach((workspace) => {
       for (let i = 1; i <= 2; i++) {
@@ -51,7 +64,7 @@ module.exports = {
           title: `${workspace.title} Survey ${i}`,
           isActive: false,
           workspace: workspace.id,
-          url: `https://example.com/${workspace.title.toLowerCase().replace(/\s+/g, "-")}-survey-${i}`,
+          url: `${Date.now().toString()}-survey`,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
@@ -67,5 +80,7 @@ module.exports = {
     await queryInterface.bulkDelete("survey", null, {});
     // Delete all workspaces
     await queryInterface.bulkDelete("workspace", null, {});
+    // Delete all workspace-group associations
+    await queryInterface.bulkDelete("WorkspaceGroup", null, {});
   },
 };

@@ -6,8 +6,12 @@ import { CustomError } from "../utils/CustomError";
 import { authUser, signIn } from "../services/auth";
 import { RootState } from "../store/store";
 import { signIn as signInRed } from "../store/slices/authSlice";
+import { translations } from "../components/lang/translations";
 
-export const useSignIn = () => {
+export const useSignIn = (
+  currentLang: "en" | "de",
+  getCurrentLanguageTranslations: () => (typeof translations)["en"]
+) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Record<string, string> | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
@@ -18,8 +22,11 @@ export const useSignIn = () => {
     setError(null);
     setSuccess(false);
     try {
-      console.log("going in");
-      const user = await signIn(data);
+      const user = await signIn(
+        data,
+        currentLang,
+        getCurrentLanguageTranslations
+      );
       setSuccess(true);
       localStorage.setItem("userData", JSON.stringify(user));
       dispatch(signInRed({ ...user }));

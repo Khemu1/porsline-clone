@@ -27,7 +27,7 @@ const RedirectEnding: React.FC<{
       previewImageUrl: state.sharedForm.previewImageUrl,
       shareSurvey: state.defaultEnding.shareSurvey,
       defaultEnding: state.sharedForm.defaultEnding,
-      ReloadOrDirectButton: state.defaultEnding.ReloadOrDirectButton,
+      ReloadOrDirectButton: state.defaultEnding.reloadOrRedirect,
       buttonText: state.defaultEnding.buttonText,
       autoReload: state.defaultEnding.autoReload,
       reloadTimeInSeconds: state.defaultEnding.reloadTimeInSeconds,
@@ -39,7 +39,7 @@ const RedirectEnding: React.FC<{
   return (
     <div className="flex flex-col flex-grow  overflow-hidden shrink-0 rounded-md text-sm w-full ">
       <EnterRedirectLink
-        label={"Respondents are directed to the following URL"}
+        label={t("redirectEndingText")}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           dispatch(setRedirectUrl(e.target.value))
         }

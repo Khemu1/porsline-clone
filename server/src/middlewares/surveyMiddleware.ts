@@ -10,6 +10,8 @@ import { CustomError } from "../errors/customError";
 import Survey from "../db/models/Survey";
 import WorkSpace from "../db/models/WorkSpace";
 import { Op } from "sequelize";
+import { getTranslation } from "../utils";
+import UserGroup from "../db/models/UserGroup";
 export const validateNewSurvey = async (
   req: Request<{ surveyId: string }, {}, { title: string }>,
   res: Response<
@@ -64,17 +66,19 @@ export const checkWorkspaceExistsForSurvey = async (
     {},
     {
       workspaceId: string;
-      groupId: string;
       userId: string;
       duplicateSurvey?: SurveyModel;
+      userGroupIds: number[];
     }
   >,
   next: NextFunction
 ) => {
   const { workspaceId } = req.params;
   const { workspaceId: workspaceIdFromBody } = req.body;
+
   try {
     const idToLookFor = workspaceId ?? workspaceIdFromBody;
+
     if (isNaN(+idToLookFor)) {
       return next(
         new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
@@ -91,10 +95,18 @@ export const checkWorkspaceExistsForSurvey = async (
       );
     }
 
-    // Store the groupId for later use
-    res.locals.groupId = workspace.groupId.toString();
+    const { userId } = res.locals;
+    const userGroups = await UserGroup.findAll({
+      where: {
+        userId: +userId,
+      },
+    });
 
-    next(); // Proceed to the next middleware
+    const userGroupIds = userGroups.map((group) => group.groupId);
+
+    res.locals.userGroupIds = userGroupIds;
+
+    next();
   } catch (error) {
     return next(error);
   }
@@ -134,6 +146,7 @@ export const checkSurveyExists = async (
 
     const survey = await Survey.findOne({
       where: { id: surveyId },
+      attributes: { exclude: ["id", "url"] },
     });
 
     if (!survey) {
@@ -142,6 +155,75 @@ export const checkSurveyExists = async (
       );
     }
     console.log("survey found from middleware");
+
+    if (title !== survey.title) {
+      res.locals.duplicateSurvey = {
+        ...survey.get(),
+        title,
+        createdAt: new Date(),
+        updatedAt: undefined,
+        url: Date.now().toString() + "-survey",
+      };
+    }
+
+    next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const checkSurveyExistsForPreview = async (
+  req: Request<
+    { surveyPath: string },
+    {},
+    {
+      workspaceId: string;
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      workspaceId: string;
+      groupId: string;
+      userId: string;
+      duplicateSurvey?: SurveyModel;
+    }
+  >,
+  next: NextFunction
+) => {
+  const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+  const { surveyPath } = req.params;
+  const { title } = req.body;
+
+  try {
+    if (!surveyPath) {
+      return next(
+        new CustomError(
+          getTranslation(lang, "urlRequired"),
+          400,
+          true,
+          "invalidSurveyId"
+        )
+      );
+    }
+
+    const survey = await Survey.findOne({
+      where: { url: surveyPath },
+    });
+
+    if (!survey) {
+      return next(
+        new CustomError(
+          getTranslation(lang, "surveyNotFound"),
+          404,
+          true,
+          "surveyNotFound"
+        )
+      );
+    }
 
     if (title !== survey.title) {
       res.locals.duplicateSurvey = {
@@ -168,12 +250,18 @@ export const checkDuplicateSurveyTitle = async (
   res: Response<{}, { workspaceId: string }>,
   next: NextFunction
 ) => {
+  const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
   const { surveyId } = req.params;
   const { title, workspaceId } = req.body;
 
   if (!title || title.trim().length === 0) {
     return next(
-      new CustomError("Survey title is required", 400, true, "titleRequired")
+      new CustomError(
+        getTranslation(lang, "surveyTitleRequired"),
+        400,
+        true,
+        "titleRequired"
+      )
     );
   }
 
@@ -184,7 +272,7 @@ export const checkDuplicateSurveyTitle = async (
   if (existingSurvey) {
     return next(
       new CustomError(
-        "Survey with this title already exists",
+        getTranslation(lang, "surveyNotFound"),
         409,
         true,
         "titleExists"
@@ -201,6 +289,7 @@ export const checkDuplicateSurveyUrl = async (
   next: NextFunction
 ) => {
   try {
+    const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { url } = req.body;
     if (!url) {
       return next(
@@ -216,7 +305,7 @@ export const checkDuplicateSurveyUrl = async (
     if (existingSurvey) {
       return next(
         new CustomError(
-          "Survey with this URL already exists",
+          getTranslation(lang, "urlIsUsed"),
           409,
           true,
           "urlExists"
@@ -226,7 +315,6 @@ export const checkDuplicateSurveyUrl = async (
 
     next();
   } catch (error) {
-    console.log("errrorrororor");
     const { headers } = req;
     const currentLang = headers["accept-language"] as "en" | "de";
     if (error instanceof ZodError) {
@@ -256,6 +344,7 @@ export const validateSurveyForMoving = async (
   next: NextFunction
 ) => {
   try {
+    const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { targetWorkspaceId } = req.body;
     const { surveyId } = req.params;
     if (isNaN(+targetWorkspaceId)) {
@@ -271,7 +360,7 @@ export const validateSurveyForMoving = async (
     if (!targetWorkspace) {
       return next(
         new CustomError(
-          "Target workspace not found",
+          getTranslation(lang, "targetWorkspaceNotFound"),
           404,
           true,
           "targetWorkspaceNotFound"

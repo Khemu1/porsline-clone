@@ -128,7 +128,7 @@ const EditDefaultEnding: React.FC<{
       <ImageUploadField
         file={file}
         setFile={handleFileChange}
-        label="Image"
+        label={t("image")}
         title=""
         switchChecked={isImageUploadEnabled}
         onSwitchChange={handleSwitchChange("imageUpload")}
@@ -191,7 +191,7 @@ const EditDefaultEnding: React.FC<{
         />
         {reloadOrRedirect && (
           <div className="flex flex-col justify-between gap-2 px-4  main_text  flex-wrap">
-            <span className="main_text">Redirect To</span>
+            <span className="main_text">{t("redirectTo")}</span>
             <Listbox
               value={redirectToWhat}
               onChange={(
@@ -213,7 +213,16 @@ const EditDefaultEnding: React.FC<{
             >
               <div className="relative">
                 <ListboxButton className="cursor-default py-2 px-4 w-full text-left bg-transparent border border-[#85808025]">
-                  <span className="block truncate">{redirectToWhat}</span>
+                  <span className="block truncate">
+                    {" "}
+                    {redirectToWhat === "Survey Link (Reaload the Survey)"
+                      ? t("surveyLink")
+                      : selected === "Results Link"
+                      ? t("resultsLink")
+                      : selected === "Another Link"
+                      ? t("anotherLink")
+                      : redirectToWhat}
+                  </span>
                 </ListboxButton>
                 <ListboxOptions className="absolute mt-1 bg-black border w-full top-8 border-[#85808025] shadow-lg max-h-60 overflow-y-auto z-[51]">
                   {options.map((option) => (
@@ -234,7 +243,16 @@ const EditDefaultEnding: React.FC<{
                             selected ? "font-medium bg-blue-600" : "font-normal"
                           }`}
                         >
-                          {option.name}
+                          {option.name.toLowerCase() ===
+                          "survey link (reaload the survey)".toLowerCase()
+                            ? t("surveyLink")
+                            : option.name.toLowerCase() ===
+                              "results link".toLowerCase()
+                            ? t("resultsLink")
+                            : option.name.toLowerCase() ===
+                              "another link".toLowerCase()
+                            ? t("anotherLink")
+                            : option.name}
                         </span>
                       )}
                     </ListboxOption>

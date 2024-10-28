@@ -39,7 +39,7 @@ const EditRedirectEnding: React.FC<{
   return (
     <div className="flex flex-col flex-grow  overflow-hidden shrink-0 rounded-md text-sm w-full ">
       <EnterRedirectLink
-        label={"Respondents are directed to the following URL"}
+        label={t("redirectEndingText")}
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
           dispatch(setRedirectUrl(e.target.value))
         }

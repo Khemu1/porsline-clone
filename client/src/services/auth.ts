@@ -3,25 +3,34 @@ import { SignInProps, SignInResponseProps } from "../types";
 import { CustomError } from "../utils/CustomError";
 
 export const signIn = async (
-  formData: SignInProps
+  formData: SignInProps,
+  currentLang: "de" | "en",
+  lang: () => (typeof translations)["en"]
 ): Promise<SignInResponseProps> => {
   try {
     const response = await fetch("/api/auth/signin", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Accept-Language": currentLang,
       },
       body: JSON.stringify(formData),
     });
 
     if (!response.ok) {
       const errorData: CustomError = await response.json();
-      const errorMessage = errorData.message || "Sign-in failed";
+
+      const currentLanguageTranslations = lang();
+
+      const errorMessage =
+        currentLanguageTranslations[
+          errorData.type as keyof typeof currentLanguageTranslations
+        ] || currentLanguageTranslations.unknownError;
 
       const err = new CustomError(
         errorMessage,
         response.status,
-        "SignInError",
+        "getSurveyError",
         true,
         errorData.details,
         errorData.errors

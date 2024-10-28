@@ -1,6 +1,7 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import authPortalStyle from "../../styles/authPortal.module.css";
 import { useSignIn } from "../../hooks/auth";
+import { useLanguage } from "../lang/LanguageProvider";
 
 // Define the type for the form data
 interface FormData {
@@ -9,10 +10,15 @@ interface FormData {
 }
 
 const SignIn: React.FC = () => {
+  const { t, setLanguage, getCurrentLanguage, getCurrentLanguageTranslations } =
+    useLanguage();
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
   });
+
+  // State to hold the selected language
+  const [language, setLanguageState] = useState<string>("en");
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -22,7 +28,11 @@ const SignIn: React.FC = () => {
       [name]: value,
     });
   };
-  const { loading, error, success, handleSignIn } = useSignIn();
+
+  const { loading, error, success, handleSignIn } = useSignIn(
+    getCurrentLanguage(),
+    getCurrentLanguageTranslations
+  );
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,38 +41,61 @@ const SignIn: React.FC = () => {
 
       if (username && password) {
         await handleSignIn(formData);
-      } else {
-        window.alert("pleaseFillFields");
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  const handleLanguageChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const selectedLanguage = e.target.value;
+    setLanguageState(selectedLanguage);
+    setLanguage(selectedLanguage as "en" | "de");
+    localStorage.setItem("language", selectedLanguage);
+  };
+
+  useEffect(() => {
+    const language = localStorage.getItem("language");
+    if (language) {
+      setLanguageState(language);
+    }
+  }, []);
+
   return (
     <div className={authPortalStyle.authPortal}>
-      <h1 className="mb-5 font-semibold text-5xl italic">{"loginTitle"}</h1>
+      <div className={`flex w-full mb-5`}>
+        <select
+          className="p-1"
+          id="language"
+          value={language}
+          onChange={handleLanguageChange}
+        >
+          <option value="en">{t("english")}</option>
+          <option value="de">{t("german")}</option>
+        </select>
+      </div>
+      <h1 className="mb-5 font-semibold text-5xl italic">{t("login")}</h1>
 
       <form onSubmit={handleSubmit}>
         <div className={authPortalStyle.inputContainer}>
-          <label htmlFor="username">{"usernamePlaceholder"}</label>
+          <label htmlFor="username">{t("username")}</label>
           <input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            placeholder={"usernamePlaceholder"}
+            placeholder={t("enterUsername")}
           />
         </div>
 
         <div className={authPortalStyle.inputContainer}>
-          <label htmlFor="password">{"passwordPlaceholder"}</label>
+          <label htmlFor="password">{t("password")}</label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder={"passwordPlaceholder"}
+            placeholder={t("enterPassword")}
           />
         </div>
 
@@ -72,7 +105,7 @@ const SignIn: React.FC = () => {
             disabled={loading || success}
             className="btn-secondary"
           >
-            {"loginButton"}
+            {t("login")}
           </button>
         </div>
         {error && (

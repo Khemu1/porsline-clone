@@ -4,6 +4,7 @@ import { CustomError } from "../errors/customError";
 import { Op } from "sequelize";
 import UserGroup from "../db/models/UserGroup";
 import Group from "../db/models/Group";
+import { getTranslation } from "../utils";
 
 const addUser = async ({
   username,
@@ -36,6 +37,7 @@ const addUser = async ({
 const signInService = async ({
   username,
   password,
+  currentLang,
 }: signInParams): Promise<SafeUser> => {
   console.log("username", username, password);
   try {
@@ -54,9 +56,10 @@ const signInService = async ({
         },
       ],
     });
+    const notFoundMessage = getTranslation("de", "invalidCredentials");
 
     if (!existingUser || password !== existingUser.password) {
-      throw new CustomError("Invalid credentials", 401, true);
+      throw new CustomError(notFoundMessage, 401, true);
     }
 
     return existingUser.omitFields(["password", "createdAt", "updatedAt"]);

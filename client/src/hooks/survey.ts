@@ -14,6 +14,7 @@ import {
   SurveyModel,
   UpdateSurveyTitleProps,
   UpdateSurveyTitleResponse,
+  UpdateSurveyUrlProps,
 } from "../types";
 import { CustomError } from "../utils/CustomError";
 import { translations } from "../components/lang/translations";
@@ -75,34 +76,33 @@ export const useUpdateSurvey = () => {
   };
 };
 
-
 export const useUpdateSurveyUrl = () => {
   const [errorState, setErrorState] = useState<Record<string, string> | null>(
     null
   );
-
   const mutation = useMutation<
-    UpdateSurveyTitleResponse,
+    SurveyModel,
     CustomError | unknown,
-    UpdateSurveyTitleProps
+    UpdateSurveyUrlProps
   >({
     mutationFn: async ({
-      title,
       workspaceId,
       surveyId,
+      url,
       getCurrentLanguageTranslations,
       currentLang,
-    }: UpdateSurveyTitleProps) => {
+    }: UpdateSurveyUrlProps) => {
       setErrorState(null);
 
       return await updateSurveyUrl(
-        title,
         workspaceId,
         surveyId,
+        url,
         getCurrentLanguageTranslations,
         currentLang
       );
     },
+
     onError: (err: CustomError | unknown) => {
       const message =
         err instanceof CustomError
@@ -118,14 +118,14 @@ export const useUpdateSurveyUrl = () => {
   });
 
   const {
-    mutateAsync: handleUpdateSurvey,
+    mutateAsync: handleUpdateSurveyUrl,
     isError,
     isSuccess,
     isPending,
   } = mutation;
 
   return {
-    handleUpdateSurvey,
+    handleUpdateSurveyUrl,
     isError,
     isSuccess,
     errorState,

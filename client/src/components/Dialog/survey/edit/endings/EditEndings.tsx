@@ -218,7 +218,7 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
                       clearSlices(dispatch);
                     }}
                   >
-                    {t("endings")}
+                    {t("endingPage")}
                   </button>
                   <button
                     type="button"

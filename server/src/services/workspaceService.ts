@@ -4,19 +4,26 @@ import UserGroup from "../db/models/UserGroup";
 import WorkSpace from "../db/models/WorkSpace";
 import { CustomError } from "../errors/customError";
 import { UpdateWorkspaceTitleResponse, WorkSpaceModel } from "../types/types";
+import Group from "../db/models/Group";
+import WorkspaceGroup from "../db/models/WorkspaceGroup";
 
 export const addWorkSpaceService = async (userId: number, title: string) => {
   try {
-    const group = await UserGroup.findOne({ where: { userId: userId } });
+    const group = await Group.findOne({ where: { maker: userId } });
     if (!group) {
-      throw new CustomError("error finding your group", 404, true);
+      throw new CustomError("Error finding your group", 404, true);
     }
+
     const workspace = await WorkSpace.create({
       title,
       maker: userId,
-      groupId: group.groupId,
-      
     });
+
+    await WorkspaceGroup.create({
+      groupId: group.id,
+      workspaceId: workspace.id,
+    });
+
     return workspace.get({ plain: true });
   } catch (error) {
     throw error;
@@ -28,26 +35,32 @@ export const getWorkSpacesService = async (
 ): Promise<WorkSpaceModel[]> => {
   try {
     const userGroups = await UserGroup.findAll({ where: { userId } });
-
     const groupIds = userGroups.map((userGroup) => userGroup.groupId);
 
-    // Fetch workspaces created by the user
     const myWorkspaces = await WorkSpace.findAll({
       where: { maker: userId },
       include: [{ model: Survey, as: "surveys" }],
-      order: [["createdAt", "ASC"]],
     });
 
     const groupWorkspaces = await WorkSpace.findAll({
+      include: [
+        {
+          model: Group,
+          as: "groups",
+          where: { id: groupIds },
+          through: { attributes: [] },
+        },
+        { model: Survey, as: "surveys" },
+      ],
       where: {
-        groupId: groupIds,
         id: { [Op.not]: myWorkspaces.map((ws) => ws.id) },
       },
-      include: [{ model: Survey, as: "surveys" }],
-      order: [["createdAt", "ASC"]],
     });
 
-    const allWorkspaces = [...myWorkspaces, ...groupWorkspaces];
+    const allWorkspaces = [...myWorkspaces, ...groupWorkspaces].sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
 
     return allWorkspaces;
   } catch (error) {

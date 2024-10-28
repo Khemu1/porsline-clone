@@ -6,6 +6,8 @@ import UserGroup from "../db/models/UserGroup";
 import { connect } from "http2";
 import { Op } from "sequelize";
 import { getTranslation } from "../utils";
+import WorkspaceGroup from "../db/models/WorkspaceGroup";
+import WorkSpace from "../db/models/WorkSpace";
 import Group from "../db/models/Group";
 
 export const NewGroupValidation = async (
@@ -53,46 +55,61 @@ export const checkGroupMembership = async (
   >,
   res: Response<
     {},
-    { groupId: string; userId: string; groupMembers?: UserGroupModel[] }
+    { userGroupIds: number[]; userId: string; groupMembers?: UserGroupModel[] }
   >,
   next: NextFunction
 ) => {
   try {
-    const { groupId, userId } = res.locals;
+    console.log("in checkGroupMembership");
+    const { userGroupIds, userId } = res.locals;
+    const { workspaceId } = req.body;
     const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
-    // Check if the user is a member or owner in a single query
-    const userGroupMembership = await UserGroup.findOne({
-      where: {
-        userId,
-        groupId,
-      },
-    });
-    const isGroupOwner = await Group.findOne({
-      where: { id: groupId, maker: userId },
+    const workspace = await WorkSpace.findOne({
+      where: { id: workspaceId },
     });
 
-    // Check if the user is either a member or the owner of the group
-    if (!userGroupMembership && !isGroupOwner) {
+    if (!workspace) {
       return next(
         new CustomError(
-          getTranslation(currentLang, "notAMemberOfGroup"),
-          403,
+          getTranslation(currentLang, "workspaceNotFound"),
+          404,
           true,
-          "notAMemberOfGroup"
+          "workspaceNotFound"
         )
       );
     }
 
-    // Retrieve group members only if access is granted
-    const groupMembers = await UserGroup.findAll({
-      where: { groupId },
+    if (userGroupIds.length === 0) {
+      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+    }
+    console.log({ workspaceId: workspace.id, groupId: userGroupIds });
+    const hasAccess = await WorkspaceGroup.findOne({
+      where: { workspaceId: workspace.id, groupId: userGroupIds },
     });
 
-    // Set relevant data in response locals for use in the next middleware
-    res.locals.groupId = groupId;
-    res.locals.groupMembers = groupMembers.map((group) =>
-      group.get({ plain: true })
+    if (!hasAccess) {
+      return next(
+        new CustomError(
+          "No Access to this workspace",
+          403,
+          true,
+          "accessDeniedToWorkspace"
+        )
+      );
+    }
+
+    const userGroup = await Group.findOne({
+      where: { maker: userId },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId: userGroup?.id },
+    });
+
+    res.locals.userGroupIds = userGroupIds;
+    res.locals.groupMembers = groupMembers.map((member) =>
+      member.get({ plain: true })
     );
 
     next();

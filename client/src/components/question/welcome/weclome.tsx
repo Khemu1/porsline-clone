@@ -189,7 +189,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
                 <ImageUploadField
                   file={file}
                   setFile={handleFileChange}
-                  label="Image"
+                  label={t("image")}
                   title=""
                   switchChecked={isImageUploadEnabled}
                   onSwitchChange={handleSwitchChange("imageUpload")}
@@ -250,7 +250,7 @@ const Welcome: React.FC<WelcomeProps> = ({ isOpen, onClose }) => {
                       : "bg-[#2f2b72] "
                   } transition-all main_text_bold py-2 px-4 rounded`}
                 >
-                  Save
+                  {t("save")}
                 </button>
                 <button
                   type="button"

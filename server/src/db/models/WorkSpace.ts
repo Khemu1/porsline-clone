@@ -12,7 +12,6 @@ class WorkSpace
   declare id: number;
   declare maker: number;
   declare title: string;
-  declare groupId: number;
   declare createdAt: Date;
   declare updatedAt: Date;
 
@@ -31,13 +30,6 @@ WorkSpace.init(
       type: DataTypes.INTEGER,
       references: {
         model: "user",
-        key: "id",
-      },
-    },
-    groupId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: "group",
         key: "id",
       },
     },

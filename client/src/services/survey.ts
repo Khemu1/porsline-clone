@@ -317,22 +317,21 @@ export const getSurvey = async (
   }
 };
 
-
 export const updateSurveyUrl = async (
   workspaceId: number,
   surveyId: number,
-  url:string,
+  url: string,
   lang: () => (typeof translations)["en"],
   currentLang: "en" | "de"
-): Promise<SurveyModel> => {
+) => {
   try {
     const response = await fetch(`/api/survey/${surveyId}/update-url`, {
-      method: "GET",
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         "Accept-Language": currentLang,
       },
-      body: JSON.stringify({workspaceId,url})
+      body: JSON.stringify({ workspaceId, url }),
     });
 
     if (!response.ok) {

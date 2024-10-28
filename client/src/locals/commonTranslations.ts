@@ -29,7 +29,20 @@ export const commonTranslations = {
     members: "Members",
     share: "Share",
     create: "Create",
-    change: "Change",
+    copy: "Copy",
+    customizeLink: "Customize Link",
+    surveyLink: "Survey Link",
+    enterNameForSurveyLink: "Enter Distinct Name For Your Survey Link",
+    suervyEndingHeader: "Your information has been sent successfully.",
+    surveyEndingbody:
+      "You can create your own forms and surveys for free or use a Porsline template.",
+    surveyEndingButton1: "Create survey with Porsline",
+    surveyEndingButton2: "Know more about Porsline",
+    requiredAnswer: "An Answer is Required",
+    endingPage: "Ending Page",
+    redirectToUrl: "Redirect to URL",
+    redirectEndingText: "Respondents are directed to the following URL",
+    goBack:"Go Back",
   },
   de: {
     unknownError: "Ein unbekannter Fehler ist aufgetreten.",
@@ -60,10 +73,22 @@ export const commonTranslations = {
     enterUserId: "Benutzer-ID eingeben",
     members: "Mitglieder",
     share: "Akite",
-
-    // todo: comeback
-    create: "Create",
-    change: "Change",
+    copy: "Kopieren",
+    customizeLink: "Link anpassen",
+    surveyLink: "Umfrage-Link",
+    enterNameForSurveyLink:
+      "Geben Sie einen eindeutigen Namen für Ihren Umfragelink ein",
+    suervyEndingHeader: "Ihre Informationen wurden erfolgreich gesendet.",
+    surveyEndingbody:
+      "Sie können Ihre eigenen Formulare und Umfragen für kostenlos erstellen oder eine Porsline-Vorlage verwenden.",
+    surveyEndingButton1: "Umfrage mit Porsline erstellen",
+    surveyEndingButton2: "Mehr über Porsline erfahren",
+    requiredAnswer: "Eine Antwort ist erforderlich",
+    create: "Erstellen",
+    endingPage: "Endseite",
+    redirectToUrl: "Weiterleitung zur URL",
+    redirectEndingText: "Antworten werden an die folgende URL weitergeleitet",
+    goBack:"Zurück",
     // Other common translations
   },
 };
