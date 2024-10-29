@@ -42,6 +42,8 @@ const Surveys = () => {
 
   const socket = useSocket();
   useEffect(() => {
+    if (!currentWorkspace?.id || !currentSurvey?.id) return;
+    
     const handleSurvey = async (data: { survey: SurveyModel }) => {
       console.log("just arrived", data);
       try {
@@ -58,9 +60,9 @@ const Surveys = () => {
       try {
         await updateSurveyF(
           data.survey,
-          currentSurvey!.id,
+          currentSurvey.id,
           data.surveyWorkspaceId,
-          currentWorkspace!.id,
+          currentWorkspace.id,
           dispatch
         );
       } catch (error) {
@@ -79,7 +81,7 @@ const Surveys = () => {
           +data.surveyId,
           +data.sourceWorkspaceId,
           +data.targetWorkspaceId,
-          +currentWorkspace!.id,
+          +currentWorkspace.id,
           data.survey,
           dispatch
         );
@@ -95,7 +97,7 @@ const Surveys = () => {
       try {
         await deleteSurveyF(
           +data.surveyId,
-          +currentWorkspace!.id,
+          +currentWorkspace.id,
           +data.surveyWorkspaceId,
           dispatch
         );

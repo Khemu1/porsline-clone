@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RootState } from "../../store/store";
 import { useSelector } from "react-redux";
 import { useLanguage } from "../lang/LanguageProvider";
@@ -10,7 +10,7 @@ const UserGroup = () => {
   const groupState = useSelector((state: RootState) => state.userGroup);
   const { handleRemoveMember, errorState: removeErrorState } =
     useRemoveGroupMember();
-  const { handleAddMember, errorState } = useAddGroupMember();
+  const { handleAddMember, errorState, isSuccess } = useAddGroupMember();
 
   const [text, setText] = useState("");
 
@@ -33,6 +33,12 @@ const UserGroup = () => {
       currentLang: getCurrentLanguage(),
     });
   };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setText("");
+    }
+  }, [isSuccess]);
 
   return (
     <div className="flex flex-col gap-3 p-6 bg-[#1e1e1e] text-white rounded-md shadow-md max-w-[600px]">
