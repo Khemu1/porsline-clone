@@ -14,13 +14,22 @@ const workspaceSlice = createSlice({
   initialState,
   reducers: {
     setWorkspaces: (state, action: PayloadAction<WorkSpaceModel[]>) => {
-      state.workspaces = action.payload;
+      // Ensure surveys is initialized as an array for each workspace
+      state.workspaces = action.payload.map((workspace) => ({
+        ...workspace,
+        surveys: workspace.surveys || [],
+      }));
     },
     signOut: (state) => {
       state.workspaces = [];
     },
     addWorkspace: (state, action: PayloadAction<WorkSpaceModel>) => {
-      state.workspaces.push(action.payload);
+      // Initialize surveys if it's undefined
+      const newWorkspace = {
+        ...action.payload,
+        surveys: action.payload.surveys || [],
+      };
+      state.workspaces.push(newWorkspace);
     },
     updateWorkspace: (
       state,
@@ -28,7 +37,12 @@ const workspaceSlice = createSlice({
     ) => {
       state.workspaces = state.workspaces.map((workspace) =>
         workspace.id === action.payload.id
-          ? { ...workspace, ...action.payload.workspaceData }
+          ? {
+              ...workspace,
+              ...action.payload.workspaceData,
+              surveys:
+                action.payload.workspaceData.surveys || workspace.surveys || [],
+            }
           : workspace
       );
     },
@@ -40,7 +54,10 @@ const workspaceSlice = createSlice({
     addSurveyToWorkspace: (state, action: PayloadAction<SurveyModel>) => {
       state.workspaces = state.workspaces.map((workspace) =>
         workspace.id === action.payload.workspace
-          ? { ...workspace, surveys: [...workspace.surveys, action.payload] }
+          ? {
+              ...workspace,
+              surveys: [...(workspace.surveys || []), action.payload],
+            }
           : workspace
       );
     },
@@ -50,54 +67,36 @@ const workspaceSlice = createSlice({
     ) => {
       const workspace = state.workspaces.find(
         (ws) => +ws.id === +action.payload.workspaceId
-      )!;
-      const updatedSurveys = workspace.surveys.filter(
-        (survey) => survey.id !== action.payload.surveyId
-      )!;
-
-      state.workspaces = state.workspaces.map((ws) =>
-        +ws.id === +action.payload.workspaceId
-          ? { ...ws, surveys: [...updatedSurveys] }
-          : ws
       );
+
+      if (workspace && workspace.surveys) {
+        const updatedSurveys = workspace.surveys.filter(
+          (survey) => survey.id !== action.payload.surveyId
+        );
+
+        state.workspaces = state.workspaces.map((ws) =>
+          +ws.id === +action.payload.workspaceId
+            ? { ...ws, surveys: updatedSurveys }
+            : ws
+        );
+      }
     },
     updateWorkspaceSurvey: (state, action: PayloadAction<SurveyModel>) => {
       const workspace = state.workspaces.find(
         (ws) => ws.id === action.payload.workspace
       );
 
-      if (!workspace) {
-        console.error(
-          `Workspace with ID ${action.payload.workspace} not found.`
+      if (workspace && workspace.surveys) {
+        const updatedSurveys = workspace.surveys.map((survey) =>
+          survey.id === action.payload.id
+            ? { ...survey, ...action.payload }
+            : survey
         );
-        return;
-      }
 
-      if (!workspace.surveys) {
-        console.error(
-          `Surveys not found for workspace with ID ${workspace.id}.`
+        state.workspaces = state.workspaces.map((ws) =>
+          ws.id === workspace.id ? { ...ws, surveys: updatedSurveys } : ws
         );
-        return;
       }
-
-      const surveyToUpdate = workspace.surveys.find(
-        (survey) => survey.id === action.payload.id
-      );
-
-      if (!surveyToUpdate) {
-        console.error(`Survey with ID ${action.payload.id} not found.`);
-        return;
-      }
-
-      const updatedSurvey = { ...surveyToUpdate, ...action.payload };
-      const updatedSurveys = workspace.surveys.map((survey) =>
-        survey.id === action.payload.id ? updatedSurvey : survey
-      );
-
-      const updatedWorkspace = { ...workspace, surveys: updatedSurveys };
-      state.workspaces = state.workspaces.map((ws) =>
-        ws.id === updatedWorkspace.id ? updatedWorkspace : ws
-      );
     },
 
     moveSurveyToAnotherWorkspace: (
@@ -114,61 +113,39 @@ const workspaceSlice = createSlice({
         (ws) => ws.id === sourceWorkspaceId
       );
 
-      if (!sourceWorkspace) {
-        console.error(
-          `Source workspace with ID ${sourceWorkspaceId} not found.`
-        );
-        return;
-      }
-
       const targetWorkspace = state.workspaces.find(
         (ws) => ws.id === targetWorkspaceId
       );
 
-      if (!targetWorkspace) {
-        console.error(
-          `Target workspace with ID ${targetWorkspaceId} not found.`
+      if (sourceWorkspace && targetWorkspace) {
+        // Ensure surveys are initialized
+        sourceWorkspace.surveys = sourceWorkspace.surveys || [];
+        targetWorkspace.surveys = targetWorkspace.surveys || [];
+
+        const surveyToMove = sourceWorkspace.surveys.find(
+          (survey) => survey.id === surveyId
         );
-        return;
-      }
 
-      if (!sourceWorkspace.surveys) {
-        console.error(
-          `Surveys not found for source workspace with ID ${sourceWorkspaceId}.`
-        );
-        return;
-      }
+        if (surveyToMove) {
+          // Remove from source workspace and add to target workspace
+          sourceWorkspace.surveys = sourceWorkspace.surveys.filter(
+            (survey) => survey.id !== surveyId
+          );
 
-      const surveyToMove = sourceWorkspace.surveys.find(
-        (survey) => survey.id === surveyId
-      );
+          targetWorkspace.surveys.push(surveyToMove);
 
-      if (!surveyToMove) {
-        console.error(
-          `Survey with ID ${surveyId} not found in source workspace.`
-        );
-        return;
-      }
-
-      sourceWorkspace.surveys = sourceWorkspace.surveys.filter(
-        (survey) => survey.id !== surveyId
-      );
-
-      if (!targetWorkspace.surveys) {
-        targetWorkspace.surveys = [];
-      }
-
-      targetWorkspace.surveys.push(surveyToMove);
-
-      state.workspaces = state.workspaces.map((workspace) => {
-        if (workspace.id === sourceWorkspaceId) {
-          return { ...workspace, surveys: [...sourceWorkspace.surveys] };
+          // Update the state with modified workspaces
+          state.workspaces = state.workspaces.map((workspace) => {
+            if (workspace.id === sourceWorkspaceId) {
+              return { ...workspace, surveys: [...sourceWorkspace.surveys] };
+            }
+            if (workspace.id === targetWorkspaceId) {
+              return { ...workspace, surveys: [...targetWorkspace.surveys] };
+            }
+            return workspace;
+          });
         }
-        if (workspace.id === targetWorkspaceId) {
-          return { ...workspace, surveys: [...targetWorkspace.surveys] };
-        }
-        return workspace;
-      });
+      }
     },
   },
 });

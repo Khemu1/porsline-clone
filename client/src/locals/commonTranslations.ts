@@ -42,7 +42,10 @@ export const commonTranslations = {
     endingPage: "Ending Page",
     redirectToUrl: "Redirect to URL",
     redirectEndingText: "Respondents are directed to the following URL",
-    goBack:"Go Back",
+    goBack: "Go Back",
+    yourGroup: "Your Group",
+    welcomeBack: "Welcome Back",
+    owner:"Owner"
   },
   de: {
     unknownError: "Ein unbekannter Fehler ist aufgetreten.",
@@ -88,7 +91,10 @@ export const commonTranslations = {
     endingPage: "Endseite",
     redirectToUrl: "Weiterleitung zur URL",
     redirectEndingText: "Antworten werden an die folgende URL weitergeleitet",
-    goBack:"Zurück",
+    goBack: "Zurück",
+    yourGroup: "Ihr Gruppe",
+    welcomeBack: "Willkommen zurück",
+    owner:"Besitzer"
     // Other common translations
   },
 };

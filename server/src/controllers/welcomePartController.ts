@@ -52,25 +52,18 @@ export const addWelcomePart = async (
   next: NextFunction
 ) => {
   try {
-    const { welcomePartData, groupMembers, userId } = res.locals;
-
+    const { welcomePartData, groupMembers } = res.locals;
     const newWelcomePartData = await addWelcomePartService(welcomePartData);
+
+
     groupMembers?.forEach((member) => {
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
-        console.log("found", memberSocketId);
         io.to(memberSocketId).emit("WELCOME_PART_ADDED", {
           welcomePart: { ...newWelcomePartData },
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      console.log("emitting to user with ownerId", emitTo);
-      io.to(emitTo).emit("WELCOME_PART_ADDED", {
-        welcomePart: { ...newWelcomePartData },
-      });
-    }
     return res.status(201).json(newWelcomePartData);
   } catch (error) {
     next(error);
@@ -86,7 +79,7 @@ export const deleteWelcomePart = async (
   next: NextFunction
 ) => {
   try {
-    const { groupMembers, userId } = res.locals;
+    const { groupMembers } = res.locals;
     const { surveyId } = req.body;
     const { welcomeId } = req.params;
     await deleteWelcomePartService(+welcomeId);
@@ -95,14 +88,6 @@ export const deleteWelcomePart = async (
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("WELCOME_PART_DELETED", {
-          welcomePart: welcomeId,
-          surveyId: surveyId,
-        });
-      }
-
-      if (userSocketMap[+userId]) {
-        const emitTo = userSocketMap[+userId];
-        io.to(emitTo).emit("WELCOME_PART_DELETED", {
           welcomePart: welcomeId,
           surveyId: surveyId,
         });
@@ -183,12 +168,6 @@ export const editWelcomePart = async (
       }
     });
 
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("WELCOME_PART_UPDATED", {
-        welcomePart: { ...newWelcomePartData!.get({ plain: true }) },
-      });
-    }
 
     return res.status(200).json(newWelcomePartData!);
   } catch (error) {

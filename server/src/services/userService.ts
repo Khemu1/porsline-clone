@@ -56,7 +56,7 @@ const signInService = async ({
         },
       ],
     });
-    const notFoundMessage = getTranslation("de", "invalidCredentials");
+    const notFoundMessage = getTranslation(currentLang, "invalidCredentials");
 
     if (!existingUser || password !== existingUser.password) {
       throw new CustomError(notFoundMessage, 401, true);
@@ -82,6 +82,7 @@ const getUserService = async (userId: number) => {
             {
               model: UserGroup,
               as: "members",
+              where: { [Op.not]: { userId: userId } },
             },
           ],
         },

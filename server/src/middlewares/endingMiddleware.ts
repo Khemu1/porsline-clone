@@ -115,13 +115,12 @@ export const checkWorkspaceExists = async (
   if (!workspace) {
     return next(new CustomError("Workspace not found", 404, true));
   }
-  res.locals.groupId = workspace.groupId.toString();
   next();
 };
 
 export const checkSurveyExists = async (
   req: Request<
-    { endingId: string; type: "default" | "custom" },
+    { endingId: string; type: "default" | "custom"; surveyId: string,workspaceId: string },
     {},
     {
       surveyId: string;

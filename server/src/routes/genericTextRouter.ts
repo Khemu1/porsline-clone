@@ -15,14 +15,16 @@ import {
   editGenericText,
   getGenericQuestion,
 } from "../controllers/genericTextController";
+import { checkGroupMembershipFowWorkspace } from "../middlewares/workspaceMiddleware";
+import { checkWorkspaceExistsForSurveyBuilder } from "../middlewares/welcomePartMiddleware";
 
 const genericTextRouter = Router();
 
 genericTextRouter.post(
   "/add",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateNewQuestion,
   addGenericQuestion
@@ -31,8 +33,8 @@ genericTextRouter.post(
 genericTextRouter.get(
   "/get",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   getGenericQuestion
 );
@@ -40,8 +42,8 @@ genericTextRouter.get(
 genericTextRouter.delete(
   "/delete/:questionId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   checkGenericTextExists,
   deleteGenericQuestion
@@ -50,8 +52,8 @@ genericTextRouter.delete(
 genericTextRouter.post(
   "/duplicate/:questionId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   checkGenericTextExists,
   duplicateGenericText
@@ -60,11 +62,11 @@ genericTextRouter.post(
 genericTextRouter.put(
   "/edit/:questionId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateEditQuestion,
-  editGenericText,
+  editGenericText
 );
 
 export default genericTextRouter;

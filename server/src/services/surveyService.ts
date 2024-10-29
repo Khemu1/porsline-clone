@@ -73,7 +73,6 @@ export const getSurveyService = async (
 };
 
 export const updateSurveyStatusService = async (surveyId: number) => {
-  console.log("in service", surveyId);
   try {
     const survey = await Survey.findByPk(surveyId);
     const updatedDate = new Date();
@@ -162,7 +161,8 @@ export const moveSurveyService = async (
         },
       }
     );
-    return targetWorkspaceId;
+    const survey = await Survey.findByPk(surveyId);
+    return survey!.get({ plain: true });
   } catch (error) {
     throw error;
   }

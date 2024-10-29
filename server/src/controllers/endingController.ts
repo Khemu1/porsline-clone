@@ -60,14 +60,6 @@ export const addEnding = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("ENDING_ADDED", {
-        ending,
-        type: endingType,
-        defaultEnding,
-      });
-    }
 
     return res.status(201).json({ ending, type: endingType, defaultEnding });
   } catch (error) {
@@ -116,15 +108,6 @@ export const deleteEnding = async (
       }
     });
 
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("ENDING_DELETED", {
-        surveyId,
-        endingId,
-        type,
-      });
-    }
-
     return res.status(200).json({ endingId, type });
   } catch (error) {
     next(error);
@@ -170,15 +153,6 @@ export const duplicateEnding = async (
         });
       }
     });
-
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("ENDING_DUPLICATED", {
-        ending: newEnding,
-        type,
-      });
-    }
-
     return res.status(201).json({ ending: newEnding, type });
   } catch (error) {
     next(error);
@@ -222,15 +196,6 @@ export const editEnding = async (
       const memberSocketId = userSocketMap[member.userId];
       if (memberSocketId) {
         io.to(memberSocketId).emit("ENDING_EDITED", {
-          ending,
-          prevType: currentEndingType,
-          prevId: +endingId,
-        });
-      }
-
-      if (userSocketMap[+userId]) {
-        const emitTo = userSocketMap[+userId];
-        io.to(emitTo).emit("ENDING_EDITED", {
           ending,
           prevType: currentEndingType,
           prevId: +endingId,

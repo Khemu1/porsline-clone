@@ -4,6 +4,7 @@ import DescriptionPreivew from "../Dialog/survey/edit/preview/DescriptionPreivew
 import LabelPreivew from "../Dialog/survey/edit/preview/LabelPreivew";
 import ShareSurvey from "../Dialog/survey/edit/preview/ShareSurvey";
 import { useEffect } from "react";
+import { useLanguage } from "../lang/LanguageProvider";
 
 interface PreviewProps {
   imageUrl?: string;
@@ -31,8 +32,7 @@ const SurveyEndingPreview: React.FC<PreviewProps> = ({
   anotherLink,
   redirectUrl,
 }) => {
-
-  console.log("in",redirectToWhat,anotherLink,buttonText,)
+  const { t } = useLanguage();
   useEffect(() => {
     if (autoReload && reloadTimeInSeconds) {
       setTimeout(() => {
@@ -89,10 +89,10 @@ const SurveyEndingPreview: React.FC<PreviewProps> = ({
             </button>
           )}
         {shareSurvey && <ShareSurvey />}
-        {redirectUrl && (
+        {redirectUrl && !buttonText && (
           <div className="text-center flex flex-col gap-5 items-center text-xl main_text bg-[#1a1b1d] py-8 px-5 w-[430px] rounded-md">
             <p className="w-[250px] main_text_bold mb-4">
-              Your information has been sent successfully.
+              {t("suervyEndingHeader")}.
             </p>
           </div>
         )}

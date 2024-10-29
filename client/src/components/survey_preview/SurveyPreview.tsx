@@ -38,7 +38,7 @@ const SurveyPreview = () => {
 
   useEffect(() => {
     if (survey) {
-      const welcomePartData = survey.welcomePart?.[0] ?? null;
+      const welcomePartData = survey.welcomePart ?? null;
       setWelcomePart(welcomePartData);
       setQuestions(survey.questions ?? []);
       setEnding(survey.ending ?? null);
@@ -61,6 +61,14 @@ const SurveyPreview = () => {
       setCurrent(2);
     }
   }, [current, currentIndex, questions.length]);
+
+  useEffect(() => {
+    if (current === 0 && !welcomePart?.buttonText) {
+      setTimeout(() => {
+        setCurrent(1);
+      }, 1500);
+    }
+  }, [current]);
 
   const handleNext = () => {
     if (current === 0) {
@@ -100,7 +108,7 @@ const SurveyPreview = () => {
   if (!survey) {
     return <div>Survey not found</div>;
   }
-
+  console.log("SurveyPreview", survey);
   return (
     <div className="flex flex-col h-[100dvh] w-full justify-between">
       <div className="flex-1 flex flex-col justify-center items-center">
@@ -114,7 +122,7 @@ const SurveyPreview = () => {
         {current === 1 &&
           questions.length > 0 &&
           currentIndex < questions.length && (
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-col justify-center flex-1">
               <PreviewQuestion
                 {...questions[currentIndex]}
                 hideQuestionNumber={questions[currentIndex].hideQuestionNumber}

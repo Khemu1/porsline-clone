@@ -1,6 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../../config/database";
-import { GroupMemberModel, UserGroupModel } from "../../types/types";
+import {  UserGroupModel } from "../../types/types";
 
 interface UserGroupModelCreationAttributes
   extends Optional<UserGroupModel, "createdAt" | "updatedAt"> {}
@@ -17,7 +17,6 @@ class UserGroup
   declare groupName: string;
 
   // Adding a members field to keep track of group members
-  declare members?: GroupMemberModel[]; // Optional field for members
 
   static associate(models: any) {
     UserGroup.belongsTo(models.User, { foreignKey: "userId" });

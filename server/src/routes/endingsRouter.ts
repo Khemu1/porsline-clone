@@ -14,14 +14,16 @@ import {
   validateNewEnding,
 } from "../middlewares/endingMiddleware";
 import { authUser } from "../middlewares/authMiddleware";
+import { checkGroupMembershipFowWorkspace } from "../middlewares/workspaceMiddleware";
+import { checkWorkspaceExistsForSurveyBuilder } from "../middlewares/welcomePartMiddleware";
 
 const endingsRouter = Router();
 
 endingsRouter.post(
   "/add",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateNewEnding,
   addEnding
@@ -30,8 +32,8 @@ endingsRouter.post(
 endingsRouter.delete(
   "/delete/:endingId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   deleteEnding
 );
@@ -39,8 +41,8 @@ endingsRouter.delete(
 endingsRouter.post(
   "/duplicate/:endingId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   checkEndingExists,
   duplicateEnding
@@ -49,8 +51,8 @@ endingsRouter.post(
 endingsRouter.put(
   "/edit/:endingId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateEditEnding,
   editEnding

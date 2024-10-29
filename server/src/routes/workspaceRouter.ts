@@ -8,9 +8,9 @@ import {
 } from "../controllers/workspaceController";
 import {
   checkDuplicateWorkspaceTitle,
+  checkGroupMembershipFowWorkspace,
   checkWorkspaceExists,
 } from "../middlewares/workspaceMiddleware";
-import { checkGroupMembership } from "../middlewares/groupMiddleware";
 
 const workspaceRouter = Router();
 
@@ -20,7 +20,7 @@ workspaceRouter.patch(
   "/:workspaceId/update-title",
   authUser,
   checkWorkspaceExists,
-  checkGroupMembership,
+  checkGroupMembershipFowWorkspace,
   checkDuplicateWorkspaceTitle,
   updateWorkspaceTitle
 );
@@ -28,7 +28,7 @@ workspaceRouter.delete(
   "/:workspaceId/delete",
   authUser,
   checkWorkspaceExists,
-  checkGroupMembership,
+  checkGroupMembershipFowWorkspace,
   deleteWorkspace
 );
 

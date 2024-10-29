@@ -14,13 +14,21 @@ const currentWorkspaceSlice = createSlice({
   initialState,
   reducers: {
     setCurrentWorkspace: (state, action: PayloadAction<WorkSpaceModel>) => {
-      state.currentWorkspace = action.payload;
+      state.currentWorkspace = {
+        ...action.payload,
+        surveys: action.payload.surveys || [],
+      };
     },
     clearCurrentWorkspace: (state) => {
       state.currentWorkspace = null;
     },
     updateCurrentWorkspace: (state, action: PayloadAction<WorkSpaceModel>) => {
-      state.currentWorkspace = { ...state.currentWorkspace, ...action.payload };
+      state.currentWorkspace = {
+        ...state.currentWorkspace,
+        ...action.payload,
+        surveys:
+          action.payload.surveys || state.currentWorkspace?.surveys || [],
+      };
     },
     updateCurrentWorkspaceSurveys: (
       state,
@@ -48,6 +56,9 @@ const currentWorkspaceSlice = createSlice({
       state,
       action: PayloadAction<SurveyModel>
     ) => {
+      if (!state.currentWorkspace!.surveys) {
+        state.currentWorkspace!.surveys = [];
+      }
       state.currentWorkspace!.surveys.push(action.payload);
     },
   },

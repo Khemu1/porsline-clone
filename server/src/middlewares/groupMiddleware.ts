@@ -55,18 +55,25 @@ export const checkGroupMembership = async (
   >,
   res: Response<
     {},
-    { userGroupIds: number[]; userId: string; groupMembers?: UserGroupModel[] }
+    {
+      userGroupIds: number[];
+      userId: string;
+      groupMembers?: UserGroupModel[];
+      workspaceOwner?: string;
+    }
   >,
   next: NextFunction
 ) => {
   try {
     console.log("in checkGroupMembership");
-    const { userGroupIds, userId } = res.locals;
+    const { userGroupIds, userId, workspaceOwner } = res.locals;
     const { workspaceId } = req.body;
+    const { workspaceId: fromParams } = req.params;
+    const finalWorkspaceId = workspaceId || fromParams;
     const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
     const workspace = await WorkSpace.findOne({
-      where: { id: workspaceId },
+      where: { id: finalWorkspaceId },
     });
 
     if (!workspace) {
@@ -79,7 +86,7 @@ export const checkGroupMembership = async (
         )
       );
     }
-
+    console.log("in membership user group ids", userGroupIds);
     if (userGroupIds.length === 0) {
       return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
     }
@@ -100,7 +107,7 @@ export const checkGroupMembership = async (
     }
 
     const userGroup = await Group.findOne({
-      where: { maker: userId },
+      where: { maker: workspaceOwner },
     });
 
     const groupMembers = await UserGroup.findAll({
@@ -112,6 +119,10 @@ export const checkGroupMembership = async (
       member.get({ plain: true })
     );
 
+    console.log(
+      "check group membership done here are the group members",
+      res.locals.groupMembers
+    );
     next();
   } catch (error) {
     next(error);

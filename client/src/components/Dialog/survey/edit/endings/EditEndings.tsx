@@ -164,6 +164,18 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
     }
   };
 
+  const setActiveEndingTab = (endingType: "default" | "custom") => {
+    clearSlices(dispatch);
+    setActive(endingType);
+    if (ending.type === "default") {
+      dispatch(modifyDefaultEndingSliceFields(ending));
+      dispatch(modifySharedFormSliceFields(ending));
+    } else if (ending.type === "custom") {
+      dispatch(modifyRedirectEndingSliceFields(ending));
+      dispatch(modifySharedFormSliceFields(ending));
+    }
+  };
+
   useEffect(() => {
     if (isSuccess) {
       clearSlices(dispatch);
@@ -214,8 +226,7 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
                       active === "default" ? "bg-[#242068]" : "bg-[#2420683a]"
                     }`}
                     onClick={() => {
-                      setActive("default");
-                      clearSlices(dispatch);
+                      setActiveEndingTab("default");
                     }}
                   >
                     {t("endingPage")}
@@ -226,8 +237,7 @@ const EditEndings: React.FC<EndingsProps> = ({ isOpen, onClose, ending }) => {
                       active === "custom" ? "bg-[#242068]" : "bg-[#2420683a]"
                     }`}
                     onClick={() => {
-                      setActive("custom");
-                      clearSlices(dispatch);
+                      setActiveEndingTab("custom");
                     }}
                   >
                     {t("redirectToURL")}

@@ -2,10 +2,10 @@ import { Router } from "express";
 import { authUser } from "../middlewares/authMiddleware";
 import {
   checkSurveyExists,
-  checkWorkspaceExists,
   checkGroupMembership,
   validateNewWelcomePart,
   validateEditWelcomePart,
+  checkWorkspaceExistsForSurveyBuilder,
 } from "../middlewares/welcomePartMiddleware";
 import {
   addWelcomePart,
@@ -13,21 +13,22 @@ import {
   duplicateWelcomePart,
   editWelcomePart,
 } from "../controllers/welcomePartController";
+import { checkGroupMembershipFowWorkspace } from "../middlewares/workspaceMiddleware";
 
 const welcomePartRouter = Router();
 
 welcomePartRouter.get(
   "/welcome/:id",
   authUser,
-  checkGroupMembership,
-  checkWorkspaceExists,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists
 );
 welcomePartRouter.post(
   "/add",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateNewWelcomePart,
   addWelcomePart
@@ -36,8 +37,8 @@ welcomePartRouter.post(
 welcomePartRouter.delete(
   `/delete/:welcomeId`,
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   deleteWelcomePart
 );
@@ -45,11 +46,11 @@ welcomePartRouter.delete(
 welcomePartRouter.post(
   "/edit/:welcomeId",
   authUser,
-  checkWorkspaceExists,
-  checkGroupMembership,
+  checkWorkspaceExistsForSurveyBuilder,
+  checkGroupMembershipFowWorkspace,
   checkSurveyExists,
   validateEditWelcomePart,
-  editWelcomePart,
+  editWelcomePart
 );
 
 export default welcomePartRouter;

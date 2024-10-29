@@ -108,47 +108,49 @@ const Home = () => {
       </aside>
 
       <section>
-        <div className="flex items-end gap-5 mb-5 relative w-max">
-          <p className="font-extrabold text-gray-300 text-xl max-w-[250px] text-ellipsis overflow-hidden">
-            {currentWorkspace?.title}
-          </p>
-          <button
-            className="p-[.5px] bg-[#292c2e] cursor-pointer transition-all hover:bg-[#6272a4] rounded-md "
-            onClick={toggleMenu}
-            ref={toggleButtonRef}
-          >
-            <img
-              src="/assets/icons/dots.svg"
-              alt="More Options"
-              className="w-[20px]"
-            />
-          </button>
-          {menuOpen && (
-            <div
-              className="flex w-[150px] flex-col text-left right-0 top-[30px] text-sm absolute font-semibold bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
-              ref={workspaceChangeMenuRef}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-end gap-5 mb-5 relative w-max">
+            <p className="font-extrabold text-gray-300 text-xl max-w-[250px] text-ellipsis overflow-hidden">
+              {currentWorkspace?.title}
+            </p>
+            <button
+              className="p-[.5px] bg-[#292c2e] cursor-pointer transition-all hover:bg-[#6272a4] rounded-md "
+              onClick={toggleMenu}
+              ref={toggleButtonRef}
             >
-              <span
-                className="survey_card_buttons"
-                onClick={() => setIsUpdateWorkspaceTitleOpen(true)}
+              <img
+                src="/assets/icons/dots.svg"
+                alt="More Options"
+                className="w-[20px]"
+              />
+            </button>
+            {menuOpen && (
+              <div
+                className="flex w-[150px] flex-col text-left right-0 top-[30px] text-sm absolute font-semibold bg-[#0e0e0e] p-2 rounded-md shadow-md z-10"
+                ref={workspaceChangeMenuRef}
               >
-                {t("renameWorkspace")}{" "}
-              </span>
-              <span
-                className="survey_card_buttons text-red-600"
-                onClick={() => {
-                  handleDeleteWorkspace({
-                    workspaceId: currentWorkspace!.id,
-                    getCurrentLanguageTranslations,
-                    currentLang: getCurrentLanguage(),
-                  });
-                  setMenuOpen(false);
-                }}
-              >
-                {t("delete")}{" "}
-              </span>
-            </div>
-          )}
+                <span
+                  className="survey_card_buttons"
+                  onClick={() => setIsUpdateWorkspaceTitleOpen(true)}
+                >
+                  {t("renameWorkspace")}{" "}
+                </span>
+                <span
+                  className="survey_card_buttons text-red-600"
+                  onClick={() => {
+                    handleDeleteWorkspace({
+                      workspaceId: currentWorkspace!.id,
+                      getCurrentLanguageTranslations,
+                      currentLang: getCurrentLanguage(),
+                    });
+                    setMenuOpen(false);
+                  }}
+                >
+                  {t("delete")}{" "}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
         <Surveys />
       </section>

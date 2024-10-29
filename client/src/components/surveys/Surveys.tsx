@@ -72,6 +72,7 @@ const Surveys = () => {
       surveyId: string | number;
       sourceWorkspaceId: string | number;
       targetWorkspaceId: string | number;
+      survey: SurveyModel;
     }) => {
       try {
         await moveSurveyF(
@@ -79,6 +80,7 @@ const Surveys = () => {
           +data.sourceWorkspaceId,
           +data.targetWorkspaceId,
           +currentWorkspace!.id,
+          data.survey,
           dispatch
         );
       } catch (error) {

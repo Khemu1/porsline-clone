@@ -171,9 +171,11 @@ export const moveSurveyF = async (
   sourceWorkspaceId: number,
   targetWorkspaceId: number,
   currentWorkspaceId: number,
+  survey: SurveyModel,
   dispatch: Dispatch
 ) => {
   try {
+    console.log(currentWorkspaceId, sourceWorkspaceId);
     if (currentWorkspaceId === sourceWorkspaceId) {
       dispatch(deleteCurrnetWorkspaceSurvey(surveyId));
       dispatch(clearCurrentSurvey());
@@ -186,6 +188,10 @@ export const moveSurveyF = async (
         targetWorkspaceId,
       })
     );
+    if (currentWorkspaceId === targetWorkspaceId) {
+      dispatch(addSurveyToCurrentWorkspace(survey));
+      dispatch(addSurvey(survey));
+    }
   } catch (error) {
     console.error("Error moving survey:", error);
   }

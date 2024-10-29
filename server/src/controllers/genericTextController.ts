@@ -48,12 +48,6 @@ export const addGenericQuestion = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("GENERIC_TEXT_ADDED", {
-        newGenericText: { ...newQuestionData },
-      });
-    }
 
     return res.status(201).json(newQuestionData);
   } catch (error) {
@@ -133,13 +127,6 @@ export const deleteGenericQuestion = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("GENERIC_TEXT_DELETED", {
-        surveyId: surveyId,
-        questionId: questionId,
-      });
-    }
     return res.status(200).json({ questionId });
   } catch (error) {
     next(error);
@@ -182,13 +169,6 @@ export const duplicateGenericText = async (
         });
       }
     });
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("GENERIC_TEXT_DUPLICATED", {
-        duplicatedGenericText: { ...newQuestionData },
-      });
-    }
-
     return res.status(201).json({ question: { ...newQuestionData } });
   } catch (error) {
     next(error);
@@ -233,13 +213,6 @@ export const editGenericText = async (
         });
       }
     });
-
-    if (userSocketMap[+userId]) {
-      const emitTo = userSocketMap[+userId];
-      io.to(emitTo).emit("GENERIC_TEXT_EDITED", {
-        duplicatedGenericText: { ...newQuestionData },
-      });
-    }
 
     return res.status(200).json({ question: { ...newQuestionData } });
   } catch (error) {

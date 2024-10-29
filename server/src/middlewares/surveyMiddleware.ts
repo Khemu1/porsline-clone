@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { SurveyModel } from "../types/types";
+import { SurveyModel, UserGroupModel } from "../types/types";
 import {
   newSurveySchema,
   updateUrlSchema,
@@ -12,6 +12,9 @@ import WorkSpace from "../db/models/WorkSpace";
 import { Op } from "sequelize";
 import { getTranslation } from "../utils";
 import UserGroup from "../db/models/UserGroup";
+import User from "../db/models/User";
+import WorkspaceGroup from "../db/models/WorkspaceGroup";
+import Group from "../db/models/Group";
 export const validateNewSurvey = async (
   req: Request<{ surveyId: string }, {}, { title: string }>,
   res: Response<
@@ -69,6 +72,7 @@ export const checkWorkspaceExistsForSurvey = async (
       userId: string;
       duplicateSurvey?: SurveyModel;
       userGroupIds: number[];
+      workspaceOwner: string;
     }
   >,
   next: NextFunction
@@ -96,19 +100,119 @@ export const checkWorkspaceExistsForSurvey = async (
     }
 
     const { userId } = res.locals;
+
+    // Find all groups for the invited user
     const userGroups = await UserGroup.findAll({
       where: {
         userId: +userId,
       },
     });
 
+    // Include the owner's user group
+    const ownerGroup = await UserGroup.findOne({
+      where: {
+        userId: workspace.maker,
+      },
+    });
+
     const userGroupIds = userGroups.map((group) => group.groupId);
+    if (ownerGroup && !userGroupIds.includes(ownerGroup.groupId)) {
+      userGroupIds.push(ownerGroup.groupId);
+    }
 
     res.locals.userGroupIds = userGroupIds;
+    res.locals.workspaceOwner = workspace.maker.toString();
 
     next();
   } catch (error) {
     return next(error);
+  }
+};
+
+export const checkGroupMembershipForSurvey = async (
+  req: Request<
+    { surveyId: string; workspaceId: string },
+    {},
+    {
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+      workspaceId: string;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      userGroupIds: number[];
+      userId: string;
+      groupMembers?: UserGroupModel[];
+      workspaceOwner: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    console.log("in checkGroupMembership");
+    const { userGroupIds, userId, workspaceOwner } = res.locals;
+    const { workspaceId } = req.body;
+    const { workspaceId: fromParams } = req.params;
+    const finalWorkspaceId = workspaceId || fromParams;
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
+    const workspace = await WorkSpace.findOne({
+      where: { id: finalWorkspaceId },
+    });
+
+    if (!workspace) {
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "workspaceNotFound"),
+          404,
+          true,
+          "workspaceNotFound"
+        )
+      );
+    }
+    console.log("in membership user group ids", userGroupIds);
+    if (userGroupIds.length === 0) {
+      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+    }
+    console.log({ workspaceId: workspace.id, groupId: userGroupIds });
+    const hasAccess = await WorkspaceGroup.findOne({
+      where: { workspaceId: workspace.id, groupId: userGroupIds },
+    });
+
+    if (!hasAccess) {
+      return next(
+        new CustomError(
+          "No Access to this workspace",
+          403,
+          true,
+          "accessDeniedToWorkspace"
+        )
+      );
+    }
+
+    const userGroup = await Group.findOne({
+      where: { maker: workspaceOwner },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId: userGroup?.id },
+    });
+
+    res.locals.userGroupIds = userGroupIds;
+    res.locals.groupMembers = groupMembers.map((member) =>
+      member.get({ plain: true })
+    );
+
+    console.log(
+      "check group membership done here are the group members",
+      res.locals.groupMembers
+    );
+    next();
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -156,15 +260,13 @@ export const checkSurveyExists = async (
     }
     console.log("survey found from middleware");
 
-    if (title !== survey.title) {
-      res.locals.duplicateSurvey = {
-        ...survey.get(),
-        title,
-        createdAt: new Date(),
-        updatedAt: undefined,
-        url: Date.now().toString() + "-survey",
-      };
-    }
+    res.locals.duplicateSurvey = {
+      ...survey.get(),
+      title,
+      createdAt: new Date(),
+      updatedAt: undefined,
+      url: Date.now().toString() + "-survey",
+    };
 
     next();
   } catch (error) {
@@ -346,7 +448,6 @@ export const validateSurveyForMoving = async (
   try {
     const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { targetWorkspaceId } = req.body;
-    const { surveyId } = req.params;
     if (isNaN(+targetWorkspaceId)) {
       return next(
         new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
@@ -367,7 +468,6 @@ export const validateSurveyForMoving = async (
         )
       );
     }
-    console.log("check for validation for moving done", "done");
     next();
   } catch (error) {
     next(error);

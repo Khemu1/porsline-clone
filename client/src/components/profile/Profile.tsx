@@ -32,7 +32,10 @@ const Profile = () => {
   return (
     <div className="flex flex-col p-6 gap-8 bg-[#121212] min-h-screen text-[#e4e4e4]">
       <div className="flex flex-col gap-4 mb-6">
-        <h2 className="text-3xl font-bold mb-2">{t("switchLanguage")}</h2>
+        <h1 className="main_text_bold text-3xl font-bold mb-2">
+          {t("welcomeBack")} {user?.userData.username}
+        </h1>
+        <h2 className="text-2xl font-bold mb-2">{t("switchLanguage")}</h2>
         <div className="flex gap-2">
           <button
             onClick={() => {

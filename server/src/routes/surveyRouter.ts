@@ -13,6 +13,7 @@ import {
 import {
   checkDuplicateSurveyTitle,
   checkDuplicateSurveyUrl,
+  checkGroupMembershipForSurvey,
   checkSurveyExists,
   checkWorkspaceExistsForSurvey,
   validateNewSurvey,
@@ -26,7 +27,7 @@ surveyRouter.get(
   "/:workspaceId/:surveyId",
   authUser,
   checkWorkspaceExistsForSurvey,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   checkSurveyExists,
   getSurvey
 );
@@ -36,7 +37,7 @@ surveyRouter.post(
   authUser,
   checkWorkspaceExistsForSurvey,
   validateNewSurvey,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   checkDuplicateSurveyTitle,
   addSurvey
 );
@@ -46,7 +47,7 @@ surveyRouter.patch(
   authUser,
   checkWorkspaceExistsForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   checkDuplicateSurveyTitle,
   updateSurveyTitle
 );
@@ -56,7 +57,7 @@ surveyRouter.patch(
   authUser,
   checkWorkspaceExistsForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   updateSurvyStatus
 );
 
@@ -65,7 +66,7 @@ surveyRouter.patch(
   authUser,
   checkWorkspaceExistsForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   checkDuplicateSurveyUrl,
   updateSurveyUrl
 );
@@ -75,7 +76,7 @@ surveyRouter.delete(
   authUser,
   checkWorkspaceExistsForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   deleteSurvey
 );
 
@@ -83,8 +84,8 @@ surveyRouter.post(
   "/:surveyId/duplicate",
   authUser,
   checkWorkspaceExistsForSurvey,
+  checkGroupMembershipForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
   validateSurveyForMoving,
   duplicateSurvey
 );
@@ -94,7 +95,7 @@ surveyRouter.patch(
   authUser,
   checkWorkspaceExistsForSurvey,
   checkSurveyExists,
-  checkGroupMembership,
+  checkGroupMembershipForSurvey,
   validateSurveyForMoving,
   moveSurvey
 );

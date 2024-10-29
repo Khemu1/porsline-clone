@@ -17,6 +17,8 @@ import {
 import EndingsContainer from "./EndingsContainer";
 import { updateWelcomePart } from "../../store/slices/welcomePartSlice";
 import WelcomePart from "./WelcomePart";
+import { WorkSpaceModel } from "../../types";
+import { setCurrentWorkspace } from "../../store/slices/currentWorkspaceSlice";
 
 const SurveyBuilder = () => {
   const { workspaceId, surveyId } = useParams();
@@ -70,6 +72,10 @@ const SurveyBuilder = () => {
       if (survey.customEndings) {
         dispatch(setCustomEndings(survey.customEndings ?? []));
       }
+      const itsWorkspace = survey.itsWorkspace as WorkSpaceModel;
+      if (itsWorkspace) {
+        dispatch(setCurrentWorkspace(itsWorkspace));
+      }
     } else {
       console.warn("Survey is null or undefined");
     }
@@ -98,7 +104,6 @@ const SurveyBuilder = () => {
             <p>{t("welcomePage")}</p>
           </button>
 
-          {/* Open Generic Text Page */}
           <div
             className="flex justify-start items-center bg-[#0e0f0f] py-1 px-3 gap-2 rounded-lg w-full cursor-pointer transition-all hover:shadow-2xl"
             onClick={() => setOpenTextPage(true)}

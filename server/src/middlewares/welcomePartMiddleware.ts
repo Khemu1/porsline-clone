@@ -23,6 +23,7 @@ import {
 } from "../utils";
 import WelcomePart from "../db/models/WelcomePart";
 import Group from "../db/models/Group";
+import WorkspaceGroup from "../db/models/WorkspaceGroup";
 
 export const checkGroupMembership = async (
   req: Request<
@@ -83,18 +84,31 @@ export const checkGroupMembership = async (
   }
 };
 
-export const checkWorkspaceExists = async (
+export const checkWorkspaceExistsForSurveyBuilder = async (
   req: Request<
-    { welcomeId: string },
+    {
+      endingId: string;
+      welcomeId: string;
+      surveyId: string;
+      workspaceId: string;
+    },
+    {},
+    {
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+      workspaceId: string;
+    }
+  >,
+  res: Response<
     {},
     {
       workspaceId: string;
-      surveyId: string;
-      welcomeData: NewWelcomePart;
-      options: welcomePartOptions;
+      userId: string;
+      workspaceOwner?: string;
+      userGroupIds?: number[];
     }
   >,
-  res: Response<{}, { workspaceId: string; userId: string; groupId: string }>,
   next: NextFunction
 ) => {
   const { workspaceId } = req.body;
@@ -111,8 +125,82 @@ export const checkWorkspaceExists = async (
   if (!workspace) {
     return next(new CustomError("Workspace not found", 404, true));
   }
-  res.locals.groupId = workspace.groupId.toString();
+  const userGroups = await UserGroup.findAll({
+    where: {
+      userId: +workspace.maker,
+    },
+  });
+  res.locals.userGroupIds = userGroups.map((group) => group.groupId);
+
+  res.locals.workspaceOwner = workspace.maker.toString();
   next();
+};
+
+export const checkGroupMembershipforSurveyBulder = async (
+  req: Request<
+    { surveyId: string; workspaceId: string },
+    {},
+    {
+      isActive: boolean;
+      title: string;
+      targetWorkspaceId: string;
+      workspaceId: string;
+    }
+  >,
+  res: Response<
+    {},
+    {
+      userGroupIds?: number[];
+      userId: string;
+      groupMembers?: UserGroupModel[];
+      workspaceOwner?: string;
+    }
+  >,
+  next: NextFunction
+) => {
+  try {
+    const { userGroupIds, workspaceOwner } = res.locals;
+    const { workspaceId } = req.body;
+    const { workspaceId: fromParams } = req.params;
+    const finalWorkspaceId = workspaceId || fromParams;
+    // const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
+    if (!userGroupIds || userGroupIds.length === 0) {
+      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+    }
+
+    const hasAccess = await WorkspaceGroup.findOne({
+      where: { workspaceId: finalWorkspaceId, groupId: userGroupIds },
+    });
+
+    if (!hasAccess) {
+      return next(
+        new CustomError(
+          "No Access to this workspace",
+          403,
+          true,
+          "accessDeniedToWorkspace"
+        )
+      );
+    }
+
+    const userGroup = await Group.findOne({
+      where: { maker: workspaceOwner },
+    });
+
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId: userGroup?.id },
+    });
+
+    res.locals.userGroupIds = userGroupIds;
+    res.locals.groupMembers = groupMembers.map((member) =>
+      member.get({ plain: true })
+    );
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const checkSurveyExists = async (

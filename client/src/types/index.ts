@@ -18,6 +18,7 @@ export interface SurveyModel {
   questions: GenericTextModel[];
   defaultEndings: DefaultEndingModel[];
   customEndings: CustomEndingModel[];
+  itsWorkspace?: WorkSpaceModel;
 }
 
 export interface SurveyPreviewModel {
@@ -28,7 +29,7 @@ export interface SurveyPreviewModel {
   workspace: number;
   createdAt?: Date;
   updatedAt?: Date;
-  welcomePart?: WelcomePartModel[];
+  welcomePart?: WelcomePartModel;
   questions: GenericTextModel[];
   ending: DefaultEndingModel | CustomEndingModel;
 }

@@ -37,7 +37,7 @@ const UserGroup = () => {
   return (
     <div className="flex flex-col gap-3 p-6 bg-[#1e1e1e] text-white rounded-md shadow-md max-w-[600px]">
       <h3 className="text-2xl font-bold mb-2 text-[#e4e4e4]">
-        {groupState.name}
+        {t("yourGroup")}
       </h3>
 
       <div className="flex flex-col items-center gap-1">
