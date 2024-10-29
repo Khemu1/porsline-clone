@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, where } from "sequelize";
 import Survey from "../db/models/Survey";
 import UserGroup from "../db/models/UserGroup";
 import WorkSpace from "../db/models/WorkSpace";
@@ -35,7 +35,14 @@ export const getWorkSpacesService = async (
 ): Promise<WorkSpaceModel[]> => {
   try {
     const userGroups = await UserGroup.findAll({ where: { userId } });
-    const groupIds = userGroups.map((userGroup) => userGroup.groupId);
+    const getUserOwnGroup = await Group.findOne({ where: { maker: userId } });
+
+    
+    const groupIds = userGroups
+      .filter(
+        (group) => group.get({ plain: true }).groupId !== getUserOwnGroup!.id
+      )
+      .map((group) => group.groupId);
 
     const myWorkspaces = await WorkSpace.findAll({
       where: { maker: userId },
