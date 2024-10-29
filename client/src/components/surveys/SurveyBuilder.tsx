@@ -35,7 +35,7 @@ const SurveyBuilder = () => {
     (state: RootState) => state.currentSurvey.currentSurvey
   );
 
-  const { survey } = useGetSurvey(
+  const { survey, isLoading } = useGetSurvey(
     Number(workspaceId),
     Number(surveyId),
     getCurrentLanguageTranslations,
@@ -45,7 +45,7 @@ const SurveyBuilder = () => {
   // Load survey from local storage on component mount
   useEffect(() => {
     const savedSurvey = localStorage.getItem("currentSurvey");
-    if (savedSurvey) {
+    if (savedSurvey && !survey && !isLoading) {
       const parsedSurvey = JSON.parse(savedSurvey);
       if (!currentSurvey) {
         dispatch(setCurrentSurvey(parsedSurvey));

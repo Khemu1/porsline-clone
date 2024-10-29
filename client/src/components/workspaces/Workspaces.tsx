@@ -42,8 +42,6 @@ const Workspaces = () => {
   const socket = useSocket();
   useEffect(() => {
     const handleNewWorkspace = async (data: { workspace: WorkSpaceModel }) => {
-      console.log("arrived to add", data);
-
       try {
         await addNewWorkspaceF(data.workspace, dispatch);
       } catch (error) {
@@ -56,7 +54,6 @@ const Workspaces = () => {
       workspaceId: number;
     }) => {
       try {
-        console.log("incming edit", data);
         await updateWorkspaceF(+data.workspaceId, data.workspace, dispatch);
       } catch (error) {
         console.error(error);
@@ -65,7 +62,6 @@ const Workspaces = () => {
 
     const handleDeleteWorkspace = async (data: { workspaceId: number }) => {
       try {
-        console.log("arrived to delete", data);
         await deleteWorkspaceF(
           +data.workspaceId,
           +currentWorkspace!.id,

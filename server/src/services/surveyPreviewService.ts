@@ -7,11 +7,26 @@ import Survey from "../db/models/Survey";
 import WelcomePart from "../db/models/WelcomePart";
 import { CustomError } from "../errors/customError";
 
-
 export const getSurveyPreviewService = async (surveyPath: string) => {
+  console.log(surveyPath);
 
   try {
+    const findText = await Survey.findOne({
+      where: {
+        url: surveyPath,
+      },
+      include: [
+        {
+          model: WelcomePart,
+          as: "welcomePart",
+        },
+      ],
+    });
+    console.log(findText?.get({ plain: true }));
     const survey = await Survey.findOne({
+      where: {
+        url: surveyPath,
+      },
       include: [
         {
           model: WelcomePart,
@@ -34,9 +49,6 @@ export const getSurveyPreviewService = async (surveyPath: string) => {
           ],
         },
       ],
-      where: {
-        url: surveyPath,
-      },
       order: [["questions", "createdAt", "ASC"]],
     });
 

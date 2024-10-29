@@ -117,7 +117,7 @@ const Nav = () => {
       <div className="flex gap-2">
         {isSurveyBuilderPath && (
           <div className="flex items-center gap-2 border-r px-2 border-r-[#f6f6f627]">
-            <Link to={`/survey/${currentSurvey?.url}`}>
+            <Link to={`/survey/${currentSurvey?.url}`} target="_blank">
               <img
                 src="/assets/icons/preview-eye.svg"
                 alt="Preview"

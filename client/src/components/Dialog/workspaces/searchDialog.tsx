@@ -7,6 +7,7 @@ import { retrunSearchData } from "../../../utils";
 import { setCurrentWorkspace } from "../../../store/slices/currentWorkspaceSlice";
 import { setSurveys } from "../../../store/slices/surveySlice";
 import { clearCurrentSurvey } from "../../../store/slices/currentSurveySlice";
+import { Link } from "react-router-dom";
 
 interface SearchDialogProps {
   isOpen: boolean;
@@ -103,13 +104,14 @@ const SearchDialog: React.FC<SearchDialogProps> = ({ isOpen, onClose }) => {
                     </h3>
                     {surveys.length ? (
                       surveys.map((survey, index) => (
-                        <div
+                        <Link
+                          to={`/survey/${survey.workspace}/${survey.id}/build`}
                           key={index}
                           className="p-2 cursor-pointer hover:bg-gray-700 rounded-md"
                           onClick={() => setTitle(survey.title)}
                         >
                           {survey.title}
-                        </div>
+                        </Link>
                       ))
                     ) : (
                       <div className="text-sm text-gray-400">
