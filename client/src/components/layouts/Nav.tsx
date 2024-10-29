@@ -51,12 +51,11 @@ const Nav = () => {
       surveyWorkspaceId: number;
     }) => {
       try {
-        if (!currentSurvey?.id || currentWorkspace?.id) return;
         await updateSurveyF(
           data.survey,
-          currentSurvey.id,
+          currentSurvey?.id,
           data.surveyWorkspaceId,
-          currentWorkspace!.id,
+          currentWorkspace?.id,
           dispatch
         );
       } catch (error) {

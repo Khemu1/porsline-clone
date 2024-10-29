@@ -283,7 +283,7 @@ export const addNewEndingF = async (
     } else {
       dispatch(addDefaultEnding(ending as DefaultEndingModel));
     }
-    if (defaultEnding) {
+    if (defaultEnding || ending.defaultEnding) {
       dispatch(setDefaultEnding({ id: ending.id, type }));
     }
   } catch (error) {
