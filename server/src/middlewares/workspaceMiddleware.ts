@@ -79,7 +79,7 @@ export const checkWorkspaceExists = async (
 
 export const checkGroupMembershipFowWorkspace = async (
   req: Request<
-    {endingId: string, surveyId: string; workspaceId: string },
+    { endingId: string; surveyId: string; workspaceId: string },
     {},
     {
       isActive: boolean;
@@ -121,9 +121,16 @@ export const checkGroupMembershipFowWorkspace = async (
       );
     }
     if (!userGroupIds || userGroupIds.length === 0) {
-      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "notAMemberOfAnyGroup"),
+          403,
+          true,
+          "notAMemberOfAnyGroup"
+        )
+      );
     }
-    
+
     const hasAccess = await WorkspaceGroup.findOne({
       where: { workspaceId: workspace.id, groupId: userGroupIds },
     });
@@ -131,7 +138,7 @@ export const checkGroupMembershipFowWorkspace = async (
     if (!hasAccess) {
       return next(
         new CustomError(
-          "No Access to this workspace",
+          getTranslation(currentLang, "notAMemberOfGroup"),
           403,
           true,
           "accessDeniedToWorkspace"
@@ -158,29 +165,16 @@ export const checkGroupMembershipFowWorkspace = async (
   }
 };
 
-export const checkDuplicateWorkspaceTitle = async (
+export const checkWorkspaceTitle = async (
   req: Request<{ workspaceId: string }, {}, { title: string }>,
   res: Response<{}, { userId: string }>,
   next: NextFunction
 ) => {
   try {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
     const { title } = req.body;
     const { workspaceId } = req.params;
-
-    const existingWorkspace = await WorkSpace.findOne({
-      where: { id: { [Op.not]: +workspaceId }, title },
-    });
-
-    if (existingWorkspace) {
-      return next(
-        new CustomError(
-          "Workspace with this title already exists",
-          409,
-          true,
-          "workspaceTitleExists"
-        )
-      );
-    }
 
     newWorkspaceSchema().parse({ title });
 

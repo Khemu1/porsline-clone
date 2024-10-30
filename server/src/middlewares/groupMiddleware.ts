@@ -88,7 +88,14 @@ export const checkGroupMembership = async (
     }
     console.log("in membership user group ids", userGroupIds);
     if (userGroupIds.length === 0) {
-      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "notAMemberOfAnyGroup"),
+          403,
+          true,
+          "notAMemberOfAnyGroup"
+        )
+      );
     }
     console.log({ workspaceId: workspace.id, groupId: userGroupIds });
     const hasAccess = await WorkspaceGroup.findOne({

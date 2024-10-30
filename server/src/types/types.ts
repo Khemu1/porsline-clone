@@ -74,6 +74,7 @@ export interface EndPartModel {
 export interface SignUpParams {
   username: string;
   password: string;
+  currentLang: "en" | "de";
 }
 
 export interface signInParams {

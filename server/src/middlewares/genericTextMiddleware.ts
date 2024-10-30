@@ -46,80 +46,46 @@ export const checkGroupMembership = async (
   >,
   next: NextFunction
 ) => {
-    try {
-      const { groupId, userId } = res.locals;
-      console.log(res.locals ? "not empty" : "empty");
-      const currentLang =
-        (req.headers["accept-language"] as "en" | "de") ?? "en";
+  try {
+    const { groupId, userId } = res.locals;
+    console.log(res.locals ? "not empty" : "empty");
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
-      const userGroupMembership = await UserGroup.findOne({
-        where: {
-          userId,
-          groupId,
-        },
-      });
-      const isGroupOwner = await Group.findOne({
-        where: { id: groupId, maker: userId },
-      });
+    const userGroupMembership = await UserGroup.findOne({
+      where: {
+        userId,
+        groupId,
+      },
+    });
+    const isGroupOwner = await Group.findOne({
+      where: { id: groupId, maker: userId },
+    });
 
-      if (!userGroupMembership && !isGroupOwner) {
-        return next(
-          new CustomError(
-            getTranslation(currentLang, "notAMemberOfGroup"),
-            403,
-            true,
-            "notAMemberOfGroup"
-          )
-        );
-      }
-
-      const groupMembers = await UserGroup.findAll({
-        where: { groupId },
-      });
-
-      res.locals.groupId = groupId;
-      res.locals.groupMembers = groupMembers.map((group) =>
-        group.get({ plain: true })
+    if (!userGroupMembership && !isGroupOwner) {
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "notAMemberOfGroup"),
+          403,
+          true,
+          "notAMemberOfGroup"
+        )
       );
-
-      next();
-    } catch (error) {
-      next(error);
     }
-};
 
-export const checkWorkspaceExists = async (
-  req: Request<
-    { questionId: string },
-    {},
-    {
-      workspaceId: string;
-      surveyId: string;
-      newQuestion: NewQuestion;
-      options: NewQuestionOptions;
-    }
-  >,
-  res: Response<{}, { workspaceId: string; userId: string; groupId: string }>,
-  next: NextFunction
-) => {
-  const { workspaceId } = req.body;
-  if (isNaN(+workspaceId) || +workspaceId < 1) {
-    return next(
-      new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
+    const groupMembers = await UserGroup.findAll({
+      where: { groupId },
+    });
+
+    res.locals.groupId = groupId;
+    res.locals.groupMembers = groupMembers.map((group) =>
+      group.get({ plain: true })
     );
-  }
 
-  const workspace = await WorkSpace.findOne({
-    where: { id: +workspaceId },
-  });
-
-  if (!workspace) {
-    return next(new CustomError("Workspace not found", 404, true));
+    next();
+  } catch (error) {
+    next(error);
   }
-  res.locals.groupId = workspace.groupId.toString();
-  next();
 };
-
 export const checkSurveyExists = async (
   req: Request<
     { questionId: string },
@@ -141,11 +107,16 @@ export const checkSurveyExists = async (
   next: NextFunction
 ) => {
   const { surveyId } = req.body;
-
+  const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
   try {
     if (Number.isNaN(+surveyId)) {
       return next(
-        new CustomError("Invalid survey ID", 400, true, "invalidSurveyId")
+        new CustomError(
+          getTranslation(currentLang, "unexpectedError"),
+          400,
+          true,
+          "invalidSurveyId"
+        )
       );
     }
 
@@ -155,7 +126,12 @@ export const checkSurveyExists = async (
 
     if (!survey) {
       return next(
-        new CustomError("Survey not found", 404, true, "surveyNotFound")
+        new CustomError(
+          getTranslation(currentLang, "surveyNotFound"),
+          404,
+          true,
+          "surveyNotFound"
+        )
       );
     }
 
@@ -240,6 +216,7 @@ export const validateEditQuestion = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = req.headers["accept-language"] as "en" | "de";
   try {
     const data = processEditQuestionData(req.body);
     const options = processNewQuestionOptions(req.body);
@@ -258,7 +235,6 @@ export const validateEditQuestion = async (
     next();
   } catch (error) {
     const { headers } = req;
-    const currentLang = headers["accept-language"] as "en" | "de";
     if (error instanceof ZodError) {
       next(
         new CustomError(
@@ -300,6 +276,8 @@ export const checkGenericTextExists = async (
   next: NextFunction
 ) => {
   try {
+    const currentLang = req.headers["accept-language"] as "en" | "de";
+
     const { questionId } = req.params;
 
     const genericText = await GenericText.findOne({
@@ -313,7 +291,7 @@ export const checkGenericTextExists = async (
     if (!genericText) {
       return next(
         new CustomError(
-          "Generic text not found",
+          getTranslation(currentLang, "genericTextNotFound"),
           404,
           true,
           "genericTextNotFound"

@@ -120,7 +120,12 @@ export const checkWorkspaceExists = async (
 
 export const checkSurveyExists = async (
   req: Request<
-    { endingId: string; type: "default" | "custom"; surveyId: string,workspaceId: string },
+    {
+      endingId: string;
+      type: "default" | "custom";
+      surveyId: string;
+      workspaceId: string;
+    },
     {},
     {
       surveyId: string;
@@ -138,11 +143,17 @@ export const checkSurveyExists = async (
   next: NextFunction
 ) => {
   const { surveyId } = req.body;
-
+  const currentLanguage =
+    (req.headers["accept-language"] as "en" | "de") || "en";
   try {
     if (Number.isNaN(+surveyId)) {
       return next(
-        new CustomError("Invalid survey ID", 400, true, "invalidSurveyId")
+        new CustomError(
+          getTranslation(currentLanguage, "unexpectedError"),
+          400,
+          true,
+          "invalidSurveyId"
+        )
       );
     }
 
@@ -152,7 +163,12 @@ export const checkSurveyExists = async (
 
     if (!survey) {
       return next(
-        new CustomError("Survey not found", 404, true, "surveyNotFound")
+        new CustomError(
+          getTranslation(currentLanguage, "surveyNotFound"),
+          404,
+          true,
+          "surveyNotFound"
+        )
       );
     }
 
@@ -184,6 +200,7 @@ export const validateNewEnding = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
   try {
     const { defaultEnding, type } = req.body;
     const customEndingData = processCustomEndingData(req.body);
@@ -208,8 +225,6 @@ export const validateNewEnding = async (
 
     next();
   } catch (error) {
-    const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
-
     if (error instanceof ZodError) {
       const validationErrors = validateWithSchema(error, currentLang);
       next(
@@ -223,7 +238,16 @@ export const validateNewEnding = async (
         )
       );
     } else {
-      next(new CustomError("Unknown Error", 500, true, "unknownError", ""));
+      console.log(error);
+      next(
+        new CustomError(
+          getTranslation(currentLang, "surveyNotFound"),
+          500,
+          true,
+          "unknownError",
+          ""
+        )
+      );
     }
   }
 };
@@ -251,6 +275,7 @@ export const checkEndingExists = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
   try {
     const { endingId } = req.params;
     const { type } = req.body;
@@ -280,7 +305,7 @@ export const checkEndingExists = async (
       if (!defaultEnding) {
         return next(
           new CustomError(
-            "Default ending not found",
+            getTranslation(currentLang, "endingNotFound"),
             404,
             true,
             "endingNotFound"
@@ -291,15 +316,21 @@ export const checkEndingExists = async (
       res.locals.ending = defaultEnding.get();
     } else {
       return next(
-        new CustomError("Invalid type provided", 400, true, "invalidType")
+        new CustomError(
+          getTranslation(currentLang, "unexpectedError"),
+          400,
+          true,
+          "invalidType"
+        )
       );
     }
 
     next();
   } catch (error) {
+    console.log(error);
     return next(
       new CustomError(
-        "An error occurred while checking the ending",
+        getTranslation(currentLang, "unexpectedError"),
         500,
         true,
         "internalServerError"
@@ -331,6 +362,8 @@ export const validateEditEnding = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
+
   try {
     const { defaultEnding, type } = req.body;
     const customEndingData = processEditCustomEndingData(req.body);
@@ -364,8 +397,6 @@ export const validateEditEnding = async (
 
     next();
   } catch (error) {
-    const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
-
     if (error instanceof ZodError) {
       const validationErrors = validateWithSchema(error, currentLang);
       next(
@@ -379,7 +410,15 @@ export const validateEditEnding = async (
         )
       );
     } else {
-      next(new CustomError("Unknown Error", 500, true, "unknownError", ""));
+      next(
+        new CustomError(
+          getTranslation(currentLang, "unexpectedError"),
+          500,
+          true,
+          "unknownError",
+          ""
+        )
+      );
     }
   }
 };

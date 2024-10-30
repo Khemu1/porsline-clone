@@ -7,7 +7,7 @@ import {
   updateWorkspaceTitle,
 } from "../controllers/workspaceController";
 import {
-  checkDuplicateWorkspaceTitle,
+  checkWorkspaceTitle,
   checkGroupMembershipFowWorkspace,
   checkWorkspaceExists,
 } from "../middlewares/workspaceMiddleware";
@@ -21,7 +21,7 @@ workspaceRouter.patch(
   authUser,
   checkWorkspaceExists,
   checkGroupMembershipFowWorkspace,
-  checkDuplicateWorkspaceTitle,
+  checkWorkspaceTitle,
   updateWorkspaceTitle
 );
 workspaceRouter.delete(

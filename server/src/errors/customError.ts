@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { getTranslation } from "../utils";
 
 // src/errors/customError.ts
 
@@ -35,6 +36,8 @@ export const sendDevError = (
   req: Request,
   res: Response
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
   const {
     statusCode = 500,
     status = "error",
@@ -43,9 +46,15 @@ export const sendDevError = (
     type,
     errors,
   } = error;
+
+  const checkMessage =
+    message.trim().length === 0
+      ? getTranslation(currentLang, "unexpectedError")
+      : message;
+
   res.status(statusCode).json({
     status,
-    message,
+    checkMessage,
     type,
     stack,
     details: error.details || {},
@@ -58,6 +67,8 @@ export const sendProdError = (
   req: Request,
   res: Response
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
   const {
     statusCode = 500,
     status = "error",
@@ -67,17 +78,22 @@ export const sendProdError = (
     errors,
   } = error;
 
+  const checkMessage =
+    message.trim().length === 0
+      ? getTranslation(currentLang, "unexpectedError")
+      : message;
+
   if (isOperational) {
     res.status(statusCode).json({
       status,
-      message,
+      checkMessage,
       type,
       errors,
     });
   } else {
     res.status(500).json({
       status: "error",
-      message: "Something went wrong!",
+      message: getTranslation(currentLang, "unexpectedError"),
       errors,
     });
   }

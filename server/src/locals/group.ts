@@ -9,6 +9,7 @@ export const groupTranslations = {
     invitedUsersTooLong: "Invited users are too long",
     userIsAlreadyAMember: "User is already a member",
     cantinviteYourSelf: "You can't invite yourself",
+    notAMemberOfAnyGroup: "User isn't a member of any group",
   },
   de: {
     notAMemberOfGroup: "Benutzer ist nicht Mitglied dieser Gruppe",
@@ -20,5 +21,6 @@ export const groupTranslations = {
     invitedUsersTooLong: "Eingeladene Benutzer sind zu lang",
     userIsAlreadyAMember: "Benutzer ist bereits Mitglied",
     cantinviteYourSelf: "Du kannst dich nicht selbst einladen",
+    notAMemberOfAnyGroup: "Der Benutzer ist kein Mitglied einer Gruppe",
   },
 };

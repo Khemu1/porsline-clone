@@ -3,6 +3,7 @@ import { CustomError } from "../errors/customError";
 import { verifyToken } from "../services/jwtService";
 import UserGroup from "../db/models/UserGroup";
 import { UserGroupModel, UserModel } from "../types/types";
+import { getTranslation } from "../utils";
 
 export const authUser = async (
   req: Request,
@@ -19,11 +20,13 @@ export const authUser = async (
   next: NextFunction
 ) => {
   try {
+    const currentLanguage =
+      (req.headers["accept-language"] as "en" | "de") ?? "en";
     const idToken = req.cookies.jwt;
 
     if (!idToken) {
       throw new CustomError(
-        "No Access Token Found",
+        getTranslation(currentLanguage, "unexpectedError"),
         401,
         true,
         "premissionDenied"
@@ -37,7 +40,12 @@ export const authUser = async (
       tokenData.groups === null ||
       tokenData.groups === undefined
     ) {
-      throw new CustomError("Invalid Token", 401, true, "premissionDenied");
+      throw new CustomError(
+        getTranslation(currentLanguage, "unexpectedError"),
+        401,
+        true,
+        "premissionDenied"
+      );
     }
     res.locals.groupMembers = undefined;
     if (tokenData.userGroup) {

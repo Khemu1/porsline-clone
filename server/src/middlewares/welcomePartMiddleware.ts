@@ -44,7 +44,6 @@ export const checkGroupMembership = async (
 ) => {
   try {
     const { groupId, userId } = res.locals;
-    console.log(res.locals ? "not empty" : "empty");
     const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
     const userGroupMembership = await UserGroup.findOne({
@@ -111,6 +110,7 @@ export const checkWorkspaceExistsForSurveyBuilder = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = req.headers["accept-language"] as "en" | "de";
   const { workspaceId } = req.body;
   if (isNaN(+workspaceId) || +workspaceId < 1) {
     return next(
@@ -123,7 +123,13 @@ export const checkWorkspaceExistsForSurveyBuilder = async (
   });
 
   if (!workspace) {
-    return next(new CustomError("Workspace not found", 404, true));
+    return next(
+      new CustomError(
+        getTranslation(currentLang, "workspaceNotFound"),
+        404,
+        true
+      )
+    );
   }
   const userGroups = await UserGroup.findAll({
     where: {
@@ -163,10 +169,17 @@ export const checkGroupMembershipforSurveyBulder = async (
     const { workspaceId } = req.body;
     const { workspaceId: fromParams } = req.params;
     const finalWorkspaceId = workspaceId || fromParams;
-    // const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
 
     if (!userGroupIds || userGroupIds.length === 0) {
-      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "notAMemberOfAnyGroup"),
+          403,
+          true,
+          "notAMemberOfAnyGroup"
+        )
+      );
     }
 
     const hasAccess = await WorkspaceGroup.findOne({
@@ -176,7 +189,7 @@ export const checkGroupMembershipforSurveyBulder = async (
     if (!hasAccess) {
       return next(
         new CustomError(
-          "No Access to this workspace",
+          getTranslation(currentLang, "notAMemberOfGroup"),
           403,
           true,
           "accessDeniedToWorkspace"
@@ -221,10 +234,17 @@ export const checkSurveyExists = async (
   next: NextFunction
 ) => {
   const { surveyId } = req.body;
-
+  const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
   try {
     if (Number.isNaN(+surveyId)) {
-      return next(new CustomError("", 400, true, "invalidSurveyId"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "surveyNotFound"),
+          400,
+          true,
+          "invalidSurveyId"
+        )
+      );
     }
 
     const survey = await Survey.findOne({
@@ -232,7 +252,14 @@ export const checkSurveyExists = async (
     });
 
     if (!survey) {
-      return next(new CustomError("", 404, true, "surveyNotFound"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "surveyNotFound"),
+          404,
+          true,
+          "surveyNotFound"
+        )
+      );
     }
 
     next();

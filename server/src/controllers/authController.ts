@@ -7,13 +7,14 @@ import {
 import { signInParams, SignUpParams } from "../types/types";
 import { generateToken } from "../services/jwtService";
 import { NextFunction } from "connect";
-import { getTranslation } from "../utils";
 
 const signUp = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+
     const { username, password } = req.body as SignUpParams;
 
-    const user = await addUser({ username, password });
+    const user = await addUser({ username, password, currentLang });
     const jwtToken = generateToken({ id: user.id });
     return res
       .status(201)

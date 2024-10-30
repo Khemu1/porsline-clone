@@ -9,6 +9,7 @@ import { getTranslation } from "../utils";
 const addUser = async ({
   username,
   password,
+  currentLang,
 }: SignUpParams): Promise<SafeUser> => {
   try {
     const existingUser = await User.findOne({
@@ -18,12 +19,16 @@ const addUser = async ({
     });
 
     if (existingUser) {
-      throw new CustomError("Username already exists.", 400, true);
+      throw new CustomError(
+        getTranslation(currentLang, "usernameIsTaken"),
+        400,
+        true
+      );
     }
 
     const user = User.build({
       username,
-      password: password, // Hash the password
+      password,
     });
     await user.validate();
 
@@ -39,7 +44,6 @@ const signInService = async ({
   password,
   currentLang,
 }: signInParams): Promise<SafeUser> => {
-  console.log("username", username, password);
   try {
     const existingUser = await User.findOne({
       where: {
@@ -93,7 +97,7 @@ const getUserService = async (userId: number) => {
     console.log(userData, groupsUserIn);
     return { userData, groupsUserIn };
   } catch (error) {
-    throw error; // Propagate any errors
+    throw error;
   }
 };
 

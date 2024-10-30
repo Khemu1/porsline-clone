@@ -173,9 +173,15 @@ export const checkGroupMembershipForSurvey = async (
         )
       );
     }
-    console.log("in membership user group ids", userGroupIds);
     if (userGroupIds.length === 0) {
-      return next(new CustomError("", 403, true, "notAMemberOfAnyGroup"));
+      return next(
+        new CustomError(
+          getTranslation(currentLang, "notAMemberOfAnyGroup"),
+          403,
+          true,
+          "notAMemberOfAnyGroup"
+        )
+      );
     }
     console.log({ workspaceId: workspace.id, groupId: userGroupIds });
     const hasAccess = await WorkspaceGroup.findOne({
@@ -238,6 +244,7 @@ export const checkSurveyExists = async (
   >,
   next: NextFunction
 ) => {
+  const currentLang = (req.headers["accept-language"] as "en" | "de") || "en";
   const { surveyId } = req.params;
   const { title } = req.body;
 
@@ -255,10 +262,13 @@ export const checkSurveyExists = async (
 
     if (!survey) {
       return next(
-        new CustomError("Survey not found", 404, true, "surveyNotFound")
+        new CustomError(
+          getTranslation(currentLang, "surveyNotFound"),
+          404,
+          true
+        )
       );
     }
-    console.log("survey found from middleware");
 
     res.locals.duplicateSurvey = {
       ...survey.get(),
@@ -391,11 +401,11 @@ export const checkDuplicateSurveyUrl = async (
   next: NextFunction
 ) => {
   try {
-    const lang = (req.headers["accept-language"] as "en" | "de") ?? "en";
+    const currentLang = (req.headers["accept-language"] as "en" | "de") ?? "en";
     const { url } = req.body;
     if (!url) {
       return next(
-        new CustomError("Survey URL is required", 400, true, "urlRequired")
+        new CustomError(getTranslation(currentLang, "urlRequired"), 400, true)
       );
     }
     updateUrlSchema().parse({ url });
@@ -407,7 +417,7 @@ export const checkDuplicateSurveyUrl = async (
     if (existingSurvey) {
       return next(
         new CustomError(
-          getTranslation(lang, "urlIsUsed"),
+          getTranslation(currentLang, "urlIsUsed"),
           409,
           true,
           "urlExists"
@@ -450,7 +460,12 @@ export const validateSurveyForMoving = async (
     const { targetWorkspaceId } = req.body;
     if (isNaN(+targetWorkspaceId)) {
       return next(
-        new CustomError("Invalid workspace ID", 400, true, "workspaceNotFound")
+        new CustomError(
+          getTranslation(lang, "workspaceNotFound"),
+          400,
+          true,
+          "workspaceNotFound"
+        )
       );
     }
 
