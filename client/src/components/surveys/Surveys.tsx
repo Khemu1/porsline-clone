@@ -96,7 +96,7 @@ const Surveys = () => {
       surveyId: string | number;
       surveyWorkspaceId: string | number;
     }) => {
-      if (!currentWorkspace?.id || !currentSurvey?.id) return;
+      if (!currentWorkspace?.id) return;
 
       try {
         await deleteSurveyF(

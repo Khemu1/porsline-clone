@@ -63,7 +63,8 @@ const SurveyPreview = () => {
   }, [current, currentIndex, questions.length]);
 
   useEffect(() => {
-    if (current === 0 && !welcomePart?.buttonText) {
+    if (current === 0 && welcomePart && !welcomePart.buttonText) {
+      console.log("no button text");
       setTimeout(() => {
         setCurrent(1);
       }, 1500);
