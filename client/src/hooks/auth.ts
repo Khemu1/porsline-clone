@@ -73,19 +73,21 @@ export const useAuthUser = () => {
 
   const user = useSelector((state: RootState) => state.auth);
   const handleSignIn = useCallback(async () => {
-    try {
-      const user = await authUser();
-      localStorage.setItem("userData", JSON.stringify(user));
+    if (!user) {
+      try {
+        const user = await authUser();
+        localStorage.setItem("userData", JSON.stringify(user));
 
-      dispatch(signInRed({ ...user }));
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: unknown) {
-      localStorage.removeItem("userData");
-      if (pathName.pathname.startsWith("/")) {
-        routeTo("/authportal");
+        dispatch(signInRed({ ...user }));
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err: unknown) {
+        localStorage.removeItem("userData");
+        if (pathName.pathname.startsWith("/")) {
+          routeTo("/authportal");
+        }
       }
     }
-  }, [dispatch, routeTo]);
+  }, [dispatch, routeTo, user]);
 
   useEffect(() => {
     const isAuthPage = pathName.pathname.startsWith("/");
@@ -93,7 +95,7 @@ export const useAuthUser = () => {
     if (isAuthPage && !user.id) {
       handleSignIn();
     }
-  }, [handleSignIn, pathName, user, routeTo]);
+  }, [handleSignIn, pathName, user]);
 
   return { handleSignIn };
 };
