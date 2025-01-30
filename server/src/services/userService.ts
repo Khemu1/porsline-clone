@@ -94,7 +94,6 @@ const getUserService = async (userId: number) => {
     });
 
     const groupsUserIn = await UserGroup.findAll({ where: { userId: userId } });
-    console.log(userData, groupsUserIn);
     return { userData, groupsUserIn };
   } catch (error) {
     throw error;

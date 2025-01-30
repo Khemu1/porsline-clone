@@ -71,8 +71,7 @@ export const useAuthUser = () => {
 
   const dispatch = useDispatch();
 
-  const user = useSelector((state: RootState) => state.auth); // Adjust based on your state structure
-
+  const user = useSelector((state: RootState) => state.auth);
   const handleSignIn = useCallback(async () => {
     try {
       const user = await authUser();
@@ -83,7 +82,7 @@ export const useAuthUser = () => {
     } catch (err: unknown) {
       localStorage.removeItem("userData");
       if (pathName.pathname.startsWith("/")) {
-        routeTo("/signin");
+        routeTo("/authportal");
       }
     }
   }, [dispatch, routeTo]);
@@ -94,7 +93,7 @@ export const useAuthUser = () => {
     if (isAuthPage && !user.id) {
       handleSignIn();
     }
-  }, [handleSignIn, pathName, user]);
+  }, [handleSignIn, pathName, user, routeTo]);
 
   return { handleSignIn };
 };
